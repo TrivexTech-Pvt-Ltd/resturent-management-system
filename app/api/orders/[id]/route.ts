@@ -7,7 +7,7 @@ export async function PATCH(
 ) {
     const { id } = await params;
     const { status } = await request.json();
-    const updatedOrder = updateOrderStatus(id, status);
+    const updatedOrder = await updateOrderStatus(id, status);
 
     if (updatedOrder) {
         return NextResponse.json(updatedOrder);

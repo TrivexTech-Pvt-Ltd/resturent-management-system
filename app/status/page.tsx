@@ -12,7 +12,10 @@ export default function StatusPage() {
         setOrders(data);
     };
 
+    const [isMounted, setIsMounted] = useState(false);
+
     useEffect(() => {
+        setIsMounted(true);
         fetchOrders();
         const interval = setInterval(fetchOrders, 1000);
         return () => clearInterval(interval);
@@ -73,7 +76,7 @@ export default function StatusPage() {
             <footer className="bg-slate-900 border-t border-slate-800 p-6 flex justify-between items-center">
                 <div className="flex items-center gap-4">
                     <div className="text-slate-500 text-sm uppercase font-bold tracking-widest">Local Time</div>
-                    <div className="text-white font-mono text-2xl">{new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    <div className="text-white font-mono text-2xl">{isMounted ? new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''}</div>
                 </div>
                 <div className="flex-1 mx-12 overflow-hidden border-x border-slate-800 px-8">
                     <div className="text-slate-400 font-bold text-xl whitespace-nowrap animate-marquee">

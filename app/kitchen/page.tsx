@@ -6,6 +6,8 @@ import { Order } from '@/lib/types';
 export default function KitchenPage() {
     const [orders, setOrders] = useState<Order[]>([]);
 
+    const [isMounted, setIsMounted] = useState(false);
+
     const fetchOrders = async () => {
         const res = await fetch('/api/orders');
         const data = await res.json();
@@ -14,6 +16,7 @@ export default function KitchenPage() {
     };
 
     useEffect(() => {
+        setIsMounted(true);
         fetchOrders();
         const interval = setInterval(fetchOrders, 1000); // Poll every 1 second
         return () => clearInterval(interval);
@@ -37,7 +40,7 @@ export default function KitchenPage() {
                 </div>
                 <div className="bg-slate-800 px-6 py-3 rounded-2xl flex items-center gap-4">
                     <div className="w-3 h-3 bg-success rounded-full animate-pulse" />
-                    <span className="font-mono text-xl">{new Date().toLocaleTimeString()}</span>
+                    <span className="font-mono text-xl">{isMounted ? new Date().toLocaleTimeString() : ''}</span>
                 </div>
             </header>
 

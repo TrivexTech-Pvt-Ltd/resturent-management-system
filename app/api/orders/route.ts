@@ -3,22 +3,17 @@ import { getOrders, saveOrder } from '@/lib/db';
 import { Order } from '@/lib/types';
 
 export async function GET() {
-    const orders = getOrders();
+    const orders = await getOrders();
     return NextResponse.json(orders);
 }
 
 export async function POST(request: Request) {
-    const orderData = await request.json();
-    const orders = getOrders();
-
-    const newOrder: Order = {
-        ...orderData,
-        id: Math.random().toString(36).substr(2, 9),
-        orderNumber: (orders.length + 101).toString(),
-        status: 'PENDING',
-        createdAt: new Date().toISOString(),
-    };
-
-    saveOrder(newOrder);
-    return NextResponse.json(newOrder);
+    try {
+        const orderData = await request.json();
+        const savedOrder = await saveOrder(orderData);
+        return NextResponse.json(savedOrder);
+    } catch (error: any) {
+        console.error('API Route Error:', error);
+        return NextResponse.json({ error: error.message || 'Internal Server Error' }, { status: 500 });
+    }
 }

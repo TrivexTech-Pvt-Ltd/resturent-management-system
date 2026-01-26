@@ -7,6 +7,7 @@ import PaymentModal from '@/components/PaymentModal';
 import BillPrinter from '@/components/BillPrinter';
 
 export default function CashierPage() {
+    const [isMounted, setIsMounted] = useState(false);
     const [menu, setMenu] = useState<MenuItem[]>([]);
     const [cart, setCart] = useState<OrderItem[]>([]);
     const [isPaymentOpen, setIsPaymentOpen] = useState(false);
@@ -14,6 +15,7 @@ export default function CashierPage() {
     const [lastOrder, setLastOrder] = useState<Order | null>(null);
 
     useEffect(() => {
+        setIsMounted(true);
         fetch('/api/menu')
             .then(res => res.json())
             .then(data => {
@@ -62,11 +64,6 @@ export default function CashierPage() {
             localStorage.setItem('last_order_status', 'success');
             localStorage.removeItem('current_cart');
             setIsPaymentOpen(false);
-
-            // Trigger print after a short delay for state update
-            setTimeout(() => {
-                window.print();
-            }, 500);
         }
     };
 
@@ -76,7 +73,9 @@ export default function CashierPage() {
             <header className="px-8 py-4 glass-card border-b flex justify-between items-center z-10">
                 <h1 className="text-2xl font-bold text-primary">FoodShop POS</h1>
                 <div className="flex gap-4 items-center">
-                    <span className="text-sm font-medium bg-slate-100 px-3 py-1 rounded-full">{new Date().toLocaleDateString()}</span>
+                    <span className="text-sm font-medium bg-slate-100 px-3 py-1 rounded-full">
+                        {isMounted ? new Date().toLocaleDateString() : ''}
+                    </span>
                 </div>
             </header>
 

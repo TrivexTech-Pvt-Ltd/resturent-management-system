@@ -38,7 +38,7 @@ body {
 
 /* Custom transitions */
 .transition-all {
-  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .print-only {
@@ -46,10 +46,34 @@ body {
 }
 
 @media print {
-  .no-print {
-    display: none !important;
+
+  /* Hide everything by default */
+  body * {
+    visibility: hidden;
   }
+
+  /* Show only the bill and its children */
+  .print-only,
+  .print-only * {
+    visibility: visible;
+  }
+
+  /* Center the bill on the page */
   .print-only {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    transform: translateX(-50%);
+    width: 80mm;
+    margin: 0;
+    padding: 20px;
     display: block !important;
+    background: white !important;
+  }
+
+  /* Force portrait orientation */
+  @page {
+    margin: 0;
+    size: portrait;
   }
 }

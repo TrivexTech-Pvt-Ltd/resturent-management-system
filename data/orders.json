@@ -149,5 +149,29 @@
     "orderNumber": "106",
     "status": "READY",
     "createdAt": "2026-01-26T06:32:17.702Z"
+  },
+  {
+    "items": [
+      {
+        "id": "1",
+        "name": "Classic Burger",
+        "price": 8.99,
+        "category": "Burgers",
+        "quantity": 1
+      },
+      {
+        "id": "2",
+        "name": "Cheese Burger",
+        "price": 9.99,
+        "category": "Burgers",
+        "quantity": 1
+      }
+    ],
+    "total": 18.98,
+    "paymentMethod": "CASH",
+    "id": "xjy3mdxf7",
+    "orderNumber": "107",
+    "status": "PENDING",
+    "createdAt": "2026-01-26T10:45:46.670Z"
   }
 ]
