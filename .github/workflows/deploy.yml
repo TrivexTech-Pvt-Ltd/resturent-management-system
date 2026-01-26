@@ -40,6 +40,25 @@ jobs:
 # =========================
 # BACKEND → MONSTERASP.NET
 # =========================
+  backend:
+    name: Deploy .NET API to MonsterASP.NET
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore backend/RestaurantBackend/RestaurantBackend.csproj
+
+      - name: Build
+        run: dotnet build backend/RestaurantBackend/RestaurantBackend.csproj -c Release
+
+      # 1. Upload app_offline.htm to stop IIS
       - name: Upload app_offline.htm (stop IIS)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -49,9 +68,11 @@ jobs:
           local-dir: ./app_offline_only/
           server-dir: /wwwroot/
 
+      # 2. Publish project
       - name: Publish .NET
         run: dotnet publish backend/RestaurantBackend/RestaurantBackend.csproj -c Release -o publish
 
+      # 3. Deploy published files
       - name: Deploy files to MonsterASP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -62,6 +83,7 @@ jobs:
           server-dir: /wwwroot/
           dangerous-clean-slate: true
 
+      # 4. Remove app_offline.htm (bring site back online)
       - name: Remove app_offline.htm (start IIS)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -70,4 +92,3 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./empty/
           server-dir: /wwwroot/
-
