@@ -60,9 +60,10 @@ jobs:
 
       - name: Publish
         run: |
-          dotnet publish backend/RestaurantBackend/RestaurantBackend.csproj -c Release -o publish
-          echo "Published files:"
-          ls -la publish
+          rm -rf ./_publish
+          dotnet publish backend/RestaurantBackend/RestaurantBackend.csproj -c Release -o ./_publish
+          echo "====== Published files ======"
+          ls -la ./_publish
 
       # Stop IIS
       - name: Upload app_offline.htm (stop IIS)
@@ -81,17 +82,8 @@ jobs:
           server: ${{ secrets.FTP_SERVER }}
           username: ${{ secrets.FTP_USERNAME }}
           password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./publish/
+          local-dir: ./_publish/
           server-dir: /wwwroot/
           dangerous-clean-slate: true
 
-      # Remove offline file
-      - name: Remove app_offline.htm (start IIS)
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          local-dir: ./empty/
-          server-dir: /wwwroot/
 
