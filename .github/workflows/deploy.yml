@@ -30,8 +30,8 @@ jobs:
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v3
         with:
-          publish-dir: .next
-          production-branch: main
+          publish-dir: ./dist
+          production-deploy: true
           deploy-message: "GitHub Actions deploy"
         env:
           NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
@@ -40,28 +40,19 @@ jobs:
 # =========================
 # BACKEND → MONSTERASP.NET
 # =========================
-  backend:
-    name: Deploy .NET API to MonsterASP.NET
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
+      - name: Upload app_offline.htm (stop IIS)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          dotnet-version: 8.0.x
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./app_offline_only/
+          server-dir: /wwwroot/
 
-      - name: Restore
-        run: dotnet restore backend/RestaurantBackend/RestaurantBackend.csproj
-
-      - name: Build
-        run: dotnet build backend/RestaurantBackend/RestaurantBackend.csproj -c Release
-
-      - name: Publish
+      - name: Publish .NET
         run: dotnet publish backend/RestaurantBackend/RestaurantBackend.csproj -c Release -o publish
 
-      - name: FTP Deploy to MonsterASP
+      - name: Deploy files to MonsterASP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
           server: ${{ secrets.FTP_SERVER }}
@@ -70,4 +61,13 @@ jobs:
           local-dir: ./publish/
           server-dir: /wwwroot/
           dangerous-clean-slate: true
+
+      - name: Remove app_offline.htm (start IIS)
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./empty/
+          server-dir: /wwwroot/
 
