@@ -1,0 +1,38 @@
+[
+  {
+    "id": "1",
+    "name": "Classic Burger",
+    "price": 8.99,
+    "category": "Burgers"
+  },
+  {
+    "id": "2",
+    "name": "Cheese Burger",
+    "price": 9.99,
+    "category": "Burgers"
+  },
+  {
+    "id": "3",
+    "name": "French Fries",
+    "price": 3.99,
+    "category": "Sides"
+  },
+  {
+    "id": "4",
+    "name": "Coke",
+    "price": 1.99,
+    "category": "Drinks"
+  },
+  {
+    "id": "5",
+    "name": "Pizza Margherita",
+    "price": 12.99,
+    "category": "Pizza"
+  },
+  {
+    "id": "6",
+    "name": "Pasta Carbonara",
+    "price": 11.99,
+    "category": "Pasta"
+  }
+]

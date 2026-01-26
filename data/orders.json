@@ -1,0 +1,153 @@
+[
+  {
+    "items": [
+      {
+        "id": "1",
+        "name": "Classic Burger",
+        "price": 8.99,
+        "category": "Burgers",
+        "quantity": 1
+      },
+      {
+        "id": "2",
+        "name": "Cheese Burger",
+        "price": 9.99,
+        "category": "Burgers",
+        "quantity": 1
+      }
+    ],
+    "total": 18.98,
+    "paymentMethod": "CASH",
+    "id": "2v53oes3g",
+    "orderNumber": "101",
+    "status": "COMPLETED",
+    "createdAt": "2026-01-25T06:03:02.967Z"
+  },
+  {
+    "items": [
+      {
+        "id": "1",
+        "name": "Classic Burger",
+        "price": 8.99,
+        "category": "Burgers",
+        "quantity": 1
+      },
+      {
+        "id": "3",
+        "name": "French Fries",
+        "price": 3.99,
+        "category": "Sides",
+        "quantity": 1
+      }
+    ],
+    "total": 12.98,
+    "paymentMethod": "CASH",
+    "id": "2vzxsm50u",
+    "orderNumber": "102",
+    "status": "COMPLETED",
+    "createdAt": "2026-01-25T06:06:17.469Z"
+  },
+  {
+    "items": [
+      {
+        "id": "5",
+        "name": "Pizza Margherita",
+        "price": 12.99,
+        "category": "Pizza",
+        "quantity": 1
+      },
+      {
+        "id": "6",
+        "name": "Pasta Carbonara",
+        "price": 11.99,
+        "category": "Pasta",
+        "quantity": 1
+      }
+    ],
+    "total": 24.98,
+    "paymentMethod": "CASH",
+    "id": "x74vguxns",
+    "orderNumber": "103",
+    "status": "COMPLETED",
+    "createdAt": "2026-01-25T06:11:47.040Z"
+  },
+  {
+    "items": [
+      {
+        "id": "1",
+        "name": "Classic Burger",
+        "price": 8.99,
+        "category": "Burgers",
+        "quantity": 1
+      },
+      {
+        "id": "2",
+        "name": "Cheese Burger",
+        "price": 9.99,
+        "category": "Burgers",
+        "quantity": 1
+      }
+    ],
+    "total": 18.98,
+    "paymentMethod": "CASH",
+    "id": "dv2ygnd4v",
+    "orderNumber": "104",
+    "status": "PENDING",
+    "createdAt": "2026-01-25T06:13:08.452Z"
+  },
+  {
+    "items": [
+      {
+        "id": "2",
+        "name": "Cheese Burger",
+        "price": 9.99,
+        "category": "Burgers",
+        "quantity": 1
+      },
+      {
+        "id": "6",
+        "name": "Pasta Carbonara",
+        "price": 11.99,
+        "category": "Pasta",
+        "quantity": 1
+      },
+      {
+        "id": "5",
+        "name": "Pizza Margherita",
+        "price": 12.99,
+        "category": "Pizza",
+        "quantity": 1
+      }
+    ],
+    "total": 34.97,
+    "paymentMethod": "CASH",
+    "id": "en8s1jdti",
+    "orderNumber": "105",
+    "status": "COMPLETED",
+    "createdAt": "2026-01-25T06:16:05.141Z"
+  },
+  {
+    "items": [
+      {
+        "id": "1",
+        "name": "Classic Burger",
+        "price": 8.99,
+        "category": "Burgers",
+        "quantity": 1
+      },
+      {
+        "id": "2",
+        "name": "Cheese Burger",
+        "price": 9.99,
+        "category": "Burgers",
+        "quantity": 1
+      }
+    ],
+    "total": 18.98,
+    "paymentMethod": "CASH",
+    "id": "rjbq3jfl1",
+    "orderNumber": "106",
+    "status": "READY",
+    "createdAt": "2026-01-26T06:32:17.702Z"
+  }
+]
