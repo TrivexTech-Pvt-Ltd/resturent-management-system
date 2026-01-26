@@ -56,9 +56,15 @@ jobs:
         run: dotnet restore backend/RestaurantBackend/RestaurantBackend.csproj
 
       - name: Build
-        run: dotnet build backend/RestaurantBackend/RestaurantBackend.csproj -c Release
+        run: dotnet build backend/RestaurantBackend/RestaurantBackend.csproj -c Release --no-restore
 
-      # 1. Upload app_offline.htm to stop IIS
+      - name: Publish
+        run: |
+          dotnet publish backend/RestaurantBackend/RestaurantBackend.csproj -c Release -o publish
+          echo "Published files:"
+          ls -la publish
+
+      # Stop IIS
       - name: Upload app_offline.htm (stop IIS)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -68,11 +74,7 @@ jobs:
           local-dir: ./app_offline_only/
           server-dir: /wwwroot/
 
-      # 2. Publish project
-      - name: Publish .NET
-        run: dotnet publish backend/RestaurantBackend/RestaurantBackend.csproj -c Release -o publish
-
-      # 3. Deploy published files
+      # Deploy real files
       - name: Deploy files to MonsterASP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -83,7 +85,7 @@ jobs:
           server-dir: /wwwroot/
           dangerous-clean-slate: true
 
-      # 4. Remove app_offline.htm (bring site back online)
+      # Remove offline file
       - name: Remove app_offline.htm (start IIS)
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
@@ -92,3 +94,4 @@ jobs:
           password: ${{ secrets.FTP_PASSWORD }}
           local-dir: ./empty/
           server-dir: /wwwroot/
+
