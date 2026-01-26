@@ -1,0 +1,74 @@
+name: Deploy Frontend (Netlify) + Backend (MonsterASP)
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+# =========================
+# FRONTEND → NETLIFY
+# =========================
+  frontend:
+    name: Deploy Next.js to Netlify
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install deps
+        run: npm install
+
+      - name: Build Next.js
+        run: npm run build
+
+      - name: Export (static build)
+        run: npm run export
+
+      - name: Deploy to Netlify
+        uses: nwtgck/actions-netlify@v3
+        with:
+          publish-dir: ./out
+          production-branch: main
+          deploy-message: "GitHub Actions deploy"
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+
+# =========================
+# BACKEND → MONSTERASP.NET
+# =========================
+  backend:
+    name: Deploy .NET API to MonsterASP.NET
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore
+        run: dotnet restore backend/RestaurantBackend/RestaurantBackend.csproj
+
+      - name: Build
+        run: dotnet build backend/RestaurantBackend/RestaurantBackend.csproj -c Release
+
+      - name: Publish
+        run: dotnet publish backend/RestaurantBackend/RestaurantBackend.csproj -c Release -o publish
+
+      - name: FTP Deploy to MonsterASP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          local-dir: ./publish/
+          server-dir: /wwwroot/
