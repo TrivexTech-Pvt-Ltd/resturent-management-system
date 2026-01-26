@@ -27,13 +27,10 @@ jobs:
       - name: Build Next.js
         run: npm run build
 
-      - name: Export (static build)
-        run: npm run export
-
       - name: Deploy to Netlify
         uses: nwtgck/actions-netlify@v3
         with:
-          publish-dir: ./out
+          publish-dir: .next
           production-branch: main
           deploy-message: "GitHub Actions deploy"
         env:
