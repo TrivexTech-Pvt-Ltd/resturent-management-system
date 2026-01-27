@@ -67,7 +67,7 @@ export default function CustomerDisplay() {
     return (
         <div className="h-screen bg-white flex flex-col overflow-hidden">
             <div className="bg-slate-900 p-8 text-white flex justify-between items-center">
-                <h1 className="text-4xl font-black italic">FOODSH❤P</h1>
+                <h1 className="text-4xl font-black italic"><span className="text-indigo-600">Next</span>Serve</h1>
                 <div className="text-right">
                     <p className="text-slate-400 text-sm uppercase font-bold tracking-widest">Customer Display</p>
                 </div>

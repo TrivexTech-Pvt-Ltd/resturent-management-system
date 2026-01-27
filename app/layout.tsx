@@ -13,9 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FoodShop POS | Restaurant Management System",
+  title: "NextServe | Restaurant Management System",
   description: "Advanced billing, kitchen display, and customer status tracking system.",
 };
+
+import Providers from "./providers";
 
 export default function RootLayout({
   children,
@@ -27,7 +29,9 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

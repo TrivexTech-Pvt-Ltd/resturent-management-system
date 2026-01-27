@@ -1,0 +1,327 @@
+"use client";
+
+import { useState } from "react";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import {
+    Search,
+    Plus,
+    Edit2,
+    Trash2,
+    Loader2,
+    UtensilsCrossed,
+    X
+} from "lucide-react";
+
+import { getMenu, addMenuItem, updateMenuItem, deleteMenuItem } from "@/lib/db";
+import { MenuItem } from "@/lib/types";
+import { menuItemSchema, MenuItemFormData } from "@/lib/schemas";
+import Modal from "@/components/ui/Modal";
+import DeleteConfirmModal from "@/components/ui/DeleteConfirmModal";
+import { cn } from "@/lib/utils";
+
+export default function ItemsPage() {
+    const queryClient = useQueryClient();
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isFormModalOpen, setIsFormModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
+    const [deletingItem, setDeletingItem] = useState<MenuItem | null>(null);
+
+    // React Hook Form
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: { errors },
+    } = useForm<MenuItemFormData>({
+        resolver: zodResolver(menuItemSchema),
+    });
+
+    // Queries
+    const { data: items = [], isLoading } = useQuery({
+        queryKey: ["menu"],
+        queryFn: getMenu,
+    });
+
+    // Mutations
+    const createMutation = useMutation({
+        mutationFn: addMenuItem,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["menu"] });
+            closeFormModal();
+        },
+    });
+
+    const updateMutation = useMutation({
+        mutationFn: ({ id, data }: { id: string; data: MenuItem }) => updateMenuItem(id, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["menu"] });
+            closeFormModal();
+        },
+    });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => deleteMenuItem(id),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["menu"] });
+            setIsDeleteModalOpen(false);
+            setDeletingItem(null);
+        },
+    });
+
+    // Handlers
+    const openAddModal = () => {
+        setEditingItem(null);
+        reset({ name: "", price: 0, category: "", image: "" });
+        setIsFormModalOpen(true);
+    };
+
+    const openEditModal = (item: MenuItem) => {
+        setEditingItem(item);
+        reset({
+            name: item.name,
+            price: item.price,
+            category: item.category,
+            image: item.image || "",
+        });
+        setIsFormModalOpen(true);
+    };
+
+    const closeFormModal = () => {
+        setIsFormModalOpen(false);
+        setEditingItem(null);
+        reset();
+    };
+
+    const onSubmit = (data: MenuItemFormData) => {
+        if (editingItem) {
+            updateMutation.mutate({
+                id: editingItem.id,
+                data: { ...editingItem, ...data } as MenuItem
+            });
+        } else {
+            createMutation.mutate(data);
+        }
+    };
+
+    const confirmDelete = (item: MenuItem) => {
+        setDeletingItem(item);
+        setIsDeleteModalOpen(true);
+    };
+
+    const filteredItems = items.filter((item) =>
+        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    return (
+        <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-10">
+            <div className="max-w-6xl mx-auto">
+                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                    <div>
+                        <h1 className="text-3xl font-black text-slate-900 tracking-tight italic flex items-center gap-3">
+                            <UtensilsCrossed className="text-primary h-8 w-8" />
+                            MENU ITEMS
+                        </h1>
+                        <p className="text-slate-500 font-medium mt-1">Manage your professional restaurant catalog</p>
+                    </div>
+                    <button
+                        onClick={openAddModal}
+                        className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-xl shadow-primary/20 flex items-center gap-2 w-fit active:scale-95"
+                    >
+                        <Plus className="h-5 w-5" />
+                        Add New Item
+                    </button>
+                </div>
+
+                {/* Search and Filters */}
+                <div className="glass-card p-4 rounded-3xl mb-8 flex flex-col md:flex-row gap-4 items-center">
+                    <div className="relative flex-1 w-full">
+                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+                        <input
+                            type="text"
+                            placeholder="Search by name or category..."
+                            className="w-full pl-12 pr-4 py-4 bg-slate-50/50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-medium text-slate-700 placeholder:text-slate-400 transition-all"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                </div>
+
+                {/* Items Table */}
+                <div className="glass-card rounded-[2.5rem] overflow-hidden border border-white">
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead className="bg-[#F8FAFC]/50 border-b border-slate-100">
+                                <tr>
+                                    <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Item Details</th>
+                                    <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Category</th>
+                                    <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Price</th>
+                                    <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {isLoading ? (
+                                    <tr>
+                                        <td colSpan={4} className="p-20 text-center">
+                                            <div className="flex flex-col items-center gap-4">
+                                                <Loader2 className="h-10 w-10 text-primary animate-spin" />
+                                                <span className="text-slate-400 font-bold uppercase tracking-widest text-sm">Loading Menu Library...</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : filteredItems.length === 0 ? (
+                                    <tr>
+                                        <td colSpan={4} className="p-20 text-center">
+                                            <div className="flex flex-col items-center gap-4">
+                                                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
+                                                    <Search className="text-slate-300 h-8 w-8" />
+                                                </div>
+                                                <span className="text-slate-400 font-bold uppercase tracking-widest text-sm">No items match your search</span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    filteredItems.map((item) => (
+                                        <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
+                                            <td className="p-6">
+                                                <div className="flex items-center gap-4">
+                                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-2xl shadow-inner overflow-hidden border-2 border-white">
+                                                        {item.image ? (
+                                                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            "🍔"
+                                                        )}
+                                                    </div>
+                                                    <div>
+                                                        <span className="font-bold text-slate-900 block text-lg">{item.name}</span>
+                                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-tighter">ID: {item.id.slice(0, 8)}</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="p-6">
+                                                <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs font-black uppercase tracking-wider">
+                                                    {item.category}
+                                                </span>
+                                            </td>
+                                            <td className="p-6">
+                                                <div className="flex items-baseline gap-0.5">
+                                                    <span className="text-xs font-black text-primary/60">$</span>
+                                                    <span className="text-xl font-black text-primary">{item.price.toFixed(2)}</span>
+                                                </div>
+                                            </td>
+                                            <td className="p-6 text-right">
+                                                <div className="flex justify-end gap-3 translate-x-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+                                                    <button
+                                                        onClick={() => openEditModal(item)}
+                                                        className="w-10 h-10 flex items-center justify-center bg-white text-slate-400 hover:text-primary hover:shadow-lg border border-slate-100 rounded-xl transition-all"
+                                                        title="Edit Item"
+                                                    >
+                                                        <Edit2 className="h-4 w-4" />
+                                                    </button>
+                                                    <button
+                                                        onClick={() => confirmDelete(item)}
+                                                        className="w-10 h-10 flex items-center justify-center bg-white text-slate-400 hover:text-red-500 hover:shadow-lg border border-slate-100 rounded-xl transition-all"
+                                                        title="Delete Item"
+                                                    >
+                                                        <Trash2 className="h-4 w-4" />
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            {/* Add/Edit Modal */}
+            <Modal
+                isOpen={isFormModalOpen}
+                onClose={closeFormModal}
+                title={editingItem ? "Update Menu Item" : "Precision Addition"}
+            >
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                    <div>
+                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Internal Designation</label>
+                        <input
+                            {...register("name")}
+                            className={cn(
+                                "w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-800",
+                                errors.name && "border-red-500 bg-red-50"
+                            )}
+                            placeholder="e.g. Signature Truffle Burger"
+                        />
+                        {errors.name && <p className="mt-1 text-xs font-bold text-red-500">{errors.name.message}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Classification</label>
+                        <input
+                            {...register("category")}
+                            className={cn(
+                                "w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-800",
+                                errors.category && "border-red-500 bg-red-50"
+                            )}
+                            placeholder="e.g. Entrees, Mixology"
+                        />
+                        {errors.category && <p className="mt-1 text-xs font-bold text-red-500">{errors.category.message}</p>}
+                    </div>
+
+                    <div>
+                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Monetary Valuation ($)</label>
+                        <div className="relative">
+                            <span className="absolute left-5 top-1/2 -translate-y-1/2 font-black text-slate-300">$</span>
+                            <input
+                                {...register("price")}
+                                type="number"
+                                step="0.01"
+                                className={cn(
+                                    "w-full pl-10 pr-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all font-black text-slate-800",
+                                    errors.price && "border-red-500 bg-red-50"
+                                )}
+                                placeholder="0.00"
+                            />
+                        </div>
+                        {errors.price && <p className="mt-1 text-xs font-bold text-red-500">{errors.price.message}</p>}
+                    </div>
+
+                    <div className="pt-4 flex gap-3">
+                        <button
+                            type="button"
+                            onClick={closeFormModal}
+                            className="flex-1 px-6 py-4 border-2 border-slate-100 text-slate-400 font-bold rounded-2xl hover:bg-slate-50 transition-all uppercase text-xs tracking-[0.2em]"
+                        >
+                            Abort
+                        </button>
+                        <button
+                            type="submit"
+                            disabled={createMutation.isPending || updateMutation.isPending}
+                            className="flex-[2] bg-primary text-white font-black rounded-2xl py-4 hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center justify-center uppercase text-xs tracking-[0.2em] disabled:opacity-50"
+                        >
+                            {(createMutation.isPending || updateMutation.isPending) ? (
+                                <Loader2 className="h-5 w-5 animate-spin" />
+                            ) : (
+                                editingItem ? "Commit Changes" : "Finalize Entry"
+                            )}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
+
+            {/* Delete Confirmation Modal */}
+            <DeleteConfirmModal
+                isOpen={isDeleteModalOpen}
+                onClose={() => setIsDeleteModalOpen(false)}
+                onConfirm={() => deletingItem && deleteMutation.mutate(deletingItem.id)}
+                title="Security Verification"
+                description={`This will permanently purge "${deletingItem?.name}" from the active database. This action is irreversible.`}
+                isLoading={deleteMutation.isPending}
+            />
+        </div>
+    );
+}

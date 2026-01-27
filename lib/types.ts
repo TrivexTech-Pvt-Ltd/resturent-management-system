@@ -24,3 +24,12 @@ export interface MenuItem {
     category: string;
     image?: string;
 }
+
+export type UserRole = 'Admin' | 'User';
+
+export interface User {
+    id: string;
+    username: string;
+    role: UserRole;
+    fullName?: string;
+}

@@ -83,7 +83,7 @@ export default function StatusPage() {
                         ⭐ WELCOME TO OUR RESTAURANT! PLEASE HAVE YOUR ORDER NUMBER READY FOR PICKUP ⭐ FRESH FOOD PREPARED DAILY ⭐ ENJOY YOUR MEAL ⭐
                     </div>
                 </div>
-                <div className="text-slate-600 font-black italic text-2xl">FOODSH❤P</div>
+                <div className="text-slate-600 font-black italic text-2xl"><span className="text-indigo-600">Next</span>Serve</div>
             </footer>
 
             <style jsx>{`
