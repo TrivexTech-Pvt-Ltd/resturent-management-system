@@ -277,7 +277,7 @@ export default function ItemsPage() {
                         <div className="relative">
                             <span className="absolute left-5 top-1/2 -translate-y-1/2 font-black text-slate-300">$</span>
                             <input
-                                {...register("price")}
+                                {...register("price", { valueAsNumber: true })}
                                 type="number"
                                 step="0.01"
                                 className={cn(
