@@ -35,7 +35,15 @@ export default function LoginPage() {
             loginUser(user);
             router.push("/");
         } catch (err: any) {
-            setError(err.response?.data || "Authentication failed. Please check your credentials.");
+            console.error("Login error:", err);
+            const message = err.response?.data;
+            if (typeof message === 'string') {
+                setError(message);
+            } else if (err.request) {
+                setError("No response from server. Check proxy and backend connectivity.");
+            } else {
+                setError("Authentication failed: " + err.message);
+            }
         } finally {
             setIsLoading(false);
         }
