@@ -17,9 +17,10 @@ builder.Services.AddControllers()
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNextJS",
-        policy => policy.WithOrigins("http://localhost:3000") // Or whatever port the frontend is on
-                        .AllowAnyMethod()
-                        .AllowAnyHeader());
+        policy => policy
+            .WithOrigins("http://localhost:3000", "http://resturentsystem.runasp.net")
+            .AllowAnyMethod()
+            .AllowAnyHeader());
 });
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
