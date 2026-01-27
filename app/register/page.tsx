@@ -44,7 +44,8 @@ export default function RegisterPage() {
             } else if (typeof message === 'object' && message !== null) {
                 setError(JSON.stringify(message));
             } else if (err.request) {
-                setError("No response from server. If hosted on Netlify/Vercel, ensure the Next.js proxy is working and the backend allows connections.");
+                console.error("Network Error:", err.request);
+                setError("No response from server. Ensure you are running 'npm run dev' or check your internet connection.");
             } else {
                 setError("Registration failed: " + err.message);
             }

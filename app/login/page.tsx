@@ -40,7 +40,8 @@ export default function LoginPage() {
             if (typeof message === 'string') {
                 setError(message);
             } else if (err.request) {
-                setError("No response from server. Check proxy and backend connectivity.");
+                console.error("Network Error:", err.request);
+                setError("No response from server. Ensure you are running 'npm run dev'.");
             } else {
                 setError("Authentication failed: " + err.message);
             }
