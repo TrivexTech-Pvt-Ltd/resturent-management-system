@@ -37,7 +37,15 @@ export default function RegisterPage() {
             await registerApi(data);
             router.push("/login");
         } catch (err: any) {
-            setError(err.response?.data || "Registration failed. Please try again.");
+            console.error("Registration error:", err);
+            const message = err.response?.data;
+            if (typeof message === 'string') {
+                setError(message);
+            } else if (typeof message === 'object' && message !== null) {
+                setError(JSON.stringify(message));
+            } else {
+                setError("Registration failed. Please check if the server is reachable and CORS is configured.");
+            }
         } finally {
             setIsLoading(false);
         }

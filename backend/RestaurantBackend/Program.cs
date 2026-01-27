@@ -18,7 +18,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowNextJS",
         policy => policy
-            .WithOrigins("http://localhost:3000", "http://resturentsystem.runasp.net")
+            .AllowAnyOrigin()
             .AllowAnyMethod()
             .AllowAnyHeader());
 });
