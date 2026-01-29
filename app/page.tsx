@@ -87,7 +87,7 @@ export default function Home() {
         </div>
 
         <div className="mt-16 md:mt-24 text-center text-slate-400 font-bold uppercase tracking-[0.3em] border-t border-slate-100 pt-10 text-[10px]">
-          <p>© 2026 NextServe Systems. All rights reserved.</p>
+          <p>© Copyright 2026 TrivexTech Pvt Ltd || All Rights Reserved</p>
         </div>
       </div>
     </div>
