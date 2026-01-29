@@ -21,18 +21,20 @@ export default function Home() {
   const allowedScreens = screens.filter(s => s.roles.includes(user?.role || ''));
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col p-8 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-50/50 via-white to-white">
+    <div className="min-h-screen bg-[#F8FAFC] flex flex-col p-4 md:p-8 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-50/50 via-white to-white">
       {/* Top Navigation */}
-      <div className="max-w-6xl w-full mx-auto flex justify-between items-center mb-10">
-        <div className="flex items-center gap-4 bg-white p-2 pr-6 rounded-full shadow-sm border border-slate-100">
-          <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-            <UserIcon className="h-5 w-5 text-primary" />
+      <div className="max-w-6xl w-full mx-auto flex flex-col md:flex-row justify-between items-center mb-8 md:mb-10 gap-4">
+        <div className="flex items-center gap-4 bg-white p-2 pr-6 rounded-full shadow-sm border border-slate-100 w-full md:w-auto justify-between md:justify-start">
+          <div className="flex items-center gap-4">
+            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
+              <UserIcon className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Authenticated As</p>
+              <p className="text-sm font-bold text-slate-900">{user?.fullName || user?.username}</p>
+            </div>
           </div>
-          <div>
-            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Authenticated As</p>
-            <p className="text-sm font-bold text-slate-900">{user?.fullName || user?.username}</p>
-          </div>
-          <div className="ml-4 flex items-center gap-1 px-2 py-1 bg-slate-50 text-[10px] font-black text-slate-500 rounded-lg uppercase tracking-wider">
+          <div className="flex items-center gap-1 px-2 py-1 bg-slate-50 text-[10px] font-black text-slate-500 rounded-lg uppercase tracking-wider">
             {user?.role === 'Admin' && <ShieldCheck className="h-3 w-3 text-primary" />}
             {user?.role}
           </div>
@@ -40,7 +42,7 @@ export default function Home() {
 
         <button
           onClick={logout}
-          className="flex items-center gap-2 px-6 py-3 bg-white hover:bg-red-50 text-slate-400 hover:text-red-500 font-bold rounded-2xl transition-all border border-slate-100 shadow-sm active:scale-95"
+          className="flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-red-50 text-slate-400 hover:text-red-500 font-bold rounded-2xl transition-all border border-slate-100 shadow-sm active:scale-95 w-full md:w-auto"
         >
           <LogOut className="h-4 w-4" />
           <span className="text-xs uppercase tracking-widest">Terminate Session</span>
@@ -48,19 +50,19 @@ export default function Home() {
       </div>
 
       <div className="max-w-6xl w-full mx-auto flex-1 flex flex-col justify-center">
-        <div className="text-center mb-16">
-          <h1 className="text-7xl font-black text-slate-900 mb-4 tracking-tight italic">
+        <div className="text-center mb-10 md:mb-16">
+          <h1 className="text-5xl md:text-7xl font-black text-slate-900 mb-4 tracking-tight italic">
             <span className="text-indigo-600">Next</span>Serve
           </h1>
-          <p className="text-xl text-slate-500 font-medium">Next-Gen Restaurant Management System</p>
+          <p className="text-lg md:text-xl text-slate-500 font-medium">Next-Gen Restaurant Management System</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-8">
           {allowedScreens.map((screen) => (
             <Link
               key={screen.href}
               href={screen.href}
-              className="group relative overflow-hidden glass-card rounded-[2.5rem] p-10 hover:scale-[1.03] transition-all hover:shadow-2xl hover:shadow-indigo-200/50 border border-white"
+              className="group relative overflow-hidden glass-card rounded-[2rem] md:rounded-[2.5rem] p-8 md:p-10 hover:scale-[1.03] transition-all hover:shadow-2xl hover:shadow-indigo-200/50 border border-white"
             >
               <div className={`absolute top-0 right-0 w-32 h-32 ${screen.color} opacity-[0.03] rounded-bl-full translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-700`} />
 
@@ -84,7 +86,7 @@ export default function Home() {
           ))}
         </div>
 
-        <div className="mt-24 text-center text-slate-400 font-bold uppercase tracking-[0.3em] border-t border-slate-100 pt-10 text-[10px]">
+        <div className="mt-16 md:mt-24 text-center text-slate-400 font-bold uppercase tracking-[0.3em] border-t border-slate-100 pt-10 text-[10px]">
           <p>© 2026 NextServe Systems. All rights reserved.</p>
         </div>
       </div>

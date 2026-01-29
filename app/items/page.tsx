@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
 import {
     Search,
     Plus,
@@ -11,7 +12,8 @@ import {
     Trash2,
     Loader2,
     UtensilsCrossed,
-    X
+    X,
+    ArrowLeft
 } from "lucide-react";
 
 import { getMenu, addMenuItem, updateMenuItem, deleteMenuItem } from "@/lib/db";
@@ -121,6 +123,10 @@ export default function ItemsPage() {
             <div className="max-w-6xl mx-auto">
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                     <div>
+                        <Link href="/" className="inline-flex items-center text-slate-400 hover:text-primary transition-colors text-sm font-bold gap-1 mb-2">
+                            <ArrowLeft className="h-4 w-4" />
+                            DASHBOARD
+                        </Link>
                         <h1 className="text-3xl font-black text-slate-900 tracking-tight italic flex items-center gap-3">
                             <UtensilsCrossed className="text-primary h-8 w-8" />
                             MENU ITEMS
