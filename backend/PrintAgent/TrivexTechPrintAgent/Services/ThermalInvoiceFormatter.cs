@@ -69,7 +69,10 @@ public class ThermalInvoiceFormatter : IInvoiceFormatter
         // ================================
         // TABLE HEADER
         // ================================
+        sb.Append("\x1B\x45\x01"); // Bold ON
         sb.AppendLine(LEFT_PADDING + "Item              Qty   Rate     Amt");
+        sb.Append("\x1B\x45\x00"); // Bold OFF
+
         sb.AppendLine(LEFT_PADDING + "--------------------------------------");
 
         const int ITEM_COL_WIDTH = 12;
@@ -80,7 +83,7 @@ public class ThermalInvoiceFormatter : IInvoiceFormatter
         foreach (var item in invoice.Items)
         {
             // Show portion size next to item name
-            string itemDisplayName = $"{item.Name} ({item.PortionSize})";
+            string itemDisplayName = $"{item.Name} ";
 
             foreach (var line in WrapText(itemDisplayName, CONTENT_WIDTH))
             {
