@@ -33,10 +33,14 @@ namespace RestaurantBackend.Controllers
                     order.Id = Guid.NewGuid().ToString();
                 }
 
+                var today = DateTime.UtcNow.Date;
+                var tomorrow = today.AddDays(1);
+
                 if (string.IsNullOrEmpty(order.OrderNumber))
                 {
-                    var count = await _context.Orders.CountAsync();
-                    order.OrderNumber = (count + 101).ToString();
+                    var todayCount = await _context.Orders
+                            .CountAsync(o => o.CreatedAt >= today && o.CreatedAt < tomorrow);
+                    order.OrderNumber = (todayCount + 101).ToString();
                 }
 
                 order.CreatedAt = DateTime.UtcNow;
