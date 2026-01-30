@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Order } from '@/lib/types';
-import { api } from '@/lib/axios';
+import { api } from '@/lib/api';
 
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';

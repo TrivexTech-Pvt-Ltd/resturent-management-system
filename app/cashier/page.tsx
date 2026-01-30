@@ -7,7 +7,7 @@ import PaymentModal from '@/components/PaymentModal';
 import BillPrinter from '@/components/BillPrinter';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { api } from '@/lib/axios';
+import { api } from '@/lib/api';
 import { useOrderStore } from '@/lib/store/useOrderStore';
 
 export default function CashierPage() {

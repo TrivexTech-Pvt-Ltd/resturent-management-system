@@ -1,4 +1,4 @@
-import { api } from "./axios";
+import { api } from "./api";
 import { Order, MenuItem, User } from "./types";
 
 export const getOrders = async (): Promise<Order[]> => {
@@ -26,7 +26,7 @@ export const updateOrderStatus = async (
     status: Order["status"],
 ) => {
     try {
-        await api.patch(`/Orders/${orderId}/status`, JSON.stringify(status));
+        await api.patch(`/Orders/${orderId}/status`, status);
         return true;
     } catch (error) {
         console.error("Error updating status:", error);
