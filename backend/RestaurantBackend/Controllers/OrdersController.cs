@@ -23,7 +23,7 @@ namespace RestaurantBackend.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<Order>> CreateOrder([FromBody] Order order)
+        public async Task<IActionResult> CreateOrder([FromBody] Order order)
         {
             try 
             {
@@ -55,7 +55,20 @@ namespace RestaurantBackend.Controllers
                 _context.Orders.Add(order);
                 await _context.SaveChangesAsync();
 
-                return CreatedAtAction(nameof(GetOrders), new { id = order.Id }, order);
+                InvoiceDto invoice = new InvoiceDto
+                {
+                    Items = order.Items.Select(i => new InvoiceItemDto
+                    {
+                        Name = i.Name,
+                        Price = i.Price,
+                        Qty = i.Quantity
+                    }).ToList(),
+                    Total = order.Total,
+                    OrderNo = order.OrderNumber
+                };
+
+
+                return new OkObjectResult(invoice);
             }
             catch (Exception ex)
             {
