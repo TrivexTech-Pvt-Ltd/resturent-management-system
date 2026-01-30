@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MenuItem, Portion, OrderItem, Order } from '@/lib/types';
+import { MenuItem, Portion, OrderItem } from '@/lib/types';
 import MenuItemCard from '@/components/MenuItemCard';
 import PaymentModal from '@/components/PaymentModal';
 import BillPrinter from '@/components/BillPrinter';
-
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { api } from '@/lib/axios';
+import { useOrderStore } from '@/lib/store/useOrderStore';
 
 export default function CashierPage() {
     const [isMounted, setIsMounted] = useState(false);
@@ -15,14 +16,22 @@ export default function CashierPage() {
     const [cart, setCart] = useState<OrderItem[]>([]);
     const [isPaymentOpen, setIsPaymentOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
-    const [lastOrder, setLastOrder] = useState<Order | null>(null);
+
+    // Zustand store for order management
+    const { lastOrder, setLastOrder } = useOrderStore();
+
+    console.log(lastOrder, "lastOrder");
+
 
     useEffect(() => {
         setIsMounted(true);
-        fetch('/api/menu')
-            .then(res => res.json())
-            .then(data => {
-                setMenu(data);
+        api.get('/menu')
+            .then(res => {
+                setMenu(res.data);
+                setIsLoading(false);
+            })
+            .catch(error => {
+                console.error('Error fetching menu:', error);
                 setIsLoading(false);
             });
     }, []);
@@ -79,19 +88,18 @@ export default function CashierPage() {
             paymentMethod,
         };
 
-        const res = await fetch('/api/orders', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(orderData),
-        });
+        try {
+            const res = await api.post('/orders', orderData);
+            console.log(res, "res");
 
-        if (res.ok) {
-            const newOrder = await res.json();
-            setLastOrder(newOrder);
+            // Store order data in Zustand store
+            setLastOrder(res.data);
             setCart([]);
             localStorage.setItem('last_order_status', 'success');
             localStorage.removeItem('current_cart');
             setIsPaymentOpen(false);
+        } catch (error) {
+            console.error('Error placing order:', error);
         }
     };
 
@@ -157,7 +165,7 @@ export default function CashierPage() {
                                     <div className="flex items-center justify-between gap-2 md:gap-4 mt-1 md:mt-0">
                                         <div className="flex-1 min-w-0">
                                             <h4 className="font-bold text-slate-900 mb-1 truncate text-sm md:text-base">{item.name}</h4>
-                                            <p className="text-xs text-slate-400 font-medium">${item.price.toFixed(2)} each</p>
+                                            <p className="text-xs text-slate-400 font-medium">{item.price.toFixed(2)} each</p>
                                         </div>
 
                                         <div className="flex items-center gap-1 bg-slate-50 rounded-lg px-1 py-0.5">
@@ -177,7 +185,7 @@ export default function CashierPage() {
                                             </button>
                                         </div>
 
-                                        <p className="font-black text-sm md:text-lg text-primary min-w-[60px] md:min-w-[80px] text-right">${(item.price * item.quantity).toFixed(2)}</p>
+                                        <p className="font-black text-sm md:text-lg text-primary min-w-[60px] md:min-w-[80px] text-right">{(item.price * item.quantity).toFixed(2)}</p>
                                     </div>
                                 </div>
                             ))
@@ -187,15 +195,15 @@ export default function CashierPage() {
                     <div className="space-y-3 md:space-y-4 pt-3 md:pt-4 border-t shrink-0">
                         <div className="flex justify-between text-secondary text-sm md:text-base">
                             <span>Subtotal</span>
-                            <span>${total.toFixed(2)}</span>
+                            <span>{total.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between text-secondary text-sm md:text-base">
                             <span>Tax (0%)</span>
-                            <span>$0.00</span>
+                            <span>0.00</span>
                         </div>
                         <div className="flex justify-between text-xl md:text-2xl font-bold text-slate-900 pt-1 md:pt-2">
                             <span>Total</span>
-                            <span className="text-primary">${total.toFixed(2)}</span>
+                            <span className="text-primary">{total.toFixed(2)}</span>
                         </div>
 
                         <button

@@ -39,3 +39,14 @@ export interface User {
     role: UserRole;
     fullName?: string;
 }
+
+
+export interface LastOrder {
+    orderNo: string;
+    total: number;
+    items: {
+        name: string;
+        qty: number;
+        price: number;
+    }[];
+}

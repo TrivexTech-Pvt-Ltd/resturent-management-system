@@ -126,10 +126,10 @@ export default function SalesReportPage() {
         doc.text("Financial Summary", 14, 45);
 
         doc.setFontSize(10);
-        doc.text(`Total Revenue: $${totalSales.toFixed(2)}`, 14, 55);
+        doc.text(`Total Revenue: ${totalSales.toFixed(2)}`, 14, 55);
         doc.text(`Total Transactions: ${totalOrders}`, 14, 62);
-        doc.text(`Average Order Value: $${avgOrderValue.toFixed(2)}`, 14, 69);
-        doc.text(`Payment Mix: Cash $${cashSales.toFixed(2)} / Card $${cardSales.toFixed(2)}`, 14, 76);
+        doc.text(`Average Order Value: ${avgOrderValue.toFixed(2)}`, 14, 69);
+        doc.text(`Payment Mix: Cash ${cashSales.toFixed(2)} / Card ${cardSales.toFixed(2)}`, 14, 76);
 
         // Table Section
         autoTable(doc, {
@@ -139,7 +139,7 @@ export default function SalesReportPage() {
                 `#${o.orderNumber}`,
                 format(new Date(o.createdAt), 'MMM dd, HH:mm'),
                 o.paymentMethod,
-                `$${o.total.toFixed(2)}`,
+                o.total.toFixed(2),
                 o.status
             ]),
             headStyles: { fillColor: [99, 102, 241], fontSize: 10, fontStyle: 'bold' },
@@ -270,9 +270,9 @@ export default function SalesReportPage() {
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
-                        { label: 'GROSS REVENUE', value: `$${totalSales.toFixed(2)}`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50', trend: '+12.5%', isUp: true },
+                        { label: 'GROSS REVENUE', value: `${totalSales.toFixed(2)}`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50', trend: '+12.5%', isUp: true },
                         { label: 'TRANSACTIONS', value: totalOrders.toString(), icon: BarChart3, color: 'text-indigo-600', bg: 'bg-indigo-50', trend: '+5.2%', isUp: true },
-                        { label: 'AVG ORDER VAL', value: `$${avgOrderValue.toFixed(2)}`, icon: PieChart, color: 'text-amber-600', bg: 'bg-amber-50', trend: '-1.4%', isUp: false },
+                        { label: 'AVG ORDER VAL', value: `${avgOrderValue.toFixed(2)}`, icon: PieChart, color: 'text-amber-600', bg: 'bg-amber-50', trend: '-1.4%', isUp: false },
                         { label: 'CASH vs CARD', value: `${((cashSales / Math.max(1, totalSales)) * 100).toFixed(0)}% / ${((cardSales / Math.max(1, totalSales)) * 100).toFixed(0)}%`, icon: CreditCard, color: 'text-rose-600', bg: 'bg-rose-50', trend: 'Neutral', isUp: null },
                     ].map((stat, i) => (
                         <div key={i} className="glass-card p-6 rounded-[2rem] border border-white shadow-sm flex flex-col justify-between hover:scale-[1.02] transition-transform">
@@ -355,7 +355,7 @@ export default function SalesReportPage() {
                             <div className="space-y-2">
                                 <div className="flex justify-between font-bold text-sm">
                                     <span className="text-slate-500 uppercase">Cash Transactions</span>
-                                    <span className="text-slate-900">${cashSales.toFixed(2)}</span>
+                                    <span className="text-slate-900">{cashSales.toFixed(2)}</span>
                                 </div>
                                 <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden">
                                     <div
@@ -368,7 +368,7 @@ export default function SalesReportPage() {
                             <div className="space-y-2">
                                 <div className="flex justify-between font-bold text-sm">
                                     <span className="text-slate-500 uppercase">Card Transactions</span>
-                                    <span className="text-slate-900">${cardSales.toFixed(2)}</span>
+                                    <span className="text-slate-900">{cardSales.toFixed(2)}</span>
                                 </div>
                                 <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden">
                                     <div
@@ -455,7 +455,7 @@ export default function SalesReportPage() {
                                                 </span>
                                             </td>
                                             <td className="p-6 font-black text-slate-900">
-                                                ${order.total.toFixed(2)}
+                                                {order.total.toFixed(2)}
                                             </td>
                                             <td className="p-6 text-right">
                                                 <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] font-black uppercase tracking-wider">

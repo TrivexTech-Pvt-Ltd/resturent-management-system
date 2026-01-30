@@ -260,7 +260,7 @@ export default function ItemsPage() {
                                                     {item.portions?.map((p, idx) => (
                                                         <div key={idx} className="flex items-baseline gap-1 text-sm">
                                                             <span className="text-slate-400 font-medium">{p.size}:</span>
-                                                            <span className="font-black text-primary">${p.price.toFixed(2)}</span>
+                                                            <span className="font-black text-primary">{p.price.toFixed(2)}</span>
                                                         </div>
                                                     ))}
                                                 </div>
@@ -357,7 +357,7 @@ export default function ItemsPage() {
                                                 )}
                                             </div>
                                             <div className="flex-1 relative">
-                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-300">$</span>
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-300"></span>
                                                 <input
                                                     {...register(`portions.${index}.price` as const, { valueAsNumber: true })}
                                                     type="number"

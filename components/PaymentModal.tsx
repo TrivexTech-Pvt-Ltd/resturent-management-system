@@ -22,7 +22,7 @@ export default function PaymentModal({ isOpen, onClose, total, onConfirm }: Paym
 
                 <div className="text-center mb-8">
                     <p className="text-secondary text-sm uppercase tracking-wider mb-2 font-medium">Total Amount</p>
-                    <p className="text-5xl font-black text-primary">${total.toFixed(2)}</p>
+                    <p className="text-5xl font-black text-primary">{total.toFixed(2)}</p>
                 </div>
 
                 <div className="flex gap-4 mb-8">

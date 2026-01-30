@@ -113,7 +113,7 @@ export default function CustomerDisplay() {
                                         </span>
                                         <span className="text-lg md:text-xl font-bold text-slate-800">{item.name}</span>
                                     </div>
-                                    <span className="text-lg md:text-xl font-mono text-slate-500">${(item.price * item.quantity).toFixed(2)}</span>
+                                    <span className="text-lg md:text-xl font-mono text-slate-500">{(item.price * item.quantity).toFixed(2)}</span>
                                 </div>
                             ))
                         )}
@@ -122,12 +122,12 @@ export default function CustomerDisplay() {
                     <div className="mt-4 md:mt-8 pt-4 md:pt-8 border-t-4 border-slate-900 shrink-0">
                         <div className="flex justify-between items-center mb-2">
                             <span className="text-lg md:text-xl text-slate-500 font-bold uppercase">Tax</span>
-                            <span className="text-lg md:text-xl font-mono">$0.00</span>
+                            <span className="text-lg md:text-xl font-mono">0.00</span>
                         </div>
                         <div className="flex justify-between items-end">
                             <span className="text-2xl md:text-3xl font-black uppercase text-slate-900">Total</span>
                             <div className="text-right">
-                                <span className="text-4xl md:text-6xl font-black text-primary font-mono tracking-tighter">${total.toFixed(2)}</span>
+                                <span className="text-4xl md:text-6xl font-black text-primary font-mono tracking-tighter">{total.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>

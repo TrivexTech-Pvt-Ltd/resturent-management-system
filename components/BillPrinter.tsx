@@ -1,10 +1,26 @@
-import { Order } from '@/lib/types';
+'use client';
+
+import { useOrderStore } from '@/lib/store/useOrderStore';
+import { LastOrder, Order } from '@/lib/types';
 
 interface BillPrinterProps {
-    order: Order | null;
+    order: LastOrder | null;
 }
 
 export default function BillPrinter({ order }: BillPrinterProps) {
+
+    const lastOrder = useOrderStore(s => s.lastOrder);
+    async function sendPrint(data: any) {
+        await fetch(`http://localhost:5000/print`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-API-KEY": "trivex-resturent-7090"
+            },
+            body: JSON.stringify(data)
+        });
+    }
+
     if (!order) return null;
 
     return (
@@ -18,7 +34,7 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                             <span className="text-3xl">✨</span>
                         </div>
                         <h2 className="text-2xl font-black uppercase tracking-widest italic">Success!</h2>
-                        <p className="text-indigo-100 text-sm font-medium">Order #{order.orderNumber} has been placed</p>
+                        <p className="text-indigo-100 text-sm font-medium">Order #{order.orderNo} has been placed</p>
                     </div>
                 </div>
 
@@ -35,15 +51,15 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                         <div>
                             <h3 className="text-xl font-bold text-slate-800">Bill Details</h3>
                             <div className="flex gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                                <span>#{order.orderNumber}</span>
+                                <span>#{order.orderNo}</span>
                                 <span>•</span>
-                                <span>{new Date(order.createdAt).toLocaleDateString()}</span>
+                                {/* <span>{new Date(order.createdAt).toLocaleDateString()}</span> */}
                             </div>
                         </div>
                         <div className="text-right">
-                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${order.paymentMethod === 'CARD' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                            {/* <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${order.paymentMethod === 'CARD' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}>
                                 {order.paymentMethod}
-                            </span>
+                            </span> */}
                         </div>
                     </div>
 
@@ -52,11 +68,11 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                             <div key={idx} className="flex justify-between items-center group transition-all hover:translate-x-1">
                                 <div className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center font-bold text-slate-400 text-xs">
-                                        {item.quantity}x
+                                        {item.qty}x
                                     </div>
                                     <span className="font-semibold text-slate-700">{item.name}</span>
                                 </div>
-                                <span className="font-mono text-slate-500">${(item.price * item.quantity).toFixed(2)}</span>
+                                <span className="font-mono text-slate-500">{(item.price * item.qty).toFixed(2)}</span>
                             </div>
                         ))}
                     </div>
@@ -64,11 +80,11 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                     <div className="border-t-2 border-dashed border-slate-100 pt-6 space-y-3">
                         <div className="flex justify-between text-slate-400 text-sm">
                             <span>Subtotal</span>
-                            <span className="font-mono">${order.total.toFixed(2)}</span>
+                            <span className="font-mono">{order.total.toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center text-2xl font-black text-slate-900 pt-2">
                             <span className="italic tracking-tighter">TOTAL PAID</span>
-                            <span className="text-primary tabular-nums">${order.total.toFixed(2)}</span>
+                            <span className="text-primary tabular-nums">{order.total.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
@@ -82,7 +98,7 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                         <span>Done</span>
                     </button>
                     <button
-                        onClick={() => window.print()}
+                        onClick={() => sendPrint(order)}
                         className="flex-[2] bg-primary text-white py-4 rounded-2xl font-black text-lg hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-95 flex items-center justify-center gap-2"
                     >
                         <span>Print Bill</span>
@@ -112,16 +128,16 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                 {/* Order Meta Info */}
                 <div className="flex justify-between items-center mb-1 text-[11px] font-bold">
                     <span>ORDER NO:</span>
-                    <span className="text-sm">#{order.orderNumber}</span>
+                    <span className="text-sm">#{order.orderNo}</span>
                 </div>
-                <div className="flex justify-between items-center mb-1 text-[11px]">
+                {/* <div className="flex justify-between items-center mb-1 text-[11px]">
                     <span>DATE:</span>
                     <span>{new Date(order.createdAt).toLocaleDateString()}</span>
-                </div>
-                <div className="flex justify-between items-center mb-4 text-[11px]">
+                </div> */}
+                {/* <div className="flex justify-between items-center mb-4 text-[11px]">
                     <span>PAY METHOD:</span>
                     <span className="uppercase">{order.paymentMethod}</span>
-                </div>
+                </div> */}
 
                 <div className="border-b border-black my-4" />
 
@@ -138,11 +154,11 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                             <div className="flex flex-col">
                                 <span className="font-bold text-[11px] uppercase">{item.name}</span>
                                 <span className="text-[9px] italic opacity-70">
-                                    {item.quantity} x ${item.price.toFixed(2)}
+                                    {item.qty} x {item.price.toFixed(2)}
                                 </span>
                             </div>
                             <span className="font-bold text-[11px] align-bottom">
-                                ${(item.price * item.quantity).toFixed(2)}
+                                {(item.price * item.qty).toFixed(2)}
                             </span>
                         </div>
                     ))}
@@ -154,15 +170,11 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                 <div className="space-y-1">
                     <div className="flex justify-between text-[11px]">
                         <span>Subtotal:</span>
-                        <span>${order.total.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-[11px]">
-                        <span>Tax (0%):</span>
-                        <span>$0.00</span>
+                        <span>{order.total.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-xl font-black italic mt-2 pt-2 border-t border-black/5">
                         <span>TOTAL:</span>
-                        <span>${order.total.toFixed(2)}</span>
+                        <span>{order.total.toFixed(2)}</span>
                     </div>
                 </div>
 
@@ -183,7 +195,7 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                                 />
                             ))}
                         </div>
-                        <p className="text-[9px] font-mono tracking-[3px] uppercase mt-1">{order.id.substring(0, 12)}</p>
+                        <p className="text-[9px] font-mono tracking-[3px] uppercase mt-1">{(order.orderNo || '000000000000').substring(0, 12)}</p>
                     </div>
                 </div>
 
