@@ -1,5 +1,5 @@
 [[redirects]]
-  from = "/remote-api/*"
+  from = "/api/*"
   to = "http://resturentsystem.runasp.net/api/:splat"
   status = 200
   force = true
