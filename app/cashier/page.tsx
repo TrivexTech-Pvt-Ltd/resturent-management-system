@@ -7,7 +7,7 @@ import PaymentModal from '@/components/PaymentModal';
 import BillPrinter from '@/components/BillPrinter';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { api } from '@/lib/api';
+import { getMenu, saveOrder } from '@/lib/db';
 import { useOrderStore } from '@/lib/store/useOrderStore';
 
 export default function CashierPage() {
@@ -25,9 +25,9 @@ export default function CashierPage() {
 
     useEffect(() => {
         setIsMounted(true);
-        api.get('/menu')
-            .then(res => {
-                setMenu(res.data);
+        getMenu()
+            .then(data => {
+                setMenu(data);
                 setIsLoading(false);
             })
             .catch(error => {
@@ -89,11 +89,11 @@ export default function CashierPage() {
         };
 
         try {
-            const res = await api.post('/orders', orderData);
-            console.log(res, "res");
+            const data = await saveOrder(orderData);
+            console.log(data, "res");
 
             // Store order data in Zustand store
-            setLastOrder(res.data);
+            setLastOrder(data);
             setCart([]);
             localStorage.setItem('last_order_status', 'success');
             localStorage.removeItem('current_cart');

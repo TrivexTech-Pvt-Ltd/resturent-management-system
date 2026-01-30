@@ -26,7 +26,7 @@ export const updateOrderStatus = async (
     status: Order["status"],
 ) => {
     try {
-        await api.patch(`/Orders/${orderId}/status`, status);
+        await api.patch(`/Orders/${orderId}`, { status });
         return true;
     } catch (error) {
         console.error("Error updating status:", error);
