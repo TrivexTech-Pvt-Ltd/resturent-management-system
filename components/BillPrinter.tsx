@@ -9,7 +9,22 @@ interface BillPrinterProps {
 
 export default function BillPrinter({ order }: BillPrinterProps) {
 
-    const lastOrder = useOrderStore(s => s.lastOrder);
+    const clearLastOrder = useOrderStore(s => s.clearLastOrder);
+
+    async function handlePrint() {
+        if (!order) return;
+        try {
+            await sendPrint(order);
+            // Optional: wait a bit or just close
+            clearLastOrder();
+        } catch (error) {
+            console.error("Print failed:", error);
+            // Maybe don't close if it fails? Or notify user?
+            // For now, let's just close as requested.
+            clearLastOrder();
+        }
+    }
+
     async function sendPrint(data: any) {
         await fetch(`http://localhost:5000/print`, {
             method: "POST",
@@ -29,7 +44,7 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                 {/* Decorative Header */}
                 <div className="bg-gradient-to-br from-primary to-indigo-600 p-8 text-white text-center relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-full opacity-20 bg-[radial-gradient(circle_at_30%_20%,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
-                    <div className="relative z-10">
+                    <div className="relative z-10 text-center">
                         <div className="w-16 h-16 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/30 shadow-xl animate-bounce-slow">
                             <span className="text-3xl">✨</span>
                         </div>
@@ -92,13 +107,7 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                 {/* Actions */}
                 <div className="p-8 bg-slate-50 flex gap-3 border-t border-slate-100">
                     <button
-                        onClick={() => window.location.reload()}
-                        className="flex-1 py-4 rounded-2xl font-bold text-slate-500 hover:bg-slate-200 transition-all flex items-center justify-center gap-2"
-                    >
-                        <span>Done</span>
-                    </button>
-                    <button
-                        onClick={() => sendPrint(order)}
+                        onClick={handlePrint}
                         className="flex-[2] bg-primary text-white py-4 rounded-2xl font-black text-lg hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-95 flex items-center justify-center gap-2"
                     >
                         <span>Print Bill</span>

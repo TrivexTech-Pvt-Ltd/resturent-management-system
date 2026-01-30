@@ -296,31 +296,31 @@ export default function ItemsPage() {
             <Modal
                 isOpen={isFormModalOpen}
                 onClose={closeFormModal}
-                title={editingItem ? "Update Menu Item" : "Precision Addition"}
+                title={editingItem ? "Update Item" : "Add Item"}
             >
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                     <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Internal Designation</label>
+                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Item Name</label>
                         <input
                             {...register("name")}
                             className={cn(
                                 "w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-800",
                                 errors.name && "border-red-500 bg-red-50"
                             )}
-                            placeholder="e.g. Signature Truffle Burger"
+                            placeholder="Enter Item Name"
                         />
                         {errors.name && <p className="mt-1 text-xs font-bold text-red-500">{errors.name.message}</p>}
                     </div>
 
                     <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Classification</label>
+                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Category</label>
                         <input
                             {...register("category")}
                             className={cn(
                                 "w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-800",
                                 errors.category && "border-red-500 bg-red-50"
                             )}
-                            placeholder="e.g. Entrees, Mixology"
+                            placeholder="Enter Category"
                         />
                         {errors.category && <p className="mt-1 text-xs font-bold text-red-500">{errors.category.message}</p>}
                     </div>
@@ -411,7 +411,7 @@ export default function ItemsPage() {
                             onClick={closeFormModal}
                             className="flex-1 px-6 py-4 border-2 border-slate-100 text-slate-400 font-bold rounded-2xl hover:bg-slate-50 transition-all uppercase text-xs tracking-[0.2em]"
                         >
-                            Abort
+                            Cancel
                         </button>
                         <button
                             type="submit"
@@ -421,7 +421,7 @@ export default function ItemsPage() {
                             {(createMutation.isPending || updateMutation.isPending) ? (
                                 <Loader2 className="h-5 w-5 animate-spin" />
                             ) : (
-                                editingItem ? "Commit Changes" : "Finalize Entry"
+                                editingItem ? "Update Item" : "Add Item"
                             )}
                         </button>
                     </div>

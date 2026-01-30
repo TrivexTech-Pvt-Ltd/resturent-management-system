@@ -45,7 +45,7 @@ export default function Home() {
           className="flex items-center justify-center gap-2 px-6 py-3 bg-white hover:bg-red-50 text-slate-400 hover:text-red-500 font-bold rounded-2xl transition-all border border-slate-100 shadow-sm active:scale-95 w-full md:w-auto"
         >
           <LogOut className="h-4 w-4" />
-          <span className="text-xs uppercase tracking-widest">Terminate Session</span>
+          <span className="text-xs uppercase tracking-widest">Log Out</span>
         </button>
       </div>
 
