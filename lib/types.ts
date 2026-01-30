@@ -17,12 +17,18 @@ export interface Order {
     createdAt: string;
 }
 
+export interface Portion {
+    id: string;
+    size: string;
+    price: number;
+}
+
 export interface MenuItem {
     id: string;
     name: string;
-    price: number;
     category: string;
     image?: string;
+    portions: Portion[];
 }
 
 export type UserRole = 'Admin' | 'User';

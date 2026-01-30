@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MenuItem, OrderItem, Order } from '@/lib/types';
+import { MenuItem, Portion, OrderItem, Order } from '@/lib/types';
 import MenuItemCard from '@/components/MenuItemCard';
 import PaymentModal from '@/components/PaymentModal';
 import BillPrinter from '@/components/BillPrinter';
@@ -27,13 +27,20 @@ export default function CashierPage() {
             });
     }, []);
 
-    const addToCart = (item: MenuItem) => {
+    const addToCart = (product: MenuItem, portion: Portion) => {
+        const orderItemId = portion.id || `${product.id}-${portion.size}`;
+
         setCart(prev => {
-            const existing = prev.find(i => i.id === item.id);
+            const existing = prev.find(i => i.id === orderItemId);
             if (existing) {
-                return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
+                return prev.map(i => i.id === orderItemId ? { ...i, quantity: i.quantity + 1 } : i);
             }
-            return [...prev, { ...item, quantity: 1 }];
+            return [...prev, {
+                id: orderItemId,
+                name: `${product.name} (${portion.size})`,
+                price: portion.price,
+                quantity: 1
+            }];
         });
     };
 
