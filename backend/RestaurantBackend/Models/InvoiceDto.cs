@@ -1,4 +1,4 @@
-﻿namespace TrivexTechPrintAgent.Models;
+﻿namespace RestaurantBackend.Models;
 
 public class InvoiceDto
 {
