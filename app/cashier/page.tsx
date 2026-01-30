@@ -123,7 +123,7 @@ export default function CashierPage() {
             <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
                 {/* Menu Section */}
                 <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
                         {isLoading ? (
                             [...Array(8)].map((_, i) => (
                                 <div key={i} className="glass-card p-4 rounded-2xl h-64 animate-pulse bg-slate-200" />
@@ -196,10 +196,6 @@ export default function CashierPage() {
                         <div className="flex justify-between text-secondary text-sm md:text-base">
                             <span>Subtotal</span>
                             <span>{total.toFixed(2)}</span>
-                        </div>
-                        <div className="flex justify-between text-secondary text-sm md:text-base">
-                            <span>Tax (0%)</span>
-                            <span>0.00</span>
                         </div>
                         <div className="flex justify-between text-xl md:text-2xl font-bold text-slate-900 pt-1 md:pt-2">
                             <span>Total</span>

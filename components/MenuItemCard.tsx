@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { UtensilsCrossed } from 'lucide-react';
 import { MenuItem, Portion } from '@/lib/types';
 import { cn } from '@/lib/utils';
 
@@ -31,7 +32,7 @@ export default function MenuItemCard({ item, onAdd }: MenuItemCardProps) {
                 {item.image ? (
                     <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 ) : (
-                    <span className="text-4xl">🍔</span>
+                    <UtensilsCrossed className="h-10 w-10 text-slate-300" />
                 )}
             </div>
 

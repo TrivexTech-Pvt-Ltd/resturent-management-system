@@ -228,11 +228,11 @@ export default function ItemsPage() {
                                         <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
                                             <td className="p-6">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-2xl shadow-inner overflow-hidden border-2 border-white">
+                                                    <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-slate-100 to-slate-200 flex items-center justify-center text-2xl shadow-inner overflow-hidden border-2 border-white">
                                                         {item.image ? (
                                                             <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                                                         ) : (
-                                                            "🍔"
+                                                            <UtensilsCrossed className="h-6 w-6 text-slate-300" />
                                                         )}
                                                     </div>
                                                     <div>
@@ -266,17 +266,17 @@ export default function ItemsPage() {
                                                 </div>
                                             </td>
                                             <td className="p-6 text-right">
-                                                <div className="flex justify-end gap-3 translate-x-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+                                                <div className="flex justify-end gap-3">
                                                     <button
                                                         onClick={() => openEditModal(item)}
-                                                        className="w-10 h-10 flex items-center justify-center bg-white text-slate-400 hover:text-primary hover:shadow-lg border border-slate-100 rounded-xl transition-all"
+                                                        className="w-10 h-10 cursor-pointer flex items-center justify-center bg-primary text-white hover:shadow-lg border border-primary rounded-xl transition-all hover:scale-110"
                                                         title="Edit Item"
                                                     >
                                                         <Edit2 className="h-4 w-4" />
                                                     </button>
                                                     <button
                                                         onClick={() => confirmDelete(item)}
-                                                        className="w-10 h-10 flex items-center justify-center bg-white text-slate-400 hover:text-red-500 hover:shadow-lg border border-slate-100 rounded-xl transition-all"
+                                                        className="w-10 h-10 cursor-pointer flex items-center justify-center bg-red-400 text-white hover:shadow-lg border border-red-400 rounded-xl transition-all hover:scale-110"
                                                         title="Delete Item"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
@@ -416,7 +416,7 @@ export default function ItemsPage() {
                         <button
                             type="submit"
                             disabled={createMutation.isPending || updateMutation.isPending}
-                            className="flex-[2] bg-primary text-white font-black rounded-2xl py-4 hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center justify-center uppercase text-xs tracking-[0.2em] disabled:opacity-50"
+                            className="flex-2 bg-primary text-white font-black rounded-2xl py-4 hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center justify-center uppercase text-xs tracking-[0.2em] disabled:opacity-50"
                         >
                             {(createMutation.isPending || updateMutation.isPending) ? (
                                 <Loader2 className="h-5 w-5 animate-spin" />

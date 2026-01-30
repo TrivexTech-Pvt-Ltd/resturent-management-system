@@ -51,8 +51,13 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center p-6 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-indigo-50/50 via-white to-white">
-            <div className="max-w-md w-full">
+        <div className="min-h-screen bg-linear-to-br from-slate-50 to-white relative flex items-center justify-center p-6 overflow-hidden">
+            {/* Background Decorative Elements */}
+            <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 rounded-full blur-[120px]" />
+            <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-primary/20 rounded-full blur-[120px]" />
+            <div className="absolute top-[20%] right-[5%] w-[20%] h-[20%] bg-blue-400/10 rounded-full blur-[80px]" />
+
+            <div className="max-w-md w-full relative z-10">
                 <div className="text-center mb-10">
                     <div className="inline-flex items-center justify-center w-20 h-20 bg-primary/10 rounded-[2.5rem] mb-6 animate-in zoom-in duration-500">
                         <ChefHat className="h-10 w-10 text-primary" />
@@ -107,7 +112,7 @@ export default function LoginPage() {
                         </button>
                     </form>
 
-                    <p className="text-center mt-8 text-slate-500 font-bold text-sm">
+                    <p className="text-center mt-8 text-slate-500 font-bold text-sm hidden">
                         New user?&nbsp;
                         <Link href="/register" className="text-primary hover:underline underline-offset-4">
                             Register Credentials
