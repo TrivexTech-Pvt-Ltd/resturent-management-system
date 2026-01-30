@@ -68,33 +68,75 @@ namespace RestaurantBackend.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateMenuItem(string id, MenuItem item)
+        public async Task<IActionResult> UpdateMenuItem(
+      string id,
+      UpdateMenuItemDto dto)
         {
-            if (id != item.Id)
-            {
-                return BadRequest();
-            }
+            if (id != dto.Id)
+                return BadRequest("ID mismatch");
 
-            _context.Entry(item).State = EntityState.Modified;
+            // Load existing MenuItem with portions
+            var menuItem = await _context.MenuItems
+                .Include(m => m.Portions)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
-            try
+            if (menuItem == null)
+                return NotFound();
+
+            // Update MenuItem fields
+            menuItem.Name = dto.Name;
+            menuItem.Category = dto.Category;
+            menuItem.Image = dto.Image;
+
+            // ================================
+            // Update / Add Portions
+            // ================================
+            foreach (var portionDto in dto.Portions)
             {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!MenuItemExists(id))
+                // UPDATE existing portion
+                if (!string.IsNullOrWhiteSpace(portionDto.Id))
                 {
-                    return NotFound();
+                    var existingPortion = menuItem.Portions
+                        .FirstOrDefault(p => p.Id == portionDto.Id);
+
+                    if (existingPortion == null)
+                        return BadRequest($"Invalid portion id: {portionDto.Id}");
+
+                    existingPortion.Size = portionDto.Size;
+                    existingPortion.Price = portionDto.Price;
                 }
+                // ADD new portion
                 else
                 {
-                    throw;
+                    menuItem.Portions.Add(new MenuItemPortion
+                    {
+                        Size = portionDto.Size,
+                        Price = portionDto.Price,
+                        IsAvailable = true
+                    });
                 }
             }
+
+            // OPTIONAL: remove deleted portions
+            var dtoPortionIds = dto.Portions
+                .Where(p => !string.IsNullOrWhiteSpace(p.Id))
+                .Select(p => p.Id!)
+                .ToHashSet();
+
+            var portionsToRemove = menuItem.Portions
+                .Where(p => !dtoPortionIds.Contains(p.Id))
+                .ToList();
+
+            foreach (var p in portionsToRemove)
+            {
+                _context.MenuItemPortions.Remove(p);
+            }
+
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
+
 
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMenuItem(string id)

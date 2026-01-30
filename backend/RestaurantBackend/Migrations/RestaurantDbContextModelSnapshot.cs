@@ -41,50 +41,6 @@ namespace RestaurantBackend.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("MenuItems");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "1",
-                            Category = "Burgers",
-                            Name = "Classic Burger"
-                        },
-                        new
-                        {
-                            Id = "2",
-                            Category = "Burgers",
-                            Name = "Cheese Burger"
-                        },
-                        new
-                        {
-                            Id = "3",
-                            Category = "Sides",
-                            Name = "French Fries"
-                        },
-                        new
-                        {
-                            Id = "4",
-                            Category = "Drinks",
-                            Name = "Coke"
-                        },
-                        new
-                        {
-                            Id = "5",
-                            Category = "Pizza",
-                            Name = "Pizza Margherita"
-                        },
-                        new
-                        {
-                            Id = "6",
-                            Category = "Pasta",
-                            Name = "Pasta Carbonara"
-                        },
-                        new
-                        {
-                            Id = "CR",
-                            Category = "Rice",
-                            Name = "Chicken Rice"
-                        });
                 });
 
             modelBuilder.Entity("RestaurantBackend.Models.MenuItemPortion", b =>
@@ -110,25 +66,7 @@ namespace RestaurantBackend.Migrations
 
                     b.HasIndex("MenuItemId");
 
-                    b.ToTable("MenuItemPortion");
-
-                    b.HasData(
-                        new
-                        {
-                            Id = "CR-M",
-                            IsAvailable = true,
-                            MenuItemId = "CR",
-                            Price = 650m,
-                            Size = "M"
-                        },
-                        new
-                        {
-                            Id = "CR-L",
-                            IsAvailable = true,
-                            MenuItemId = "CR",
-                            Price = 850m,
-                            Size = "L"
-                        });
+                    b.ToTable("MenuItemPortions");
                 });
 
             modelBuilder.Entity("RestaurantBackend.Models.Order", b =>

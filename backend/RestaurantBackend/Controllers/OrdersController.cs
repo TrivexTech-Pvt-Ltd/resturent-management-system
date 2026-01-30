@@ -69,13 +69,13 @@ namespace RestaurantBackend.Controllers
             }
         }
 
-        [HttpPatch("{id}/status")]
-        public async Task<IActionResult> UpdateStatus(string id, [FromBody] OrderStatus status)
+        [HttpPatch("{id}")]
+        public async Task<IActionResult> UpdateStatus(string id,[FromBody] UpdateOrderStatusDto dto)
         {
             var order = await _context.Orders.FindAsync(id);
             if (order == null) return NotFound();
 
-            order.Status = status;
+            order.Status = dto.Status;
             await _context.SaveChangesAsync();
 
             return NoContent();
