@@ -49,12 +49,12 @@ public class ThermalInvoiceFormatter : IInvoiceFormatter
         // ASCII LOGO
         // ================================
         sb.AppendLine(LEFT_PADDING + "+------------------------------------+");
-        sb.AppendLine(LEFT_PADDING + "|         Resturent Management       |");
-        sb.AppendLine(LEFT_PADDING + "|              System                |");
+        sb.AppendLine(LEFT_PADDING + "|           LOTTERIA CHINESE         |");
+        sb.AppendLine(LEFT_PADDING + "|              RRSTAURANT            |");
         sb.AppendLine(LEFT_PADDING + "+------------------------------------+");
 
-        sb.AppendLine(LEFT_PADDING + "       No 76, Puwakaramba Road,");
-        sb.AppendLine(LEFT_PADDING + "         Kadalana, Moratuwa");
+        sb.AppendLine(LEFT_PADDING + "       No 434, Athurugiriya  Road,");
+        sb.AppendLine(LEFT_PADDING + "           Hokandara North");
         sb.AppendLine(LEFT_PADDING + "          Tel: 0112652046");
 
         sb.AppendLine(LEFT_PADDING + "--------------------------------------");
