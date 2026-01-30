@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using RestaurantBackend.Data;
+using RestaurantBackend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,9 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<RestaurantDbContext>();
     db.Database.Migrate();
 }
+
+//seed data
+await DbSeed.SeedData(app);
 
 
 // Configure the HTTP request pipeline.

@@ -10,5 +10,6 @@ namespace RestaurantBackend.Models
         public decimal Price { get; set; }
         public required string Category { get; set; }
         public string? Image { get; set; }
+        public string? PortionSize { get; set; }
     }
 }

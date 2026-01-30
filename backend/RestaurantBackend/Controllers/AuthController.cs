@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using RestaurantBackend.Common;
 using RestaurantBackend.Data;
 using RestaurantBackend.Models;
 using System.Security.Cryptography;
@@ -29,7 +30,7 @@ namespace RestaurantBackend.Controllers
             var user = new User
             {
                 Username = dto.Username,
-                PasswordHash = HashPassword(dto.Password),
+                PasswordHash = CustomPasswordHasher.HashPassword(dto.Password),
                 FullName = dto.FullName,
                 Role = dto.Role
             };
@@ -65,16 +66,9 @@ namespace RestaurantBackend.Controllers
             });
         }
 
-        private string HashPassword(string password)
-        {
-            using var sha256 = SHA256.Create();
-            var hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-            return Convert.ToBase64String(hashedBytes);
-        }
-
         private bool VerifyPassword(string password, string hashedPassword)
         {
-            return HashPassword(password) == hashedPassword;
+            return CustomPasswordHasher.HashPassword(password) == hashedPassword;
         }
     }
 }

@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using RestaurantBackend.Models;
 
@@ -43,6 +44,7 @@ namespace RestaurantBackend.Data
                 new MenuItem { Id = "5", Name = "Pizza Margherita", Price = 12.99m, Category = "Pizza" },
                 new MenuItem { Id = "6", Name = "Pasta Carbonara", Price = 11.99m, Category = "Pasta" }
             );
+
         }
     }
 }

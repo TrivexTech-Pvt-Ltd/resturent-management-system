@@ -12,8 +12,8 @@ using RestaurantBackend.Data;
 namespace RestaurantBackend.Migrations
 {
     [DbContext(typeof(RestaurantDbContext))]
-    [Migration("20260127055214_AddUserTable")]
-    partial class AddUserTable
+    [Migration("20260130054149_added initial portion size")]
+    partial class addedinitialportionsize
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -39,6 +39,9 @@ namespace RestaurantBackend.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PortionSize")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<decimal>("Price")
