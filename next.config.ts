@@ -4,7 +4,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     return [
       {
-        source: '/remote-api/:path*',
+        source: '/api/:path*',
         destination: 'http://resturentsystem.runasp.net/api/:path*',
       },
     ];

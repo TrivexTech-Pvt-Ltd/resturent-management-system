@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Order } from '@/lib/types';
 
 import Link from 'next/link';
@@ -26,6 +26,39 @@ export default function StatusPage() {
 
     const inProgress = orders.filter(o => ['PENDING', 'PREPARING'].includes(o.status));
     const ready = orders.filter(o => o.status === 'READY');
+
+    const prevStatusesRef = useRef<Map<string, string>>(new Map());
+
+    const playNotificationSound = () => {
+        try {
+            const audio = new Audio('/notification.mp3');
+            audio.play().catch(err => console.error("Error playing notification sound:", err));
+        } catch (error) {
+            console.error('Error initializing sound:', error);
+        }
+    };
+
+    useEffect(() => {
+        let shouldPlaySound = false;
+        const newStatuses = new Map<string, string>();
+
+        orders.forEach(order => {
+            newStatuses.set(order.id, order.status);
+            if (order.status === 'READY') {
+                const prevStatus = prevStatusesRef.current.get(order.id);
+                // Play sound only if status changed to READY from a known previous status
+                if (prevStatus && prevStatus !== 'READY') {
+                    shouldPlaySound = true;
+                }
+            }
+        });
+
+        if (shouldPlaySound) {
+            playNotificationSound();
+        }
+
+        prevStatusesRef.current = newStatuses;
+    }, [orders]);
 
     return (
         <div className="min-h-screen bg-slate-950 flex flex-col overflow-x-hidden md:overflow-hidden">

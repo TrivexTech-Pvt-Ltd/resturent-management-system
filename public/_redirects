@@ -1,1 +1,1 @@
-/remote-api/*  http://resturentsystem.runasp.net/api/:splat  200
+/api/*  http://resturentsystem.runasp.net/api/:splat  200

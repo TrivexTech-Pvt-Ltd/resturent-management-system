@@ -79,7 +79,10 @@ public class ThermalInvoiceFormatter : IInvoiceFormatter
 
         foreach (var item in invoice.Items)
         {
-            foreach (var line in WrapText(item.Name, CONTENT_WIDTH))
+            // Show portion size next to item name
+            string itemDisplayName = $"{item.Name} ({item.PortionSize})";
+
+            foreach (var line in WrapText(itemDisplayName, CONTENT_WIDTH))
             {
                 sb.AppendLine(LEFT_PADDING + line);
             }
@@ -101,6 +104,7 @@ public class ThermalInvoiceFormatter : IInvoiceFormatter
 
             sb.AppendLine();
         }
+
 
         sb.AppendLine(LEFT_PADDING + "--------------------------------------");
 

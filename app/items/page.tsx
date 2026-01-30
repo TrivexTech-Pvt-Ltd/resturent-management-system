@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import {
@@ -34,11 +34,20 @@ export default function ItemsPage() {
     // React Hook Form
     const {
         register,
+        control,
         handleSubmit,
         reset,
         formState: { errors },
     } = useForm<MenuItemFormData>({
         resolver: zodResolver(menuItemSchema),
+        defaultValues: {
+            portions: [{ size: "", price: 0 }]
+        }
+    });
+
+    const { fields, append, remove } = useFieldArray({
+        control,
+        name: "portions",
     });
 
     // Queries
@@ -46,6 +55,8 @@ export default function ItemsPage() {
         queryKey: ["menu"],
         queryFn: getMenu,
     });
+
+
 
     // Mutations
     const createMutation = useMutation({
@@ -76,7 +87,12 @@ export default function ItemsPage() {
     // Handlers
     const openAddModal = () => {
         setEditingItem(null);
-        reset({ name: "", price: 0, category: "", image: "" });
+        reset({
+            name: "",
+            category: "",
+            image: "",
+            portions: [{ size: "", price: 0 }]
+        });
         setIsFormModalOpen(true);
     };
 
@@ -84,9 +100,9 @@ export default function ItemsPage() {
         setEditingItem(item);
         reset({
             name: item.name,
-            price: item.price,
             category: item.category,
             image: item.image || "",
+            portions: item.portions.map(p => ({ id: p.id, size: p.size, price: p.price }))
         });
         setIsFormModalOpen(true);
     };
@@ -98,13 +114,30 @@ export default function ItemsPage() {
     };
 
     const onSubmit = (data: MenuItemFormData) => {
+        // Construct the payload with portions
+        const payload = {
+            name: data.name,
+            category: data.category,
+            image: data.image,
+            portions: data.portions?.map(p => ({
+                id: p.id,
+                size: p.size,
+                price: p.price,
+                MenuItemId: editingItem?.id || ""
+            })) || []
+        };
+
         if (editingItem) {
             updateMutation.mutate({
                 id: editingItem.id,
-                data: { ...editingItem, ...data } as MenuItem
+                data: {
+                    id: editingItem.id,
+                    ...payload
+                } as any
             });
+            console.log(data, editingItem.id)
         } else {
-            createMutation.mutate(data);
+            createMutation.mutate(payload as any);
         }
     };
 
@@ -164,6 +197,7 @@ export default function ItemsPage() {
                                 <tr>
                                     <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Item Details</th>
                                     <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Category</th>
+                                    <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Portions</th>
                                     <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Price</th>
                                     <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider text-right">Actions</th>
                                 </tr>
@@ -171,7 +205,7 @@ export default function ItemsPage() {
                             <tbody>
                                 {isLoading ? (
                                     <tr>
-                                        <td colSpan={4} className="p-20 text-center">
+                                        <td colSpan={5} className="p-20 text-center">
                                             <div className="flex flex-col items-center gap-4">
                                                 <Loader2 className="h-10 w-10 text-primary animate-spin" />
                                                 <span className="text-slate-400 font-bold uppercase tracking-widest text-sm">Loading Menu Library...</span>
@@ -180,7 +214,7 @@ export default function ItemsPage() {
                                     </tr>
                                 ) : filteredItems.length === 0 ? (
                                     <tr>
-                                        <td colSpan={4} className="p-20 text-center">
+                                        <td colSpan={5} className="p-20 text-center">
                                             <div className="flex flex-col items-center gap-4">
                                                 <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
                                                     <Search className="text-slate-300 h-8 w-8" />
@@ -213,9 +247,22 @@ export default function ItemsPage() {
                                                 </span>
                                             </td>
                                             <td className="p-6">
-                                                <div className="flex items-baseline gap-0.5">
-                                                    <span className="text-xs font-black text-primary/60">$</span>
-                                                    <span className="text-xl font-black text-primary">{item.price.toFixed(2)}</span>
+                                                <div className="flex gap-1 flex-wrap">
+                                                    {item.portions?.map((p, idx) => (
+                                                        <span key={idx} className="px-2 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-bold border border-slate-200">
+                                                            {p.size}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </td>
+                                            <td className="p-6">
+                                                <div className="flex flex-col gap-1">
+                                                    {item.portions?.map((p, idx) => (
+                                                        <div key={idx} className="flex items-baseline gap-1 text-sm">
+                                                            <span className="text-slate-400 font-medium">{p.size}:</span>
+                                                            <span className="font-black text-primary">${p.price.toFixed(2)}</span>
+                                                        </div>
+                                                    ))}
                                                 </div>
                                             </td>
                                             <td className="p-6 text-right">
@@ -279,21 +326,83 @@ export default function ItemsPage() {
                     </div>
 
                     <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Monetary Valuation ($)</label>
-                        <div className="relative">
-                            <span className="absolute left-5 top-1/2 -translate-y-1/2 font-black text-slate-300">$</span>
-                            <input
-                                {...register("price", { valueAsNumber: true })}
-                                type="number"
-                                step="0.01"
-                                className={cn(
-                                    "w-full pl-10 pr-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all font-black text-slate-800",
-                                    errors.price && "border-red-500 bg-red-50"
-                                )}
-                                placeholder="0.00"
-                            />
+                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Portions & Pricing</label>
+                        <div className="space-y-3">
+                            {(() => {
+                                // Watch all portion sizes to prevent duplicates - moved outside map
+                                const watchedPortions = useWatch({ control, name: "portions" });
+
+                                return fields.map((field, index) => {
+                                    const selectedSizes = watchedPortions
+                                        ?.map((p, idx) => idx !== index ? p?.size : null)
+                                        .filter(Boolean) || [];
+
+                                    return (
+                                        <div key={field.id} className="flex gap-3 items-start">
+                                            <input type="hidden" {...register(`portions.${index}.id` as const)} />
+                                            <div className="flex-1">
+                                                <select
+                                                    {...register(`portions.${index}.size` as const)}
+                                                    className={cn(
+                                                        "w-full px-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-800 text-sm",
+                                                        errors.portions?.[index]?.size && "border-red-500 bg-red-50"
+                                                    )}
+                                                >
+                                                    <option value="">Select Size</option>
+                                                    {!selectedSizes.includes("M") && <option value="M">Medium</option>}
+                                                    {!selectedSizes.includes("L") && <option value="L">Large</option>}
+                                                </select>
+                                                {errors.portions?.[index]?.size && (
+                                                    <p className="mt-1 text-xs font-bold text-red-500">{errors.portions[index]?.size?.message}</p>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 relative">
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-300">$</span>
+                                                <input
+                                                    {...register(`portions.${index}.price` as const, { valueAsNumber: true })}
+                                                    type="number"
+                                                    step="0.01"
+                                                    placeholder="0.00"
+                                                    className={cn(
+                                                        "w-full pl-8 pr-4 py-3 bg-slate-50 border border-slate-100 rounded-xl focus:ring-4 focus:ring-primary/10 outline-none transition-all font-black text-slate-800 text-sm",
+                                                        errors.portions?.[index]?.price && "border-red-500 bg-red-50"
+                                                    )}
+                                                />
+                                                {errors.portions?.[index]?.price && (
+                                                    <p className="mt-1 text-xs font-bold text-red-500">{errors.portions[index]?.price?.message}</p>
+                                                )}
+                                            </div>
+                                            {fields.length > 1 && (
+                                                <button
+                                                    type="button"
+                                                    onClick={() => remove(index)}
+                                                    className="p-3 bg-red-50 text-red-500 rounded-xl hover:bg-red-100 transition-colors"
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    );
+                                });
+                            })()}
                         </div>
-                        {errors.price && <p className="mt-1 text-xs font-bold text-red-500">{errors.price.message}</p>}
+                        {errors.portions && typeof errors.portions.message === 'string' && (
+                            <p className="mt-2 text-xs font-bold text-red-500">{errors.portions.message}</p>
+                        )}
+                        <button
+                            type="button"
+                            onClick={() => append({ size: "", price: 0 })}
+                            disabled={fields.length >= 2}
+                            className={cn(
+                                "mt-3 text-xs font-bold flex items-center gap-1 uppercase tracking-wider transition-all",
+                                fields.length >= 2
+                                    ? "text-slate-300 cursor-not-allowed"
+                                    : "text-primary hover:text-primary/80"
+                            )}
+                        >
+                            <Plus className="h-4 w-4" />
+                            Add Portion Variant {fields.length >= 2 && "(Max Reached)"}
+                        </button>
                     </div>
 
                     <div className="pt-4 flex gap-3">
