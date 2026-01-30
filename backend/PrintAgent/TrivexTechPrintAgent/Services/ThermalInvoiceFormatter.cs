@@ -140,6 +140,7 @@ public class ThermalInvoiceFormatter : IInvoiceFormatter
         sb.AppendLine(LEFT_PADDING + "         Thank You! Come Again");
         sb.AppendLine(LEFT_PADDING + "       SYSTEM BY TrivexTech Pvt Ltd");
         sb.AppendLine(LEFT_PADDING + "           www.trivextech.lk");
+        sb.AppendLine(LEFT_PADDING + "            +94 777 152 490");
 
         // ================================
         // BOTTOM MARGIN
