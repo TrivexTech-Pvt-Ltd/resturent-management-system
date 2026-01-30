@@ -27,6 +27,11 @@ builder.Services.AddCors(options =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+builder.WebHost.UseUrls(
+    "http://0.0.0.0:5071",
+    "https://0.0.0.0:7209"
+);
+
 var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())

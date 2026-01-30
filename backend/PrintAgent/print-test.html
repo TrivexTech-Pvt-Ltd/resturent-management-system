@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Local Print Agent – Test Console</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background: #f4f4f4;
+    }
+    h2 {
+      margin-top: 0;
+    }
+    button {
+      margin: 5px 0;
+      padding: 8px 14px;
+      cursor: pointer;
+    }
+    pre {
+      background: #111;
+      color: #0f0;
+      padding: 10px;
+      max-height: 300px;
+      overflow: auto;
+    }
+    input {
+      width: 300px;
+      padding: 6px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<h2>🖨 Local Print Agent – Test Console</h2>
+
+<label>API Base URL</label><br />
+<input id="baseUrl" value="http://127.0.0.1:5000" /><br />
+
+<label>API Key</label><br />
+<input id="apiKey" value="your-secret-key" /><br />
+
+<button onclick="checkHealth()">Check Health</button>
+<button onclick="loadPrinters()">Load Printers</button>
+<button onclick="sendPrint()">Print Invoice</button>
+<button onclick="previewInvoice()">Preview Invoice</button>
+
+<h3>Response</h3>
+<pre id="output"></pre>
+
+<script>
+  const output = document.getElementById("output");
+
+  function log(data) {
+    output.textContent = typeof data === "string"
+      ? data
+      : JSON.stringify(data, null, 2);
+  }
+
+  function getBaseUrl() {
+    return document.getElementById("baseUrl").value;
+  }
+
+  function getApiKey() {
+    return document.getElementById("apiKey").value;
+  }
+
+  async function checkHealth() {
+    const res = await fetch(`${getBaseUrl()}/health`);
+    log(await res.text());
+  }
+
+  async function loadPrinters() {
+    const res = await fetch(`${getBaseUrl()}/printers`);
+    log(await res.json());
+  }
+
+  function sampleInvoice() {
+    return {
+      invoiceNumber: "INV-TEST-001",
+	  OrderNo:"1026",
+      customerName: "John Doe",
+      date: new Date().toISOString(),
+      items: [
+        { name: "Item A", qty: 2, price: 100 },
+        { name: "Item B", qty: 1, price: 250 }
+      ],
+      total: 450
+    };
+  }
+
+  async function sendPrint() {
+    const res = await fetch(`${getBaseUrl()}/print`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-KEY": getApiKey()
+      },
+      body: JSON.stringify(sampleInvoice())
+    });
+
+    log(await res.text());
+  }
+
+  async function previewInvoice() {
+    const res = await fetch(`${getBaseUrl()}/print-preview`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(sampleInvoice())
+    });
+
+    const text = await res.text();
+
+    const blob = new Blob([text], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+
+    window.open(url, "_blank");
+  }
+</script>
+
+</body>
+</html>

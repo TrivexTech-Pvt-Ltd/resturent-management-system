@@ -37,12 +37,21 @@ namespace RestaurantBackend.Data
 
             // Seed Menu Items
             modelBuilder.Entity<MenuItem>().HasData(
-                new MenuItem { Id = "1", Name = "Classic Burger", Price = 8.99m, Category = "Burgers" },
-                new MenuItem { Id = "2", Name = "Cheese Burger", Price = 9.99m, Category = "Burgers" },
-                new MenuItem { Id = "3", Name = "French Fries", Price = 3.99m, Category = "Sides" },
-                new MenuItem { Id = "4", Name = "Coke", Price = 1.99m, Category = "Drinks" },
-                new MenuItem { Id = "5", Name = "Pizza Margherita", Price = 12.99m, Category = "Pizza" },
-                new MenuItem { Id = "6", Name = "Pasta Carbonara", Price = 11.99m, Category = "Pasta" }
+                new MenuItem { Id = "1", Name = "Classic Burger",  Category = "Burgers" },
+                new MenuItem { Id = "2", Name = "Cheese Burger",  Category = "Burgers" },
+                new MenuItem { Id = "3", Name = "French Fries",  Category = "Sides" },
+                new MenuItem { Id = "4", Name = "Coke", Category = "Drinks" },
+                new MenuItem { Id = "5", Name = "Pizza Margherita", Category = "Pizza" },
+                new MenuItem { Id = "6", Name = "Pasta Carbonara",  Category = "Pasta" }
+            );
+
+            modelBuilder.Entity<MenuItem>().HasData(
+           new MenuItem { Id = "CR", Name = "Chicken Rice", Category = "Rice" }
+       );
+
+            modelBuilder.Entity<MenuItemPortion>().HasData(
+                new MenuItemPortion { Id = "CR-M", MenuItemId = "CR", Size = "M", Price = 650 },
+                new MenuItemPortion { Id = "CR-L", MenuItemId = "CR", Size = "L", Price = 850 }
             );
 
         }

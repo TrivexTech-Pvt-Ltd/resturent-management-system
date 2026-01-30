@@ -38,12 +38,6 @@ namespace RestaurantBackend.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("PortionSize")
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
                     b.HasKey("Id");
 
                     b.ToTable("MenuItems");
@@ -53,43 +47,87 @@ namespace RestaurantBackend.Migrations
                         {
                             Id = "1",
                             Category = "Burgers",
-                            Name = "Classic Burger",
-                            Price = 8.99m
+                            Name = "Classic Burger"
                         },
                         new
                         {
                             Id = "2",
                             Category = "Burgers",
-                            Name = "Cheese Burger",
-                            Price = 9.99m
+                            Name = "Cheese Burger"
                         },
                         new
                         {
                             Id = "3",
                             Category = "Sides",
-                            Name = "French Fries",
-                            Price = 3.99m
+                            Name = "French Fries"
                         },
                         new
                         {
                             Id = "4",
                             Category = "Drinks",
-                            Name = "Coke",
-                            Price = 1.99m
+                            Name = "Coke"
                         },
                         new
                         {
                             Id = "5",
                             Category = "Pizza",
-                            Name = "Pizza Margherita",
-                            Price = 12.99m
+                            Name = "Pizza Margherita"
                         },
                         new
                         {
                             Id = "6",
                             Category = "Pasta",
-                            Name = "Pasta Carbonara",
-                            Price = 11.99m
+                            Name = "Pasta Carbonara"
+                        },
+                        new
+                        {
+                            Id = "CR",
+                            Category = "Rice",
+                            Name = "Chicken Rice"
+                        });
+                });
+
+            modelBuilder.Entity("RestaurantBackend.Models.MenuItemPortion", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<bool>("IsAvailable")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("MenuItemId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("Size")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MenuItemId");
+
+                    b.ToTable("MenuItemPortion");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = "CR-M",
+                            IsAvailable = true,
+                            MenuItemId = "CR",
+                            Price = 650m,
+                            Size = "M"
+                        },
+                        new
+                        {
+                            Id = "CR-L",
+                            IsAvailable = true,
+                            MenuItemId = "CR",
+                            Price = 850m,
+                            Size = "L"
                         });
                 });
 
@@ -179,11 +217,27 @@ namespace RestaurantBackend.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("RestaurantBackend.Models.MenuItemPortion", b =>
+                {
+                    b.HasOne("RestaurantBackend.Models.MenuItem", "MenuItem")
+                        .WithMany("Portions")
+                        .HasForeignKey("MenuItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("MenuItem");
+                });
+
             modelBuilder.Entity("RestaurantBackend.Models.OrderItem", b =>
                 {
                     b.HasOne("RestaurantBackend.Models.Order", null)
                         .WithMany("Items")
                         .HasForeignKey("OrderId");
+                });
+
+            modelBuilder.Entity("RestaurantBackend.Models.MenuItem", b =>
+                {
+                    b.Navigation("Portions");
                 });
 
             modelBuilder.Entity("RestaurantBackend.Models.Order", b =>

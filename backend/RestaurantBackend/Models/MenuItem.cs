@@ -6,10 +6,16 @@ namespace RestaurantBackend.Models
     {
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
-        public required string Name { get; set; }
-        public decimal Price { get; set; }
-        public required string Category { get; set; }
+
+        [Required]
+        public string Name { get; set; } = null!;
+
+        [Required]
+        public string Category { get; set; } = null!;
+
         public string? Image { get; set; }
-        public string? PortionSize { get; set; }
+
+        // NEW: Navigation
+        public ICollection<MenuItemPortion> Portions { get; set; } = new List<MenuItemPortion>();
     }
 }
