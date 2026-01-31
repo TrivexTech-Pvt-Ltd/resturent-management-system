@@ -67,6 +67,8 @@ export default function SalesReportPage() {
         queryFn: getOrders,
     });
 
+    console.log(orders,"orders")
+
     // Filter logic
     const getFilteredOrders = () => {
         let now = new Date();
