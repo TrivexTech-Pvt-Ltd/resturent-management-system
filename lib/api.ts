@@ -11,7 +11,7 @@ export const api = {
                 const error = await res.json().catch(() => ({ message: res.statusText }));
                 throw new Error(error.message || `HTTP error! status: ${res.status}`);
             }
-            const data = await res.json();
+            const data = await res.json().catch(() => null);
             return { data };
         } catch (err) {
             console.error(`Fetch GET error for ${url}:`, err);
@@ -32,7 +32,7 @@ export const api = {
                 const error = await res.json().catch(() => ({ message: res.statusText }));
                 throw new Error(error.message || `HTTP error! status: ${res.status}`);
             }
-            const data = await res.json();
+            const data = await res.json().catch(() => null);
             return { data };
         } catch (err) {
             console.error(`Fetch POST error for ${url}:`, err);
