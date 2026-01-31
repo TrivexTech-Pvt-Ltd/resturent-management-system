@@ -5,14 +5,15 @@ import { Order } from '@/lib/types';
 
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { api } from '@/lib/api';
+import { getOrders } from '@/lib/db';
 
 export default function StatusPage() {
     const [orders, setOrders] = useState<Order[]>([]);
 
     const fetchOrders = async () => {
-        const res = await fetch('/api/orders');
-        const data = await res.json();
-        setOrders(data);
+        const res = await getOrders();
+        setOrders(res);
     };
 
     const [isMounted, setIsMounted] = useState(false);
