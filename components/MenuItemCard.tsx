@@ -32,7 +32,11 @@ export default function MenuItemCard({ item, onAdd }: MenuItemCardProps) {
                 {item.image ? (
                     <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                 ) : (
-                    <UtensilsCrossed className="h-10 w-10 text-slate-300" />
+                    <img
+                        src="/item-bg.jpg"
+                        alt="Food placeholder"
+                        className="w-full h-full object-cover opacity-80"
+                    />
                 )}
             </div>
 
