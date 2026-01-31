@@ -55,7 +55,8 @@ public class ThermalInvoiceFormatter : IInvoiceFormatter
 
         sb.AppendLine(LEFT_PADDING + "       No 434, Athurugiriya  Road,");
         sb.AppendLine(LEFT_PADDING + "           Hokandara North");
-        sb.AppendLine(LEFT_PADDING + "          Tel: 0112652046");
+        sb.AppendLine(LEFT_PADDING + "           Tel: 0117987100");
+        sb.AppendLine(LEFT_PADDING + "           Tel: 0719440100");
 
         sb.AppendLine(LEFT_PADDING + "--------------------------------------");
 
