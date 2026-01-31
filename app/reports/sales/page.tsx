@@ -399,7 +399,7 @@ export default function SalesReportPage() {
                                 </div>
                             </div>
 
-                            <div className="pt-8 border-t border-slate-100">
+                            <div className="pt-8 border-t border-slate-100 hidden">
                                 <div className="bg-slate-50 p-6 rounded-3xl space-y-3">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center">

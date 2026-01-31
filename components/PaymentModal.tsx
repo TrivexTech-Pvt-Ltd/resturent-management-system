@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { cn } from '@/lib/utils';
 
 interface PaymentModalProps {
@@ -8,9 +8,17 @@ interface PaymentModalProps {
     onConfirm: (method: 'CASH' | 'CARD') => void;
 }
 
-export default function PaymentModal({ isOpen, onClose, total, onConfirm }: PaymentModalProps) {
+function PaymentModal({ isOpen, onClose, total, onConfirm }: PaymentModalProps) {
     const [method, setMethod] = useState<'CASH' | 'CARD'>('CASH');
     const [receivedAmount, setReceivedAmount] = useState<string>('');
+
+    // Reset form when modal opens
+    useEffect(() => {
+        if (isOpen) {
+            setMethod('CASH');
+            setReceivedAmount('');
+        }
+    }, [isOpen]);
 
     const received = parseFloat(receivedAmount) || 0;
     const balance = received - total;
@@ -26,8 +34,8 @@ export default function PaymentModal({ isOpen, onClose, total, onConfirm }: Paym
     const denominations = [500, 1000, 5000];
 
     return (
-        <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-[2px] z-50 flex items-center justify-center p-4">
-            <div className="glass-card w-full max-w-sm rounded-4xl p-6 overflow-hidden animate-in fade-in zoom-in duration-200">
+        <div className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4" style={{ willChange: 'opacity' }}>
+            <div className="bg-white w-full max-w-sm rounded-4xl p-6 overflow-hidden shadow-2xl" style={{ willChange: 'transform' }}>
                 <div className="flex justify-between items-center mb-5">
                     <h2 className="text-xl font-bold italic tracking-tight uppercase">Checkout</h2>
                     <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg transition-all text-secondary cursor-pointer">✕</button>
@@ -58,7 +66,7 @@ export default function PaymentModal({ isOpen, onClose, total, onConfirm }: Paym
                 </div>
 
                 {method === 'CASH' && (
-                    <div className="space-y-4 mb-5 animate-in slide-in-from-top-4 duration-300">
+                    <div className="space-y-4 mb-5">
                         <div>
                             <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Received Amount</label>
                             <div className="relative group">
@@ -73,24 +81,23 @@ export default function PaymentModal({ isOpen, onClose, total, onConfirm }: Paym
                             </div>
                         </div>
 
-                        {received > 0 && (
-                            <div className={cn(
-                                "p-4 rounded-xl flex justify-between items-center transition-all",
-                                balance >= 0 ? "bg-emerald-50 border border-emerald-100" : "bg-rose-50 border border-rose-100"
-                            )}>
-                                <div>
-                                    <p className={cn("text-[9px] font-black uppercase tracking-widest leading-none mb-1", balance >= 0 ? "text-emerald-400" : "text-rose-400")}>
-                                        {balance >= 0 ? "Change" : "Required"}
-                                    </p>
-                                    <p className={cn("text-xl font-black tabular-nums leading-none", balance >= 0 ? "text-emerald-600" : "text-rose-600")}>
-                                        {Math.abs(balance).toFixed(2)}
-                                    </p>
-                                </div>
-                                <div className={cn("text-xl", balance >= 0 ? "opacity-100" : "opacity-30")}>
-                                    {balance >= 0 ? "🤝" : "⌛"}
-                                </div>
+                        <div className={cn(
+                            "p-4 rounded-xl flex justify-between items-center transition-all duration-200",
+                            received > 0 ? "opacity-100" : "opacity-0 pointer-events-none",
+                            balance >= 0 ? "bg-emerald-50 border border-emerald-100" : "bg-rose-50 border border-rose-100"
+                        )}>
+                            <div>
+                                <p className={cn("text-[9px] font-black uppercase tracking-widest leading-none mb-1", balance >= 0 ? "text-emerald-400" : "text-rose-400")}>
+                                    {balance >= 0 ? "Change" : "Required"}
+                                </p>
+                                <p className={cn("text-xl font-black tabular-nums leading-none", balance >= 0 ? "text-emerald-600" : "text-rose-600")}>
+                                    {Math.abs(balance).toFixed(2)}
+                                </p>
                             </div>
-                        )}
+                            <div className={cn("text-xl", balance >= 0 ? "opacity-100" : "opacity-30")}>
+                                {balance >= 0 ? "🤝" : "⌛"}
+                            </div>
+                        </div>
                     </div>
                 )}
 
@@ -105,3 +112,5 @@ export default function PaymentModal({ isOpen, onClose, total, onConfirm }: Paym
         </div>
     );
 }
+
+export default memo(PaymentModal);

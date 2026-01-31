@@ -92,12 +92,18 @@ export default function CashierPage() {
             const data = await saveOrder(orderData);
             console.log(data, "res");
 
-            // Store order data in Zustand store
-            setLastOrder(data);
+            // Close payment modal first
+            setIsPaymentOpen(false);
+
+            // Clear cart and localStorage
             setCart([]);
             localStorage.setItem('last_order_status', 'success');
             localStorage.removeItem('current_cart');
-            setIsPaymentOpen(false);
+
+            // Wait for payment modal to close before showing bill printer
+            setTimeout(() => {
+                setLastOrder(data);
+            }, 300);
         } catch (error) {
             console.error('Error placing order:', error);
         }
