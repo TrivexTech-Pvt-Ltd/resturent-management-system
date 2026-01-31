@@ -1,5 +1,6 @@
 const isServer = typeof window === 'undefined';
-const API_BASE_URL = "https://resturentsystem.runasp.net/api";
+// const API_BASE_URL = "https://resturentsystem.runasp.net/api";
+const API_BASE_URL = "https://trivexresturent.premiumasp.net/api";
     // ? "http://resturentsystem.runasp.net/api"
     // : "/api";
 
