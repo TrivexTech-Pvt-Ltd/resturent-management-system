@@ -1,4 +1,4 @@
-export type OrderStatus = 'PENDING' | 'PREPARING' | 'READY' | 'COMPLETED';
+export type OrderStatus = 'PENDING' | 'PREPARING' | 'READY' | 'COMPLETED' | 'PAID' | 'CANCELLED';
 
 export interface OrderItem {
     id: string;
@@ -38,4 +38,15 @@ export interface User {
     username: string;
     role: UserRole;
     fullName?: string;
+}
+
+
+export interface LastOrder {
+    orderNo: string;
+    total: number;
+    items: {
+        name: string;
+        qty: number;
+        price: number;
+    }[];
 }

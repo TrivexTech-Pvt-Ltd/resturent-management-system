@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Order } from '@/lib/types';
-import { api } from '@/lib/axios';
+import { getOrders, updateOrderStatus } from '@/lib/db';
 
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -13,7 +13,7 @@ export default function KitchenPage() {
     const [isMounted, setIsMounted] = useState(false);
 
     const fetchOrders = async () => {
-        const { data } = await api.get('/orders');
+        const data = await getOrders();
         // Only show incomplete orders
         setOrders(data.filter((o: Order) => o.status !== 'COMPLETED'));
     };
@@ -26,7 +26,7 @@ export default function KitchenPage() {
     }, []);
 
     const updateStatus = async (id: string, newStatus: Order['status']) => {
-        await api.patch(`/orders/${id}`, { status: newStatus });
+        await updateOrderStatus(id, newStatus);
         fetchOrders();
     };
 

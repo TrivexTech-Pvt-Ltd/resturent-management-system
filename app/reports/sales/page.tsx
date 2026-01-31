@@ -55,15 +55,19 @@ type TimeRange = 'daily' | 'weekly' | 'monthly' | 'custom';
 type PaymentFilter = 'ALL' | 'CASH' | 'CARD';
 
 export default function SalesReportPage() {
-    const [timeRange, setTimeRange] = useState<TimeRange>('weekly');
+    const [timeRange, setTimeRange] = useState<TimeRange>('daily');
     const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('ALL');
     const [customStartDate, setCustomStartDate] = useState(format(subDays(new Date(), 7), 'yyyy-MM-dd'));
     const [customEndDate, setCustomEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
+    const [currentPage, setCurrentPage] = useState(1);
+    const ITEMS_PER_PAGE = 10;
 
     const { data: orders = [], isLoading } = useQuery({
         queryKey: ["orders-report"],
         queryFn: getOrders,
     });
+
+    console.log(orders,"orders")
 
     // Filter logic
     const getFilteredOrders = () => {
@@ -84,7 +88,7 @@ export default function SalesReportPage() {
                 startLimit = startOfDay(new Date(customStartDate));
                 break;
             default:
-                startLimit = subWeeks(now, 1);
+                startLimit = startOfDay(now);
         }
 
         let endLimit = timeRange === 'custom' ? endOfDay(new Date(customEndDate)) : endOfDay(now);
@@ -126,10 +130,10 @@ export default function SalesReportPage() {
         doc.text("Financial Summary", 14, 45);
 
         doc.setFontSize(10);
-        doc.text(`Total Revenue: $${totalSales.toFixed(2)}`, 14, 55);
+        doc.text(`Total Revenue: ${totalSales.toFixed(2)}`, 14, 55);
         doc.text(`Total Transactions: ${totalOrders}`, 14, 62);
-        doc.text(`Average Order Value: $${avgOrderValue.toFixed(2)}`, 14, 69);
-        doc.text(`Payment Mix: Cash $${cashSales.toFixed(2)} / Card $${cardSales.toFixed(2)}`, 14, 76);
+        doc.text(`Average Order Value: ${avgOrderValue.toFixed(2)}`, 14, 69);
+        doc.text(`Payment Mix: Cash ${cashSales.toFixed(2)} / Card ${cardSales.toFixed(2)}`, 14, 76);
 
         // Table Section
         autoTable(doc, {
@@ -139,7 +143,7 @@ export default function SalesReportPage() {
                 `#${o.orderNumber}`,
                 format(new Date(o.createdAt), 'MMM dd, HH:mm'),
                 o.paymentMethod,
-                `$${o.total.toFixed(2)}`,
+                o.total.toFixed(2),
                 o.status
             ]),
             headStyles: { fillColor: [99, 102, 241], fontSize: 10, fontStyle: 'bold' },
@@ -180,6 +184,19 @@ export default function SalesReportPage() {
 
     const chartData = getChartData();
 
+    // Pagination calculations
+    const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
+    const paginatedOrders = [...filteredOrders].reverse().slice(
+        (currentPage - 1) * ITEMS_PER_PAGE,
+        currentPage * ITEMS_PER_PAGE
+    );
+
+    const handlePageChange = (newPage: number) => {
+        if (newPage >= 1 && newPage <= totalPages) {
+            setCurrentPage(newPage);
+        }
+    };
+
     return (
         <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-10">
             <div className="max-w-7xl mx-auto space-y-8">
@@ -215,9 +232,12 @@ export default function SalesReportPage() {
                         {(['daily', 'weekly', 'monthly', 'custom'] as TimeRange[]).map((range) => (
                             <button
                                 key={range}
-                                onClick={() => setTimeRange(range)}
+                                onClick={() => {
+                                    setTimeRange(range);
+                                    setCurrentPage(1); // Reset to first page on filter change
+                                }}
                                 className={cn(
-                                    "px-6 py-3 rounded-xl font-bold text-sm transition-all uppercase tracking-widest",
+                                    "px-6 py-3 rounded-xl font-bold text-sm transition-all uppercase tracking-widest cursor-pointer",
                                     timeRange === range
                                         ? "bg-slate-900 text-white shadow-lg shadow-slate-200"
                                         : "bg-slate-100 text-slate-500 hover:bg-slate-200"
@@ -253,7 +273,10 @@ export default function SalesReportPage() {
                             </div>
                             <select
                                 value={paymentFilter}
-                                onChange={(e) => setPaymentFilter(e.target.value as PaymentFilter)}
+                                onChange={(e) => {
+                                    setPaymentFilter(e.target.value as PaymentFilter);
+                                    setCurrentPage(1); // Reset to first page on filter change
+                                }}
                                 className="w-full md:w-48 pl-11 pr-4 py-3 bg-slate-100 rounded-2xl font-bold text-sm text-slate-700 appearance-none outline-none hover:bg-slate-200 transition-colors cursor-pointer"
                             >
                                 <option value="ALL">All Payments</option>
@@ -270,12 +293,12 @@ export default function SalesReportPage() {
                 {/* Stats Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                     {[
-                        { label: 'GROSS REVENUE', value: `$${totalSales.toFixed(2)}`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50', trend: '+12.5%', isUp: true },
+                        { label: 'GROSS REVENUE', value: `${totalSales.toFixed(2)}`, icon: DollarSign, color: 'text-emerald-600', bg: 'bg-emerald-50', trend: '+12.5%', isUp: true },
                         { label: 'TRANSACTIONS', value: totalOrders.toString(), icon: BarChart3, color: 'text-indigo-600', bg: 'bg-indigo-50', trend: '+5.2%', isUp: true },
-                        { label: 'AVG ORDER VAL', value: `$${avgOrderValue.toFixed(2)}`, icon: PieChart, color: 'text-amber-600', bg: 'bg-amber-50', trend: '-1.4%', isUp: false },
+                        { label: 'AVG ORDER VAL', value: `${avgOrderValue.toFixed(2)}`, icon: PieChart, color: 'text-amber-600', bg: 'bg-amber-50', trend: '-1.4%', isUp: false },
                         { label: 'CASH vs CARD', value: `${((cashSales / Math.max(1, totalSales)) * 100).toFixed(0)}% / ${((cardSales / Math.max(1, totalSales)) * 100).toFixed(0)}%`, icon: CreditCard, color: 'text-rose-600', bg: 'bg-rose-50', trend: 'Neutral', isUp: null },
                     ].map((stat, i) => (
-                        <div key={i} className="glass-card p-6 rounded-[2rem] border border-white shadow-sm flex flex-col justify-between hover:scale-[1.02] transition-transform">
+                        <div key={i} className="glass-card p-6 rounded-4xl border border-white shadow-sm flex flex-col justify-between hover:scale-[1.02] transition-transform">
                             <div className="flex justify-between items-start mb-4">
                                 <div className={cn("p-4 rounded-2xl", stat.bg)}>
                                     <stat.icon className={cn("h-6 w-6", stat.color)} />
@@ -355,7 +378,7 @@ export default function SalesReportPage() {
                             <div className="space-y-2">
                                 <div className="flex justify-between font-bold text-sm">
                                     <span className="text-slate-500 uppercase">Cash Transactions</span>
-                                    <span className="text-slate-900">${cashSales.toFixed(2)}</span>
+                                    <span className="text-slate-900">{cashSales.toFixed(2)}</span>
                                 </div>
                                 <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden">
                                     <div
@@ -368,7 +391,7 @@ export default function SalesReportPage() {
                             <div className="space-y-2">
                                 <div className="flex justify-between font-bold text-sm">
                                     <span className="text-slate-500 uppercase">Card Transactions</span>
-                                    <span className="text-slate-900">${cardSales.toFixed(2)}</span>
+                                    <span className="text-slate-900">{cardSales.toFixed(2)}</span>
                                 </div>
                                 <div className="h-4 w-full bg-slate-100 rounded-full overflow-hidden">
                                     <div
@@ -378,7 +401,7 @@ export default function SalesReportPage() {
                                 </div>
                             </div>
 
-                            <div className="pt-8 border-t border-slate-100">
+                            <div className="pt-8 border-t border-slate-100 hidden">
                                 <div className="bg-slate-50 p-6 rounded-3xl space-y-3">
                                     <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 bg-white rounded-xl shadow-sm flex items-center justify-center">
@@ -438,7 +461,7 @@ export default function SalesReportPage() {
                                         </td>
                                     </tr>
                                 ) : (
-                                    [...filteredOrders].reverse().map((order) => (
+                                    paginatedOrders.map((order) => (
                                         <tr key={order.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
                                             <td className="p-6">
                                                 <span className="font-bold text-slate-900">#{order.orderNumber}</span>
@@ -455,10 +478,19 @@ export default function SalesReportPage() {
                                                 </span>
                                             </td>
                                             <td className="p-6 font-black text-slate-900">
-                                                ${order.total.toFixed(2)}
+                                                {order.total.toFixed(2)}
                                             </td>
                                             <td className="p-6 text-right">
-                                                <span className="px-3 py-1 bg-slate-100 text-slate-500 rounded-full text-[10px] font-black uppercase tracking-wider">
+                                                <span className={cn(
+                                                    "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider",
+                                                    order.status === 'COMPLETED' || order.status === 'PAID'
+                                                        ? "bg-emerald-50 text-emerald-600"
+                                                        : order.status === 'PENDING'
+                                                            ? "bg-amber-50 text-amber-600"
+                                                            : order.status === 'CANCELLED'
+                                                                ? "bg-rose-50 text-rose-600"
+                                                                : "bg-slate-100 text-slate-500"
+                                                )}>
                                                     {order.status}
                                                 </span>
                                             </td>
@@ -468,6 +500,56 @@ export default function SalesReportPage() {
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Pagination UI */}
+                    {!isLoading && filteredOrders.length > 0 && (
+                        <div className="p-6 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/50">
+                            <p className="text-sm font-bold text-slate-500">
+                                Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredOrders.length)}</span> of <span className="text-slate-900">{filteredOrders.length}</span> transactions
+                            </p>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => handlePageChange(currentPage - 1)}
+                                    disabled={currentPage === 1}
+                                    className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                >
+                                    <ChevronLeft className="h-5 w-5" />
+                                </button>
+
+                                <div className="flex items-center gap-1">
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1)
+                                        .filter(page => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1)
+                                        .map((page, index, array) => (
+                                            <div key={page} className="flex items-center gap-1">
+                                                {index > 0 && array[index - 1] !== page - 1 && (
+                                                    <span className="text-slate-400 font-bold px-1">...</span>
+                                                )}
+                                                <button
+                                                    onClick={() => handlePageChange(page)}
+                                                    className={cn(
+                                                        "w-10 h-10 rounded-xl font-bold text-sm transition-all",
+                                                        currentPage === page
+                                                            ? "bg-slate-900 text-white shadow-lg shadow-slate-200"
+                                                            : "text-slate-600 hover:bg-slate-50"
+                                                    )}
+                                                >
+                                                    {page}
+                                                </button>
+                                            </div>
+                                        ))
+                                    }
+                                </div>
+
+                                <button
+                                    onClick={() => handlePageChange(currentPage + 1)}
+                                    disabled={currentPage === totalPages}
+                                    className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                                >
+                                    <ChevronRight className="h-5 w-5" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
             </div>

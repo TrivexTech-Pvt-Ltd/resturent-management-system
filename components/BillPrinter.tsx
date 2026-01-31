@@ -1,29 +1,60 @@
-import { Order } from '@/lib/types';
+'use client';
+
+import { useOrderStore } from '@/lib/store/useOrderStore';
+import { LastOrder, Order } from '@/lib/types';
 
 interface BillPrinterProps {
-    order: Order | null;
+    order: LastOrder | null;
 }
 
 export default function BillPrinter({ order }: BillPrinterProps) {
+
+    const clearLastOrder = useOrderStore(s => s.clearLastOrder);
+
+    async function handlePrint() {
+        if (!order) return;
+        try {
+            await sendPrint(order);
+            // Optional: wait a bit or just close
+            clearLastOrder();
+        } catch (error) {
+            console.error("Print failed:", error);
+            // Maybe don't close if it fails? Or notify user?
+            // For now, let's just close as requested.
+            clearLastOrder();
+        }
+    }
+
+    async function sendPrint(data: any) {
+        await fetch(`http://localhost:5000/print`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-API-KEY": "trivex-resturent-7090"
+            },
+            body: JSON.stringify(data)
+        });
+    }
+
     if (!order) return null;
 
     return (
-        <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-md transition-all duration-500 ${order ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
-            <div className="bg-white w-full max-w-[400px] rounded-[2.5rem] shadow-2xl overflow-hidden animate-in fade-in zoom-in slide-in-from-bottom-10 duration-500 relative no-print">
+        <div className={`fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-[2px] transition-all duration-500 ${order ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+            <div className="bg-white w-full max-w-[340px] rounded-4xl shadow-2xl overflow-hidden animate-in fade-in zoom-in slide-in-from-bottom-10 duration-500 relative no-print">
                 {/* Decorative Header */}
-                <div className="bg-gradient-to-br from-primary to-indigo-600 p-8 text-white text-center relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-full h-full opacity-20 bg-[radial-gradient(circle_at_30%_20%,_var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
-                    <div className="relative z-10">
-                        <div className="w-16 h-16 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center mx-auto mb-4 border border-white/30 shadow-xl animate-bounce-slow">
-                            <span className="text-3xl">✨</span>
+                <div className="bg-linear-to-br from-primary to-indigo-600 p-6 text-white text-center relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-full h-full opacity-20 bg-[radial-gradient(circle_at_30%_20%,var(--tw-gradient-stops))] from-white via-transparent to-transparent" />
+                    <div className="relative z-10 text-center">
+                        <div className="w-12 h-12 bg-white/20 backdrop-blur-lg rounded-2xl flex items-center justify-center mx-auto mb-3 border border-white/30 shadow-xl animate-bounce-slow">
+                            <span className="text-2xl">✨</span>
                         </div>
-                        <h2 className="text-2xl font-black uppercase tracking-widest italic">Success!</h2>
-                        <p className="text-indigo-100 text-sm font-medium">Order #{order.orderNumber} has been placed</p>
+                        <h2 className="text-xl font-black uppercase tracking-widest italic">Success!</h2>
+                        <p className="text-indigo-100 text-[10px] font-medium uppercase tracking-wider">Order #{order.orderNo} Placed</p>
                     </div>
                 </div>
 
                 {/* Receipt Body */}
-                <div className="p-8 bg-white relative">
+                <div className="p-6 bg-white relative">
                     {/* Jagged Edge Simulation Top */}
                     <div className="absolute top-0 left-0 w-full flex overflow-hidden -translate-y-1/2 opacity-5">
                         {[...Array(20)].map((_, i) => (
@@ -31,62 +62,46 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                         ))}
                     </div>
 
-                    <div className="flex justify-between items-center mb-8">
+                    <div className="flex justify-between items-center mb-4 pb-4 border-b border-slate-50">
                         <div>
-                            <h3 className="text-xl font-bold text-slate-800">Bill Details</h3>
-                            <div className="flex gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-wider">
-                                <span>#{order.orderNumber}</span>
-                                <span>•</span>
-                                <span>{new Date(order.createdAt).toLocaleDateString()}</span>
-                            </div>
-                        </div>
-                        <div className="text-right">
-                            <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${order.paymentMethod === 'CARD' ? 'bg-blue-100 text-blue-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                                {order.paymentMethod}
-                            </span>
+                            <h3 className="text-sm font-black text-slate-800 uppercase tracking-widest">Bill Details</h3>
+                            <p className="text-[10px] text-slate-400 font-bold">#{order.orderNo}</p>
                         </div>
                     </div>
 
-                    <div className="space-y-4 mb-8 max-h-[250px] overflow-y-auto pr-2 custom-scrollbar">
+                    <div className="space-y-3 mb-4 max-h-[180px] overflow-y-auto pr-2 custom-scrollbar">
                         {order.items.map((item, idx) => (
-                            <div key={idx} className="flex justify-between items-center group transition-all hover:translate-x-1">
-                                <div className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center font-bold text-slate-400 text-xs">
-                                        {item.quantity}x
+                            <div key={idx} className="flex justify-between items-center group transition-all">
+                                <div className="flex items-center gap-2">
+                                    <div className="w-7 h-7 rounded-lg bg-slate-50 flex items-center justify-center font-bold text-slate-400 text-[10px]">
+                                        {item.qty}x
                                     </div>
-                                    <span className="font-semibold text-slate-700">{item.name}</span>
+                                    <span className="font-bold text-slate-700 text-xs truncate max-w-[140px] uppercase">{item.name}</span>
                                 </div>
-                                <span className="font-mono text-slate-500">${(item.price * item.quantity).toFixed(2)}</span>
+                                <span className="font-mono text-slate-500 text-xs">{(item.price * item.qty).toFixed(2)}</span>
                             </div>
                         ))}
                     </div>
 
-                    <div className="border-t-2 border-dashed border-slate-100 pt-6 space-y-3">
-                        <div className="flex justify-between text-slate-400 text-sm">
+                    <div className="border-t-2 border-dashed border-slate-100 pt-4 space-y-2">
+                        <div className="flex justify-between text-slate-400 text-[10px] font-bold uppercase tracking-widest">
                             <span>Subtotal</span>
-                            <span className="font-mono">${order.total.toFixed(2)}</span>
+                            <span className="font-mono">{order.total.toFixed(2)}</span>
                         </div>
-                        <div className="flex justify-between items-center text-2xl font-black text-slate-900 pt-2">
-                            <span className="italic tracking-tighter">TOTAL PAID</span>
-                            <span className="text-primary tabular-nums">${order.total.toFixed(2)}</span>
+                        <div className="flex justify-between items-center text-xl font-black text-slate-900 pt-1">
+                            <span className="italic tracking-tighter uppercase text-sm">Total Paid</span>
+                            <span className="text-primary tabular-nums">{order.total.toFixed(2)}</span>
                         </div>
                     </div>
                 </div>
 
                 {/* Actions */}
-                <div className="p-8 bg-slate-50 flex gap-3 border-t border-slate-100">
+                <div className="p-5 bg-slate-50 border-t border-slate-100">
                     <button
-                        onClick={() => window.location.reload()}
-                        className="flex-1 py-4 rounded-2xl font-bold text-slate-500 hover:bg-slate-200 transition-all flex items-center justify-center gap-2"
-                    >
-                        <span>Done</span>
-                    </button>
-                    <button
-                        onClick={() => window.print()}
-                        className="flex-[2] bg-primary text-white py-4 rounded-2xl font-black text-lg hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-95 flex items-center justify-center gap-2"
+                        onClick={handlePrint}
+                        className="w-full bg-primary text-white py-3 rounded-2xl font-black text-base hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest cursor-pointer"
                     >
                         <span>Print Bill</span>
-                        <span className="text-xl">🖨️</span>
                     </button>
                 </div>
             </div>
@@ -112,16 +127,16 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                 {/* Order Meta Info */}
                 <div className="flex justify-between items-center mb-1 text-[11px] font-bold">
                     <span>ORDER NO:</span>
-                    <span className="text-sm">#{order.orderNumber}</span>
+                    <span className="text-sm">#{order.orderNo}</span>
                 </div>
-                <div className="flex justify-between items-center mb-1 text-[11px]">
+                {/* <div className="flex justify-between items-center mb-1 text-[11px]">
                     <span>DATE:</span>
                     <span>{new Date(order.createdAt).toLocaleDateString()}</span>
-                </div>
-                <div className="flex justify-between items-center mb-4 text-[11px]">
+                </div> */}
+                {/* <div className="flex justify-between items-center mb-4 text-[11px]">
                     <span>PAY METHOD:</span>
                     <span className="uppercase">{order.paymentMethod}</span>
-                </div>
+                </div> */}
 
                 <div className="border-b border-black my-4" />
 
@@ -138,11 +153,11 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                             <div className="flex flex-col">
                                 <span className="font-bold text-[11px] uppercase">{item.name}</span>
                                 <span className="text-[9px] italic opacity-70">
-                                    {item.quantity} x ${item.price.toFixed(2)}
+                                    {item.qty} x {item.price.toFixed(2)}
                                 </span>
                             </div>
                             <span className="font-bold text-[11px] align-bottom">
-                                ${(item.price * item.quantity).toFixed(2)}
+                                {(item.price * item.qty).toFixed(2)}
                             </span>
                         </div>
                     ))}
@@ -154,15 +169,11 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                 <div className="space-y-1">
                     <div className="flex justify-between text-[11px]">
                         <span>Subtotal:</span>
-                        <span>${order.total.toFixed(2)}</span>
-                    </div>
-                    <div className="flex justify-between text-[11px]">
-                        <span>Tax (0%):</span>
-                        <span>$0.00</span>
+                        <span>{order.total.toFixed(2)}</span>
                     </div>
                     <div className="flex justify-between text-xl font-black italic mt-2 pt-2 border-t border-black/5">
                         <span>TOTAL:</span>
-                        <span>${order.total.toFixed(2)}</span>
+                        <span>{order.total.toFixed(2)}</span>
                     </div>
                 </div>
 
@@ -174,16 +185,16 @@ export default function BillPrinter({ order }: BillPrinterProps) {
 
                     {/* Simulated Barcode with ID */}
                     <div className="inline-block">
-                        <div className="flex gap-[1px] justify-center h-8 items-end mb-1 px-4 border-l border-r border-black/10">
+                        <div className="flex gap-px justify-center h-8 items-end mb-1 px-4 border-l border-r border-black/10">
                             {[...Array(40)].map((_, i) => (
                                 <div
                                     key={i}
-                                    className="bg-black w-[1px]"
+                                    className="bg-black w-px"
                                     style={{ height: `${20 + Math.random() * 15}px`, opacity: Math.random() > 0.1 ? 1 : 0.4 }}
                                 />
                             ))}
                         </div>
-                        <p className="text-[9px] font-mono tracking-[3px] uppercase mt-1">{order.id.substring(0, 12)}</p>
+                        <p className="text-[9px] font-mono tracking-[3px] uppercase mt-1">{(order.orderNo || '000000000000').substring(0, 12)}</p>
                     </div>
                 </div>
 

@@ -228,11 +228,11 @@ export default function ItemsPage() {
                                         <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
                                             <td className="p-6">
                                                 <div className="flex items-center gap-4">
-                                                    <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center text-2xl shadow-inner overflow-hidden border-2 border-white">
+                                                    <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-slate-100 to-slate-200 flex items-center justify-center text-2xl shadow-inner overflow-hidden border-2 border-white">
                                                         {item.image ? (
                                                             <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
                                                         ) : (
-                                                            "🍔"
+                                                            <UtensilsCrossed className="h-6 w-6 text-slate-300" />
                                                         )}
                                                     </div>
                                                     <div>
@@ -260,23 +260,23 @@ export default function ItemsPage() {
                                                     {item.portions?.map((p, idx) => (
                                                         <div key={idx} className="flex items-baseline gap-1 text-sm">
                                                             <span className="text-slate-400 font-medium">{p.size}:</span>
-                                                            <span className="font-black text-primary">${p.price.toFixed(2)}</span>
+                                                            <span className="font-black text-primary">{p.price.toFixed(2)}</span>
                                                         </div>
                                                     ))}
                                                 </div>
                                             </td>
                                             <td className="p-6 text-right">
-                                                <div className="flex justify-end gap-3 translate-x-4 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all">
+                                                <div className="flex justify-end gap-3">
                                                     <button
                                                         onClick={() => openEditModal(item)}
-                                                        className="w-10 h-10 flex items-center justify-center bg-white text-slate-400 hover:text-primary hover:shadow-lg border border-slate-100 rounded-xl transition-all"
+                                                        className="w-10 h-10 cursor-pointer flex items-center justify-center bg-primary text-white hover:shadow-lg border border-primary rounded-xl transition-all hover:scale-110"
                                                         title="Edit Item"
                                                     >
                                                         <Edit2 className="h-4 w-4" />
                                                     </button>
                                                     <button
                                                         onClick={() => confirmDelete(item)}
-                                                        className="w-10 h-10 flex items-center justify-center bg-white text-slate-400 hover:text-red-500 hover:shadow-lg border border-slate-100 rounded-xl transition-all"
+                                                        className="w-10 h-10 cursor-pointer flex items-center justify-center bg-red-400 text-white hover:shadow-lg border border-red-400 rounded-xl transition-all hover:scale-110"
                                                         title="Delete Item"
                                                     >
                                                         <Trash2 className="h-4 w-4" />
@@ -296,31 +296,31 @@ export default function ItemsPage() {
             <Modal
                 isOpen={isFormModalOpen}
                 onClose={closeFormModal}
-                title={editingItem ? "Update Menu Item" : "Precision Addition"}
+                title={editingItem ? "Update Item" : "Add Item"}
             >
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
                     <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Internal Designation</label>
+                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Item Name</label>
                         <input
                             {...register("name")}
                             className={cn(
                                 "w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-800",
                                 errors.name && "border-red-500 bg-red-50"
                             )}
-                            placeholder="e.g. Signature Truffle Burger"
+                            placeholder="Enter Item Name"
                         />
                         {errors.name && <p className="mt-1 text-xs font-bold text-red-500">{errors.name.message}</p>}
                     </div>
 
                     <div>
-                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Classification</label>
+                        <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Category</label>
                         <input
                             {...register("category")}
                             className={cn(
                                 "w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-800",
                                 errors.category && "border-red-500 bg-red-50"
                             )}
-                            placeholder="e.g. Entrees, Mixology"
+                            placeholder="Enter Category"
                         />
                         {errors.category && <p className="mt-1 text-xs font-bold text-red-500">{errors.category.message}</p>}
                     </div>
@@ -357,7 +357,7 @@ export default function ItemsPage() {
                                                 )}
                                             </div>
                                             <div className="flex-1 relative">
-                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-300">$</span>
+                                                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-black text-slate-300"></span>
                                                 <input
                                                     {...register(`portions.${index}.price` as const, { valueAsNumber: true })}
                                                     type="number"
@@ -411,17 +411,17 @@ export default function ItemsPage() {
                             onClick={closeFormModal}
                             className="flex-1 px-6 py-4 border-2 border-slate-100 text-slate-400 font-bold rounded-2xl hover:bg-slate-50 transition-all uppercase text-xs tracking-[0.2em]"
                         >
-                            Abort
+                            Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={createMutation.isPending || updateMutation.isPending}
-                            className="flex-[2] bg-primary text-white font-black rounded-2xl py-4 hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center justify-center uppercase text-xs tracking-[0.2em] disabled:opacity-50"
+                            className="flex-2 bg-primary text-white font-black rounded-2xl py-4 hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center justify-center uppercase text-xs tracking-[0.2em] disabled:opacity-50"
                         >
                             {(createMutation.isPending || updateMutation.isPending) ? (
                                 <Loader2 className="h-5 w-5 animate-spin" />
                             ) : (
-                                editingItem ? "Commit Changes" : "Finalize Entry"
+                                editingItem ? "Update Item" : "Add Item"
                             )}
                         </button>
                     </div>
