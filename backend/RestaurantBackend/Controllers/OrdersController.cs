@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RestaurantBackend.Data;
 using RestaurantBackend.Models;
+using RestaurantBackend.Models.Dto;
 
 namespace RestaurantBackend.Controllers
 {
