@@ -16,6 +16,13 @@ namespace RestaurantBackend.Models
         CARD
     }
 
+    public enum OrderType
+    {
+        TAKEAWAY,
+        DINEIN,
+        DELIVERY
+    }
+
     public class OrderItem
     {
         [Key]
@@ -39,7 +46,9 @@ namespace RestaurantBackend.Models
         public List<OrderItem> Items { get; set; } = new();
         public decimal Total { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
-        public OrderStatus Status { get; set; }
+        public OrderStatus Status { get; set; } = OrderStatus.PREPARING;
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public OrderType OrderType { get; set; }
+        public int? TableNo { get; set; }
     }
 }
