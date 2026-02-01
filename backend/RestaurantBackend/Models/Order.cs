@@ -46,7 +46,7 @@ namespace RestaurantBackend.Models
         public List<OrderItem> Items { get; set; } = new();
         public decimal Total { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
-        public OrderStatus Status { get; set; } = OrderStatus.PREPARING;
+        public OrderStatus Status { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
         public OrderType OrderType { get; set; }
         public int? TableNo { get; set; }

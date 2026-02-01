@@ -1,4 +1,5 @@
-const API_BASE_URL = "https://resturentsystem.runasp.net/api";
+// const API_BASE_URL = "https://resturentsystem.runasp.net/api";
+const API_BASE_URL = "https://localhost:5072/api";
 export const api = {
     async get(url: string) {
         try {
