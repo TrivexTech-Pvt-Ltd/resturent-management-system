@@ -1,4 +1,4 @@
-﻿namespace RestaurantBackend.Models;
+﻿namespace RestaurantBackend.Models.Dto;
 
 public class MenuItemResponseDto
 {

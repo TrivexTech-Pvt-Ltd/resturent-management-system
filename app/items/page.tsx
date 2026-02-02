@@ -13,7 +13,9 @@ import {
     Loader2,
     UtensilsCrossed,
     X,
-    ArrowLeft
+    ArrowLeft,
+    ChevronLeft,
+    ChevronRight,
 } from "lucide-react";
 
 import { getMenu, addMenuItem, updateMenuItem, deleteMenuItem } from "@/lib/db";
@@ -30,6 +32,10 @@ export default function ItemsPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
     const [deletingItem, setDeletingItem] = useState<MenuItem | null>(null);
+
+    // Pagination State
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
 
     // React Hook Form
     const {
@@ -151,6 +157,19 @@ export default function ItemsPage() {
         item.category.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    // Pagination Calculations
+    const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+    const paginatedItems = filteredItems.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    // Reset pagination when search changes
+    const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        setSearchQuery(e.target.value);
+        setCurrentPage(1);
+    };
+
     return (
         <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-10">
             <div className="max-w-6xl mx-auto">
@@ -184,7 +203,7 @@ export default function ItemsPage() {
                             placeholder="Search by name or category..."
                             className="w-full pl-12 pr-4 py-4 bg-slate-50/50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-medium text-slate-700 placeholder:text-slate-400 transition-all"
                             value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
+                            onChange={handleSearchChange}
                         />
                     </div>
                 </div>
@@ -224,7 +243,7 @@ export default function ItemsPage() {
                                         </td>
                                     </tr>
                                 ) : (
-                                    filteredItems.map((item) => (
+                                    paginatedItems.map((item) => (
                                         <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
                                             <td className="p-6">
                                                 <div className="flex items-center gap-4">
@@ -289,6 +308,50 @@ export default function ItemsPage() {
                             </tbody>
                         </table>
                     </div>
+
+                    {/* Pagination UI */}
+                    {filteredItems.length > 0 && (
+                        <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
+                            <p className="text-sm font-bold text-slate-500">
+                                Showing <span className="text-slate-900">{Math.min(filteredItems.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredItems.length, currentPage * itemsPerPage)}</span> of <span className="text-slate-900">{filteredItems.length}</span> items
+                            </p>
+
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                    disabled={currentPage === 1}
+                                    className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+                                >
+                                    <ChevronLeft className="h-5 w-5" />
+                                </button>
+
+                                <div className="flex items-center gap-1">
+                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                        <button
+                                            key={page}
+                                            onClick={() => setCurrentPage(page)}
+                                            className={cn(
+                                                "w-10 h-10 rounded-xl font-bold transition-all active:scale-95",
+                                                currentPage === page
+                                                    ? "bg-primary text-white shadow-lg shadow-primary/20"
+                                                    : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                                            )}
+                                        >
+                                            {page}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <button
+                                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                    disabled={currentPage === totalPages}
+                                    className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
+                                >
+                                    <ChevronRight className="h-5 w-5" />
+                                </button>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -314,14 +377,21 @@ export default function ItemsPage() {
 
                     <div>
                         <label className="block text-xs font-black text-slate-400 uppercase tracking-widest mb-2">Category</label>
-                        <input
+                        <select
                             {...register("category")}
                             className={cn(
                                 "w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl focus:ring-4 focus:ring-primary/10 outline-none transition-all font-bold text-slate-800",
                                 errors.category && "border-red-500 bg-red-50"
                             )}
-                            placeholder="Enter Category"
-                        />
+                        >
+                            <option value="">Select Category</option>
+                            <option value="Rice">Rice</option>
+                            <option value="Kottu">Kottu</option>
+                            <option value="Noodles">Noodles</option>
+                            <option value="Chicken">Chicken</option>
+                            <option value="Beverages">Beverages</option>
+                            <option value="Tea/Coffee">Tea/Coffee</option>
+                        </select>
                         {errors.category && <p className="mt-1 text-xs font-bold text-red-500">{errors.category.message}</p>}
                     </div>
 

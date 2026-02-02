@@ -64,6 +64,9 @@ app.MapPost("/print", (
     var kotText = kotFormatter.Format(invoice);
     RawPrinterHelper.SendStringToPrinter(printerName, kotText);
 
+    var referenceBil = thermalFormatter.Format(invoice);
+    RawPrinterHelper.SendStringToPrinter(printerName, referenceBil);
+
     return Results.Ok("Bill and KOT printed successfully");
 });
 

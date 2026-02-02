@@ -1,7 +1,8 @@
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RestaurantBackend.Data;
 using RestaurantBackend.Models;
+using RestaurantBackend.Models.Dto;
 
 namespace RestaurantBackend.Controllers
 {
@@ -68,14 +69,11 @@ namespace RestaurantBackend.Controllers
         }
 
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateMenuItem(
-      string id,
-      UpdateMenuItemDto dto)
+        public async Task<IActionResult> UpdateMenuItem(string id, UpdateMenuItemDto dto)
         {
             if (id != dto.Id)
                 return BadRequest("ID mismatch");
 
-            // Load existing MenuItem with portions
             var menuItem = await _context.MenuItems
                 .Include(m => m.Portions)
                 .FirstOrDefaultAsync(m => m.Id == id);
@@ -83,29 +81,31 @@ namespace RestaurantBackend.Controllers
             if (menuItem == null)
                 return NotFound();
 
-            // Update MenuItem fields
+            // Update MenuItem
             menuItem.Name = dto.Name;
             menuItem.Category = dto.Category;
             menuItem.Image = dto.Image;
 
-            // ================================
-            // Update / Add Portions
-            // ================================
+            // DTO portion IDs (existing only)
+            var dtoPortionIds = dto.Portions
+                .Where(p => !string.IsNullOrWhiteSpace(p.Id))
+                .Select(p => p.Id!)
+                .ToHashSet();
+
             foreach (var portionDto in dto.Portions)
             {
-                // UPDATE existing portion
                 if (!string.IsNullOrWhiteSpace(portionDto.Id))
                 {
-                    var existingPortion = menuItem.Portions
+                    var portion = menuItem.Portions
                         .FirstOrDefault(p => p.Id == portionDto.Id);
 
-                    if (existingPortion == null)
+                    if (portion == null)
                         return BadRequest($"Invalid portion id: {portionDto.Id}");
 
-                    existingPortion.Size = portionDto.Size;
-                    existingPortion.Price = portionDto.Price;
+                    portion.Size = portionDto.Size;
+                    portion.Price = portionDto.Price;
+                    portion.IsAvailable = true;
                 }
-                // ADD new portion
                 else
                 {
                     menuItem.Portions.Add(new MenuItemPortion
@@ -117,22 +117,20 @@ namespace RestaurantBackend.Controllers
                 }
             }
 
-            // OPTIONAL: remove deleted portions
-            var dtoPortionIds = dto.Portions
-                .Where(p => !string.IsNullOrWhiteSpace(p.Id))
-                .Select(p => p.Id!)
-                .ToHashSet();
+            await _context.MenuItemPortions
+                .Where(p =>
+                    p.MenuItemId == menuItem.Id &&
+                    !dtoPortionIds.Contains(p.Id))
+                .ExecuteDeleteAsync();
 
-            var portionsToRemove = menuItem.Portions
-                .Where(p => !dtoPortionIds.Contains(p.Id))
-                .ToList();
-
-            foreach (var p in portionsToRemove)
+            try
             {
-                _context.MenuItemPortions.Remove(p);
+                await _context.SaveChangesAsync();
             }
-
-            await _context.SaveChangesAsync();
+            catch (DbUpdateConcurrencyException)
+            {
+                return Conflict("Menu item was modified by another user.");
+            }
 
             return NoContent();
         }
