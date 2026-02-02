@@ -1,8 +1,4 @@
-const isServer = typeof window === 'undefined';
 const API_BASE_URL = "https://resturentsystem.runasp.net/api";
-    // ? "http://resturentsystem.runasp.net/api"
-    // : "/api";
-
 export const api = {
     async get(url: string) {
         try {
