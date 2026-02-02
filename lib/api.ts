@@ -1,4 +1,4 @@
-const API_BASE_URL = "https://resturentsystem.runasp.net/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL
 export const api = {
     async get(url: string) {
         try {
