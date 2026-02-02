@@ -391,6 +391,7 @@ export default function ItemsPage() {
                             <option value="Chicken">Chicken</option>
                             <option value="Beverages">Beverages</option>
                             <option value="Tea/Coffee">Tea/Coffee</option>
+                            <option value="Desserts">Desserts</option>
                         </select>
                         {errors.category && <p className="mt-1 text-xs font-bold text-red-500">{errors.category.message}</p>}
                     </div>
