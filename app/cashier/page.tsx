@@ -141,51 +141,55 @@ export default function CashierPage() {
                 {/* Menu Section */}
                 <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-slate-50/50">
                     <div className="max-w-7xl mx-auto">
-                        <div className="flex flex-col md:flex-row gap-4 mb-6 items-start md:items-center justify-between">
-                            <div className="flex flex-col md:flex-row gap-4 w-full md:w-auto">
-                                <div className="relative w-full md:w-80 group">
+                        <div className="flex flex-col gap-6 mb-8">
+                            {/* Search and View Toggles */}
+                            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                                <div className="relative w-full md:w-96 group">
                                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 group-focus-within:text-primary transition-colors" />
                                     <input
                                         type="text"
                                         placeholder="Search menu items..."
-                                        className="w-full pl-11 pr-10 py-2.5 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm text-sm"
+                                        className="w-full pl-11 pr-10 py-3 bg-white border border-slate-200 rounded-2xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all shadow-sm text-sm font-medium"
                                         value={searchQuery}
                                         onChange={(e) => setSearchQuery(e.target.value)}
                                     />
                                     {searchQuery && (
                                         <button
                                             onClick={() => setSearchQuery('')}
-                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1 hover:bg-slate-100 rounded-full transition-colors text-slate-400"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 p-1.5 hover:bg-slate-100 rounded-xl transition-colors text-slate-400"
                                         >
                                             <X className="w-4 h-4" />
                                         </button>
                                     )}
                                 </div>
-                                <div className="flex bg-slate-100 p-1 rounded-2xl border border-slate-200 shadow-sm">
+
+                                <div className="flex bg-white p-1 rounded-2xl border border-slate-200 shadow-sm">
                                     <button
                                         onClick={() => setCols(1)}
-                                        className={`p-2 rounded-xl transition-all cursor-pointer ${cols === 1 ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                        className={`p-2.5 rounded-xl transition-all cursor-pointer ${cols === 1 ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
                                         title="1 Column View"
                                     >
                                         <LayoutList className="w-5 h-5" />
                                     </button>
                                     <button
                                         onClick={() => setCols(2)}
-                                        className={`p-2 rounded-xl transition-all cursor-pointer ${cols === 2 ? 'bg-white text-primary shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                        className={`p-2.5 rounded-xl transition-all cursor-pointer ${cols === 2 ? 'bg-primary text-white shadow-md' : 'text-slate-400 hover:text-slate-600 hover:bg-slate-50'}`}
                                         title="2 Column View"
                                     >
                                         <LayoutGrid className="w-5 h-5" />
                                     </button>
                                 </div>
                             </div>
-                            <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 w-full md:w-auto no-scrollbar">
+
+                            {/* Categories - Horizontal Scroll */}
+                            <div className="flex flex-wrap gap-2 pb-2">
                                 {categories.map(category => (
                                     <button
                                         key={category}
                                         onClick={() => setSelectedCategory(category)}
-                                        className={`px-5 py-2.5 rounded-2xl text-sm font-semibold whitespace-nowrap transition-all cursor-pointer ${selectedCategory === category
+                                        className={`px-6 py-2.5 rounded-2xl text-sm font-bold whitespace-nowrap transition-all cursor-pointer ${selectedCategory === category
                                             ? 'bg-primary text-white shadow-lg shadow-primary/25 scale-105'
-                                            : 'bg-white text-slate-600 border border-slate-200 hover:border-primary/40 hover:text-primary hover:shadow-md'
+                                            : 'bg-white text-slate-600 border border-slate-200 hover:border-primary/40 active:scale-95'
                                             }`}
                                     >
                                         {category}
