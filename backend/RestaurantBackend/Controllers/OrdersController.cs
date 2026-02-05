@@ -105,7 +105,7 @@ namespace RestaurantBackend.Controllers
             var today = DateTime.UtcNow.Date;
             var tomorrow = today.AddDays(1);
             var orders = await _context.Orders
-              //  .Where(o => o.CreatedAt >= today && o.CreatedAt < tomorrow)
+                .Where(o => o.CreatedAt >= today && o.CreatedAt < tomorrow)
                 .Include(o => o.Items)
                 .ToListAsync();
 
