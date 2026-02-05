@@ -26,7 +26,7 @@ namespace RestaurantBackend.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] Order order)
         {
-            try 
+            try
             {
                 // Ensure ID is generated if not provided
                 if (string.IsNullOrEmpty(order.Id) || order.Id == "0")
@@ -89,7 +89,7 @@ namespace RestaurantBackend.Controllers
         }
 
         [HttpPatch("{id}")]
-        public async Task<IActionResult> UpdateStatus(string id,[FromBody] UpdateOrderStatusDto dto)
+        public async Task<IActionResult> UpdateStatus(string id, [FromBody] UpdateOrderStatusDto dto)
         {
             var order = await _context.Orders.FindAsync(id);
             if (order == null) return NotFound();
@@ -99,5 +99,29 @@ namespace RestaurantBackend.Controllers
 
             return NoContent();
         }
+
+        [HttpGet("today-orders")]
+        public async Task<ActionResult<List<InvoiceDto>>> GetTodayOrders()
+        {
+            var today = DateTime.UtcNow.Date;
+            var tomorrow = today.AddDays(1);
+            var orders = await _context.Orders
+                .Where(o => o.CreatedAt >= today && o.CreatedAt < tomorrow)
+                .Include(o => o.Items)
+                .ToListAsync();
+
+            return orders.Select(order => new InvoiceDto
+            {
+                Items = order.Items.Select(i => new InvoiceItemDto
+                {
+                    Name = i.Name,
+                    Price = i.Price,
+                    Qty = i.Quantity
+                }).ToList(),
+                Total = order.Total,
+                OrderNo = order.OrderNumber
+            }).ToList();
+        }
     }
+
 }
