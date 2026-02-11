@@ -73,7 +73,7 @@ export default function Home() {
             <Link
               key={screen.href}
               href={screen.href}
-              className={`group relative overflow-hidden glass-card rounded-3xl md:rounded-3xl p-6 md:p-7 hover:scale-[1.02] transition-all hover:shadow-2xl hover:shadow-indigo-200/40 border border-white ${screen.name === 'Customer Display' ? 'pointer-events-none' : 'pointer-events-auto'}`}
+              className={`group relative overflow-hidden glass-card rounded-3xl md:rounded-3xl p-6 md:p-7 hover:scale-[1.02] transition-all hover:shadow-2xl hover:shadow-indigo-200/40 border border-white`}
             >
               <div className={`absolute top-0 right-0 w-24 h-24 ${screen.color} opacity-[0.03] rounded-bl-full translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-700`} />
 
