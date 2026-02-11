@@ -422,6 +422,7 @@ export default function ItemsPage() {
                                                     <option value="">Select Size</option>
                                                     {!selectedSizes.includes("M") && <option value="M">Medium</option>}
                                                     {!selectedSizes.includes("L") && <option value="L">Large</option>}
+                                                    {!selectedSizes.includes("XL") && <option value="XL">Extra Large</option>}
                                                 </select>
                                                 {errors.portions?.[index]?.size && (
                                                     <p className="mt-1 text-xs font-bold text-red-500">{errors.portions[index]?.size?.message}</p>
@@ -463,16 +464,16 @@ export default function ItemsPage() {
                         <button
                             type="button"
                             onClick={() => append({ size: "", price: 0 })}
-                            disabled={fields.length >= 2}
+                            disabled={fields.length >= 3}
                             className={cn(
                                 "mt-3 text-xs font-bold flex items-center gap-1 uppercase tracking-wider transition-all",
-                                fields.length >= 2
+                                fields.length >= 3
                                     ? "text-slate-300 cursor-not-allowed"
                                     : "text-primary hover:text-primary/80"
                             )}
                         >
                             <Plus className="h-4 w-4" />
-                            Add Portion Variant {fields.length >= 2 && "(Max Reached)"}
+                            Add Portion Variant {fields.length >= 3 && "(Max Reached)"}
                         </button>
                     </div>
 

@@ -45,6 +45,7 @@ namespace RestaurantBackend.Controllers
                 }
 
                 order.CreatedAt = DateTime.UtcNow;
+                order.Status = OrderStatus.PREPARING;
 
                 // Set OrderId and unique Id for each item
                 if (order.Items != null)
