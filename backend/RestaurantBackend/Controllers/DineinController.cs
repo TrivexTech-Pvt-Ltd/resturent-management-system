@@ -115,7 +115,14 @@ public class DineinController : ControllerBase
         }
 
         await _context.SaveChangesAsync();
-        return Ok(existingOrder);
+
+        // Refetch to ensure we return the complete state as saved in DB
+        var savedOrder = await _context.Orders
+            .Include(o => o.Items)
+            .AsNoTracking() // Ensure we get fresh data
+            .FirstOrDefaultAsync(o => o.Id == existingOrder.Id);
+
+        return Ok(savedOrder);
     }
 
     [HttpPost("close-dinein-order")]

@@ -6,7 +6,7 @@ import MenuItemCard from '@/components/MenuItemCard';
 import PaymentModal from '@/components/PaymentModal';
 import BillPrinter from '@/components/BillPrinter';
 import Link from 'next/link';
-import { ArrowLeft, Search, ShoppingCart, UtensilsCrossed, Trash2, X, List, LayoutGrid, LayoutList } from 'lucide-react';
+import { ArrowLeft, Search, UtensilsCrossed, Trash2, X, LayoutGrid, LayoutList } from 'lucide-react';
 import { getMenu, saveOrder } from '@/lib/db';
 import { useOrderStore } from '@/lib/store/useOrderStore';
 
@@ -16,6 +16,7 @@ export default function CashierPage() {
     const [cart, setCart] = useState<OrderItem[]>([]);
     const [isPaymentOpen, setIsPaymentOpen] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [isProcessing, setIsProcessing] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [cols, setCols] = useState(2);
@@ -93,6 +94,7 @@ export default function CashierPage() {
     });
 
     const handlePlaceOrder = async (paymentMethod: 'CASH' | 'CARD') => {
+        setIsProcessing(true);
         const orderData = {
             items: cart,
             total,
@@ -117,6 +119,8 @@ export default function CashierPage() {
             }, 300);
         } catch (error) {
             console.error('Error placing order:', error);
+        } finally {
+            setIsProcessing(false);
         }
     };
 
@@ -319,6 +323,7 @@ export default function CashierPage() {
                 onClose={() => setIsPaymentOpen(false)}
                 total={total}
                 onConfirm={handlePlaceOrder}
+                isLoading={isProcessing}
             />
             <BillPrinter order={lastOrder} />
         </div>
