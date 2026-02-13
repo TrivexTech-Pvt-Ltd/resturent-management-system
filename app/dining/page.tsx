@@ -3,18 +3,17 @@
 import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
+import toast from "react-hot-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import {
     Search,
-    Plus,
-    Edit2,
-    Trash2,
+    Plus, Trash2,
     Loader2,
     UtensilsCrossed,
     ArrowLeft,
     ChevronLeft,
-    ChevronRight,
+    ChevronRight
 } from "lucide-react";
 import { z } from "zod";
 
@@ -80,6 +79,10 @@ export default function DiningPage() {
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["dining-tables"] });
             closeFormModal();
+            toast.success("Table created successfully");
+        },
+        onError: (error: Error) => {
+            toast.error(error.message || "Failed to create table");
         },
     });
 
@@ -113,14 +116,6 @@ export default function DiningPage() {
         setIsFormModalOpen(true);
     };
 
-    const openEditModal = (table: DiningTable) => {
-        setEditingTable(table);
-        reset({
-            tableNo: table.tableNo,
-        });
-        setIsFormModalOpen(true);
-    };
-
     const closeFormModal = () => {
         setIsFormModalOpen(false);
         setEditingTable(null);
@@ -134,6 +129,10 @@ export default function DiningPage() {
                 data
             });
         } else {
+            if (tables.some((table: DiningTable) => table.tableNo === data.tableNo)) {
+                toast.error(`Table ${data.tableNo} already exists`);
+                return;
+            }
             createMutation.mutate(data);
         }
     };
@@ -233,16 +232,6 @@ export default function DiningPage() {
                                             </div>
                                         </Link>
                                         <div className="flex gap-2 w-full mt-4">
-                                            <button
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    openEditModal(table);
-                                                }}
-                                                className="flex-1 cursor-pointer flex items-center justify-center bg-primary text-white hover:shadow-lg border border-primary rounded-xl transition-all hover:scale-105 py-2"
-                                                title="Edit Table"
-                                            >
-                                                <Edit2 className="h-4 w-4" />
-                                            </button>
                                             <button
                                                 onClick={(e) => {
                                                     e.preventDefault();

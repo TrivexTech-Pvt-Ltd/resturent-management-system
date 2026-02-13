@@ -108,19 +108,32 @@ export default function DiningDetailsPage() {
                 return null;
             }
         },
+        staleTime: 0,
         refetchOnWindowFocus: true, // Prevent overwriting local state on focus
     });
 
     const [isInitialized, setIsInitialized] = useState(false);
 
+    // Reset state when tableId changes
+    useEffect(() => {
+        setIsInitialized(false);
+        setCurrentOrder({
+            id: tableId,
+            orderType: "DINEIN",
+            tableNo: 0,
+            status: "PENDING",
+            items: []
+        });
+    }, [tableId]);
+
     // Sync existing order to local state when loaded
     useEffect(() => {
-        if (isInitialized || isLoadingOrder) return;
+        if (isLoadingOrder) return;
 
         if (existingOrder) {
             setCurrentOrder(existingOrder);
             setIsInitialized(true);
-        } else if (table) {
+        } else if (table && !isInitialized) {
             // Only initialize as new if we start with no existing order AND we have table info
             // And strictly only if we are sure existingOrder is null (fetch finished)
             setCurrentOrder(prev => ({

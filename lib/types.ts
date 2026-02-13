@@ -15,6 +15,7 @@ export interface Order {
     paymentMethod: 'CASH' | 'CARD';
     status: OrderStatus;
     createdAt: string;
+    orderType?: 'DINEIN' | 'TAKEAWAY';
 }
 
 export interface Portion {
