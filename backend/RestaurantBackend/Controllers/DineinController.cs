@@ -21,7 +21,9 @@ public class DineinController : ControllerBase
     public async Task<IActionResult> GetTableList()
     {
         var tableList = await _context.Orders.
-                    Where(x=>x.OrderType==OrderType.DINEIN && x.Status==OrderStatus.PENDING).ToListAsync();
+                    Where(x=>x.OrderType==OrderType.DINEIN && x.Status==OrderStatus.PENDING)
+                    .OrderBy(x=>x.TableNo)
+                    .ToListAsync();
 
         return Ok(tableList);
     }
@@ -42,6 +44,17 @@ public class DineinController : ControllerBase
     [HttpPost("dinein-create")]
     public async Task<IActionResult> CreateDineninOrder([FromBody]Order order)
     {
+        if (order.TableNo != 0)
+        {
+            var existingTable = await _context.Orders
+                .AnyAsync(o => o.TableNo == order.TableNo && o.OrderType == OrderType.DINEIN && o.Status == OrderStatus.PENDING);
+
+            if (existingTable)
+            {
+                return BadRequest($"Table {order.TableNo} is already occupied with a pending order.");
+            }
+        }
+
         order.OrderType = OrderType.DINEIN;
         order.Status = OrderStatus.PENDING;
         order.CreatedAt = DateTime.UtcNow;
@@ -157,5 +170,19 @@ public class DineinController : ControllerBase
 
 
         return new OkObjectResult(invoice);
+    }
+
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> DeleteDineinOrder(string id)
+    {
+        var existingOrder = await _context.Orders
+            .FirstOrDefaultAsync(o => o.Id == id && o.OrderType == OrderType.DINEIN);
+        if (existingOrder == null)
+        {
+            return NotFound("Dine-in order not found.");
+        }
+        _context.Orders.Remove(existingOrder);
+        await _context.SaveChangesAsync();
+        return Ok("Dine-in order deleted successfully.");
     }
 }

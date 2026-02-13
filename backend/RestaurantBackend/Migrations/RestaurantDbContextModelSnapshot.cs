@@ -176,7 +176,8 @@ namespace RestaurantBackend.Migrations
                 {
                     b.HasOne("RestaurantBackend.Models.Order", null)
                         .WithMany("Items")
-                        .HasForeignKey("OrderId");
+                        .HasForeignKey("OrderId")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("RestaurantBackend.Models.MenuItem", b =>
