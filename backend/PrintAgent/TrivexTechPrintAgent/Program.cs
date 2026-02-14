@@ -70,6 +70,30 @@ app.MapPost("/print", (
     return Results.Ok("Bill and KOT printed successfully");
 });
 
+app.MapPost("/print-dienein", (
+    HttpRequest request,
+    InvoiceDto invoice,
+    PrinterService printerService,
+    ThermalInvoiceFormatter thermalFormatter
+) =>
+{
+    if (!IsAuthorized(request))
+        return Results.Unauthorized();
+
+    var printerName = printerService.GetPrinterName();
+    if (!printerService.PrinterExists(printerName))
+        return Results.BadRequest($"Printer '{printerName}' not found");
+
+    // Print Customer Bill
+    var billText = thermalFormatter.Format(invoice);
+    RawPrinterHelper.SendStringToPrinter(printerName, billText);
+
+    var referenceBil = thermalFormatter.Format(invoice);
+    RawPrinterHelper.SendStringToPrinter(printerName, referenceBil);
+
+    return Results.Ok("Dienen Bill and printed successfully");
+});
+
 app.MapGet("/health", () => Results.Ok("Print Agent Running"));
 
 app.MapPost("/print-preview", (
