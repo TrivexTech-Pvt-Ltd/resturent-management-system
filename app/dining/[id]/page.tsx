@@ -171,6 +171,7 @@ export default function DiningDetailsPage() {
     // Close order mutation
     const [isSettleModalOpen, setIsSettleModalOpen] = useState(false);
     const [paymentMethod, setPaymentMethod] = useState<"CASH" | "CARD">("CASH");
+    const [cashAmount, setCashAmount] = useState<string>("");
     const [orderToPrint, setOrderToPrint] = useState<LastOrder | null>(null);
 
     const closeOrderMutation = useMutation({
@@ -561,7 +562,10 @@ export default function DiningDetailsPage() {
 
                             <button
                                 disabled={currentOrder.items.length === 0}
-                                onClick={() => setIsSettleModalOpen(true)}
+                                onClick={() => {
+                                    setCashAmount("");
+                                    setIsSettleModalOpen(true);
+                                }}
                                 className="w-full bg-emerald-500 text-white py-3 md:py-4 rounded-xl font-bold text-base md:text-lg hover:bg-emerald-600 transition-all disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/20 cursor-pointer flex items-center justify-center gap-2"
                             >
                                 <CreditCard className="h-5 w-5" />
@@ -591,7 +595,10 @@ export default function DiningDetailsPage() {
 
                             <div className="grid grid-cols-2 gap-4 mb-8">
                                 <button
-                                    onClick={() => setPaymentMethod("CASH")}
+                                    onClick={() => {
+                                        setCashAmount("");
+                                        setPaymentMethod("CASH");
+                                    }}
                                     className={cn(
                                         "flex flex-col items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all cursor-pointer",
                                         paymentMethod === "CASH"
@@ -603,7 +610,10 @@ export default function DiningDetailsPage() {
                                     <span className="font-bold">Cash</span>
                                 </button>
                                 <button
-                                    onClick={() => setPaymentMethod("CARD")}
+                                    onClick={() => {
+                                        setCashAmount("");
+                                        setPaymentMethod("CARD");
+                                    }}
                                     className={cn(
                                         "flex flex-col items-center justify-center gap-3 p-4 rounded-2xl border-2 transition-all cursor-pointer",
                                         paymentMethod === "CARD"
@@ -615,6 +625,46 @@ export default function DiningDetailsPage() {
                                     <span className="font-bold">Card</span>
                                 </button>
                             </div>
+
+                            {/* Cash Amount Input - Only show when CASH is selected */}
+                            {paymentMethod === "CASH" && (
+                                <div className="mb-6 space-y-4">
+                                    <div>
+                                        <label className="block text-sm font-semibold text-slate-700 mb-2">
+                                            Cash Received
+                                        </label>
+                                        <input
+                                            type="number"
+                                            value={cashAmount}
+                                            onChange={(e) => setCashAmount(e.target.value)}
+                                            placeholder="Enter amount"
+                                            className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl focus:outline-none focus:ring-4 focus:ring-primary/10 focus:border-primary transition-all text-lg font-semibold"
+                                            step="0.01"
+                                            min="0"
+                                        />
+                                    </div>
+
+                                    {/* Balance Display */}
+                                    {cashAmount && parseFloat(cashAmount) >= total && (
+                                        <div className="bg-emerald-50 border-2 border-emerald-200 rounded-xl p-4">
+                                            <p className="text-sm text-emerald-700 font-medium mb-1">Balance to Return</p>
+                                            <p className="text-3xl font-black text-emerald-600">
+                                                {(parseFloat(cashAmount) - total).toFixed(2)}
+                                            </p>
+                                        </div>
+                                    )}
+
+                                    {/* Warning if cash amount is less than total */}
+                                    {cashAmount && parseFloat(cashAmount) < total && (
+                                        <div className="bg-amber-50 border-2 border-amber-200 rounded-xl p-4">
+                                            <p className="text-sm text-amber-700 font-medium mb-1">Insufficient Amount</p>
+                                            <p className="text-lg font-bold text-amber-600">
+                                                Short by: {(total - parseFloat(cashAmount)).toFixed(2)}
+                                            </p>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
 
                             <button
                                 onClick={confirmSettle}
@@ -637,7 +687,7 @@ export default function DiningDetailsPage() {
                 </div>
             )}
 
-            <BillPrinter order={orderToPrint} onComplete={handlePrintComplete} />
+            <BillPrinter order={orderToPrint} endPoint="print-dienein" onComplete={handlePrintComplete} />
         </div>
     );
 }

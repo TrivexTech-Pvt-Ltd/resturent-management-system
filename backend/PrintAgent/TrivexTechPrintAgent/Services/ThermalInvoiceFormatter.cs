@@ -7,129 +7,120 @@ public class ThermalInvoiceFormatter : IInvoiceFormatter
 {
     private const int PRINTER_WIDTH = 44;
     private const int CONTENT_WIDTH = 38;
+
     private static readonly string LEFT_PADDING =
         new string(' ', (PRINTER_WIDTH - CONTENT_WIDTH) / 2);
 
     private const int TOP_MARGIN_LINES = 1;
     private const int BOTTOM_MARGIN_LINES = 6;
 
+    // COLUMN WIDTHS (MUST TOTAL = 38)
+    private const int ITEM_COL_WIDTH = 12;
+    private const int QTY_WIDTH = 7;
+    private const int PRICE_WIDTH = 9;
+    private const int AMOUNT_WIDTH = 10;
+
     public string Format(InvoiceDto invoice)
     {
         var sb = new StringBuilder();
 
-        // ================================
-        // INIT
-        // ================================
-        sb.Append("\x1B\x40"); // Init printer
+        // ================= INIT =================
+        sb.Append("\x1B\x40"); // Initialize printer
 
-        // ================================
-        // BIG ORDER NUMBER (CENTERED)
-        // ================================
-        sb.Append("\x1B\x61\x01"); // Center align
+        // ================= ORDER NUMBER =================
+        sb.Append("\x1B\x61\x01"); // Center
         sb.Append("\x1B\x45\x01"); // Bold ON
         sb.AppendLine("ORDER NO");
 
-        sb.Append("\x1D\x21\x11"); // Double width + height
-        sb.AppendLine(invoice.OrderNo); // You can replace with invoice.OrderNo
-        sb.Append("\x1D\x21\x00"); // Back to normal
+        sb.Append("\x1D\x21\x11"); // Double size
+        sb.AppendLine(invoice.OrderNo);
+        sb.Append("\x1D\x21\x00"); // Normal size
 
         sb.Append("\x1B\x45\x00"); // Bold OFF
         sb.AppendLine();
+        sb.Append("\x1B\x61\x00"); // Left
 
-        // Back to LEFT alignment for normal receipt
-        sb.Append("\x1B\x61\x00");
-
-        // ================================
-        // TOP MARGIN
-        // ================================
+        // ================= TOP MARGIN =================
         for (int i = 0; i < TOP_MARGIN_LINES; i++)
             sb.AppendLine();
 
-        // ================================
-        // ASCII LOGO
-        // ================================
-        //sb.AppendLine(LEFT_PADDING + "+------------------------------------+");
-        //sb.AppendLine(LEFT_PADDING + "|           LOTTERIA CHINESE         |");
-        //sb.AppendLine(LEFT_PADDING + "|              RRSTAURANT            |");
-        //sb.AppendLine(LEFT_PADDING + "+------------------------------------+");
-
-        sb.Append("\x1B\x61\x01");   // Center align
-        sb.Append("\x1B\x7B\x01");   // REVERSE MODE ON (white on black)
-        sb.Append("\x1B\x45\x01");   // Bold ON
-
-        sb.AppendLine("      LOTTERIA      ");
-
-        sb.Append("\x1B\x45\x00");   // Bold OFF
-        sb.Append("\x1B\x7B\x00");   // REVERSE MODE OFF
-
-        sb.AppendLine();              // Space after box
+        // ================= STORE NAME =================
+        sb.Append("\x1B\x61\x01"); // Center
+        sb.Append("\x1D\x21\x11"); // Double size
+        sb.Append("\x1B\x45\x01"); // Bold ON
+        sb.AppendLine("LOTTERIA");
+        sb.Append("\x1D\x21\x00");
+        sb.Append("\x1B\x45\x00");
         sb.AppendLine("CHINESE RESTAURANT");
-
-        // Back to left alignment
         sb.Append("\x1B\x61\x00");
 
-        sb.AppendLine(LEFT_PADDING + "       No 434, Athurugiriya  Road,");
-        sb.AppendLine(LEFT_PADDING + "           Hokandara North");
-        sb.AppendLine(LEFT_PADDING + "           Tel: 0117987100");
-        sb.AppendLine(LEFT_PADDING + "           Tel: 0719440100");
+        sb.AppendLine();
 
+        // ================= ADDRESS =================
+        sb.Append("\x1B\x61\x01"); // Center alignment
+
+        sb.AppendLine("No 434, Athurugiriya Road");
+        sb.AppendLine("Hokandara North");
+        sb.AppendLine("Tel: 0117987100 / 0719440100");
+
+        sb.Append("\x1B\x61\x00"); // Back to left alignment
         sb.AppendLine(LEFT_PADDING + "--------------------------------------");
 
-        // ================================
-        // INVOICE INFO
-        // ================================
+        // ================= INVOICE INFO =================
         sb.AppendLine(LEFT_PADDING + $"Order No : {invoice.OrderNo}");
-        sb.AppendLine(LEFT_PADDING + $"Date       : {DateTime.Now:yyyy-MM-dd HH:mm}");
+        sb.AppendLine(LEFT_PADDING + $"Date     : {DateTime.Now:yyyy-MM-dd HH:mm}");
+
         sb.AppendLine(LEFT_PADDING + "--------------------------------------");
 
-        // ================================
-        // TABLE HEADER
-        // ================================
+        // ================= TABLE HEADER =================
         sb.Append("\x1B\x45\x01"); // Bold ON
-        sb.AppendLine(LEFT_PADDING + "Item              Qty   Rate     Amt");
+        sb.AppendLine(
+            LEFT_PADDING +
+            "Item".PadRight(ITEM_COL_WIDTH) +
+            "Qty".PadLeft(QTY_WIDTH) +
+            "Rate".PadLeft(PRICE_WIDTH) +
+            "Amt".PadLeft(AMOUNT_WIDTH)
+        );
         sb.Append("\x1B\x45\x00"); // Bold OFF
 
         sb.AppendLine(LEFT_PADDING + "--------------------------------------");
 
-        const int ITEM_COL_WIDTH = 12;
-        const int QTY_WIDTH = 7;
-        const int PRICE_WIDTH = 9;
-        const int AMOUNT_WIDTH = 10;
-
+        // ================= ITEMS =================
         foreach (var item in invoice.Items)
         {
-            // Show portion size next to item name
-            string itemDisplayName = $"{item.Name} ";
-
-            foreach (var line in WrapText(itemDisplayName, CONTENT_WIDTH))
-            {
-                sb.AppendLine(LEFT_PADDING + line);
-            }
+            var wrappedLines = WrapText(item.Name, ITEM_COL_WIDTH).ToList();
 
             string qty = item.Qty.ToString();
             string price = item.Price.ToString("0.00");
             string amount = (item.Qty * item.Price).ToString("0.00");
 
-            string numbers =
-                qty.PadLeft(QTY_WIDTH) +
-                price.PadLeft(PRICE_WIDTH) +
-                amount.PadLeft(AMOUNT_WIDTH);
-
-            sb.AppendLine(
-                LEFT_PADDING +
-                "".PadRight(ITEM_COL_WIDTH) +
-                numbers
-            );
+            for (int i = 0; i < wrappedLines.Count; i++)
+            {
+                if (i == wrappedLines.Count - 1)
+                {
+                    sb.AppendLine(
+                        LEFT_PADDING +
+                        wrappedLines[i].PadRight(ITEM_COL_WIDTH) +
+                        qty.PadLeft(QTY_WIDTH) +
+                        price.PadLeft(PRICE_WIDTH) +
+                        amount.PadLeft(AMOUNT_WIDTH)
+                    );
+                }
+                else
+                {
+                    sb.AppendLine(
+                        LEFT_PADDING +
+                        wrappedLines[i].PadRight(ITEM_COL_WIDTH)
+                    );
+                }
+            }
 
             sb.AppendLine();
         }
 
-
         sb.AppendLine(LEFT_PADDING + "--------------------------------------");
 
-        // ================================
-        // TOTALS
-        // ================================
+        // ================= TOTALS =================
         sb.AppendLine(
             LEFT_PADDING +
             "Sub Total".PadRight(28) +
@@ -152,24 +143,20 @@ public class ThermalInvoiceFormatter : IInvoiceFormatter
         );
         sb.Append("\x1B\x45\x00"); // Bold OFF
 
-        // ================================
-        // FOOTER
-        // ================================
+        // ================= FOOTER =================
         sb.AppendLine();
-        sb.AppendLine(LEFT_PADDING + "         Thank You! Come Again");
-        sb.AppendLine(LEFT_PADDING + "       SYSTEM BY TrivexTech Pvt Ltd");
-        sb.AppendLine(LEFT_PADDING + "           www.trivextech.lk");
-        sb.AppendLine(LEFT_PADDING + "            +94 777 152 490");
+        sb.Append("\x1B\x61\x01"); // Center
+        sb.AppendLine("Thank You! Come Again");
+        sb.AppendLine("SYSTEM BY TrivexTech Pvt Ltd");
+        sb.AppendLine("www.trivextech.lk");
+        sb.AppendLine("+94 777 152 490");
+        sb.Append("\x1B\x61\x00"); // Left
 
-        // ================================
-        // BOTTOM MARGIN
-        // ================================
+        // ================= BOTTOM MARGIN =================
         for (int i = 0; i < BOTTOM_MARGIN_LINES; i++)
             sb.AppendLine();
 
-        // ================================
-        // CUT
-        // ================================
+        // ================= CUT =================
         sb.Append("\x1D\x56\x00"); // Full cut
 
         return sb.ToString();
