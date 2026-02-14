@@ -325,7 +325,7 @@ export default function CashierPage() {
                 onConfirm={handlePlaceOrder}
                 isLoading={isProcessing}
             />
-            <BillPrinter order={lastOrder} />
+            <BillPrinter order={lastOrder} endPoint="print" />
         </div>
     );
 }
