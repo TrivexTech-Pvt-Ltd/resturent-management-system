@@ -398,15 +398,21 @@ export default function ItemsPage() {
                             )}
                         >
                             <option value="">Select Category</option>
-                            <option value="Rice">Rice</option>
+                            <option value="Fried Rice (Basmati)">Fried Rice (Basmati)</option>
+                            <option value="Fried Rice (Keeri Samba)">Fried Rice (Keeri Samba)</option>
+                            <option value="Special Rice (Basmati)">Special Rice (Basmati)</option>
+                            <option value="Pasta Special">Pasta Special</option>
+                            <option value="Cheese Pasta">Cheese Pasta</option>
                             <option value="Kottu">Kottu</option>
+                            <option value="Cheese Kottu">Cheese Kottu</option>
+                            <option value="Dolphin Kottu">Dolphin Kottu</option>
+                            <option value="Dolphin Kottu - Cheese">Dolphin Kottu - Cheese</option>
                             <option value="Noodles">Noodles</option>
-                            <option value="Pasta">Pasta</option>
-                            <option value="Chicken">Chicken</option>
+                            <option value="Bites">Bites</option>
                             <option value="Beverages">Beverages</option>
                             <option value="Tea/Coffee">Tea/Coffee</option>
                             <option value="Desserts">Desserts</option>
-                            <option value="RiceCurry">Rice & Curry</option>
+                            <option value="Rice & Curry">Rice & Curry</option>
                         </select>
                         {errors.category && <p className="mt-1 text-xs font-bold text-red-500">{errors.category.message}</p>}
                     </div>
