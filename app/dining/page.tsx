@@ -345,7 +345,7 @@ export default function DiningPage() {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={() => deletingTable && deleteMutation.mutate(deletingTable.id)}
-                title="Security Verification"
+                title="Delete Table"
                 description={`This will permanently delete Table ${deletingTable?.tableNo} from the database. This action is irreversible.`}
                 isLoading={deleteMutation.isPending}
             />
