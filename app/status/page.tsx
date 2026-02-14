@@ -25,8 +25,8 @@ export default function StatusPage() {
         return () => clearInterval(interval);
     }, []);
 
-    const inProgress = orders.filter(o => ['PENDING', 'PREPARING'].includes(o.status));
-    const ready = orders.filter(o => o.status === 'READY');
+    const inProgress = orders.filter(o => ['PENDING', 'PREPARING'].includes(o.status) && o.orderType !== 'DINEIN');
+    const ready = orders.filter(o => o.status === 'READY' && o.orderType !== 'DINEIN');
 
     const prevStatusesRef = useRef<Map<string, string>>(new Map());
 

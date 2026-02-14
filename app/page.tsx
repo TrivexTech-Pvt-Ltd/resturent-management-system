@@ -24,6 +24,7 @@ export default function Home() {
     { name: 'Kitchen Display', href: '/kitchen', icon: <Utensils className="h-6 w-6 text-white" />, color: 'bg-rose-600', roles: ['Admin', 'User'] },
     { name: 'Customer Display', href: '/customer', icon: <Monitor className="h-6 w-6 text-white" />, color: 'bg-emerald-600', roles: ['Admin', 'User'] },
     { name: 'Status Board', href: '/status', icon: <ClipboardList className="h-6 w-6 text-white" />, color: 'bg-amber-600', roles: ['Admin', 'User'] },
+    { name: 'Dining Management', href: '/dining', icon: <UtensilsCrossed className="h-6 w-6 text-white" />, color: 'bg-indigo-600', roles: ['Admin', 'User'] },
     { name: 'Items Management', href: '/items', icon: <UtensilsCrossed className="h-6 w-6 text-white" />, color: 'bg-violet-600', roles: ['Admin'] },
     { name: 'Sales Revenue', href: '/reports/sales', icon: <TrendingUp className="h-6 w-6 text-white" />, color: 'bg-emerald-600', roles: ['Admin'] },
   ];
@@ -73,7 +74,7 @@ export default function Home() {
             <Link
               key={screen.href}
               href={screen.href}
-              className={`group relative overflow-hidden glass-card rounded-3xl md:rounded-3xl p-6 md:p-7 hover:scale-[1.02] transition-all hover:shadow-2xl hover:shadow-indigo-200/40 border border-white ${screen.name === 'Customer Display' ? 'pointer-events-none' : 'pointer-events-auto'}`}
+              className={`group relative overflow-hidden glass-card rounded-3xl md:rounded-3xl p-6 md:p-7 hover:scale-[1.02] transition-all hover:shadow-2xl hover:shadow-indigo-200/40 border border-white`}
             >
               <div className={`absolute top-0 right-0 w-24 h-24 ${screen.color} opacity-[0.03] rounded-bl-full translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-700`} />
 

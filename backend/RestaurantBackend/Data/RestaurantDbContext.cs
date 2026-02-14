@@ -25,8 +25,9 @@ namespace RestaurantBackend.Data
             modelBuilder.Entity<Order>()
                 .HasMany(o => o.Items)
                 .WithOne()
-                .HasForeignKey(oi => oi.OrderId);
-                
+                .HasForeignKey(oi => oi.OrderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<Order>()
                 .Property(o => o.PaymentMethod)
                 .HasConversion<string>();

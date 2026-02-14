@@ -48,10 +48,25 @@ public class ThermalInvoiceFormatter : IInvoiceFormatter
         // ================================
         // ASCII LOGO
         // ================================
-        sb.AppendLine(LEFT_PADDING + "+------------------------------------+");
-        sb.AppendLine(LEFT_PADDING + "|           LOTTERIA CHINESE         |");
-        sb.AppendLine(LEFT_PADDING + "|              RRSTAURANT            |");
-        sb.AppendLine(LEFT_PADDING + "+------------------------------------+");
+        //sb.AppendLine(LEFT_PADDING + "+------------------------------------+");
+        //sb.AppendLine(LEFT_PADDING + "|           LOTTERIA CHINESE         |");
+        //sb.AppendLine(LEFT_PADDING + "|              RRSTAURANT            |");
+        //sb.AppendLine(LEFT_PADDING + "+------------------------------------+");
+
+        sb.Append("\x1B\x61\x01");   // Center align
+        sb.Append("\x1B\x7B\x01");   // REVERSE MODE ON (white on black)
+        sb.Append("\x1B\x45\x01");   // Bold ON
+
+        sb.AppendLine("      LOTTERIA      ");
+
+        sb.Append("\x1B\x45\x00");   // Bold OFF
+        sb.Append("\x1B\x7B\x00");   // REVERSE MODE OFF
+
+        sb.AppendLine();              // Space after box
+        sb.AppendLine("CHINESE RESTAURANT");
+
+        // Back to left alignment
+        sb.Append("\x1B\x61\x00");
 
         sb.AppendLine(LEFT_PADDING + "       No 434, Athurugiriya  Road,");
         sb.AppendLine(LEFT_PADDING + "           Hokandara North");

@@ -30,6 +30,8 @@ export default function KitchenPage() {
         fetchOrders();
     };
 
+    console.log(orders);
+
     return (
         <div className="min-h-screen bg-slate-900 text-white p-4 md:p-8">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 md:mb-12 gap-4">
@@ -56,7 +58,14 @@ export default function KitchenPage() {
                         }`}>
                         <div className="flex justify-between items-start mb-4">
                             <div>
-                                <span className="text-[10px] md:text-xs uppercase tracking-widest text-slate-400 font-bold">Order No</span>
+                                <div className="flex items-center gap-2 mb-1">
+                                    <span className="text-[10px] md:text-xs uppercase tracking-widest text-slate-400 font-bold">Order No</span>
+                                    {order.orderType && (
+                                        <span className="text-xs md:text-sm px-3 py-1 md:px-4 md:py-1.5 rounded-full bg-slate-700 text-slate-200 font-black uppercase tracking-wider">
+                                            {order.orderType === 'DINEIN' ? '🍽️ Dining' : '🥡 Takeaway'}
+                                        </span>
+                                    )}
+                                </div>
                                 <h2 className="text-2xl md:text-3xl font-black">#{order.orderNumber}</h2>
                             </div>
                             <div className={`px-2 py-1 md:px-3 md:py-1 rounded-full text-[10px] md:text-xs font-bold uppercase ${order.status === 'PENDING' ? 'bg-accent/20 text-accent' : 'bg-primary/20 text-primary'
