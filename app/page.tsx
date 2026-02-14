@@ -24,6 +24,7 @@ export default function Home() {
     { name: 'Kitchen Display', href: '/kitchen', icon: <Utensils className="h-6 w-6 text-white" />, color: 'bg-rose-600', roles: ['Admin', 'User'] },
     { name: 'Customer Display', href: '/customer', icon: <Monitor className="h-6 w-6 text-white" />, color: 'bg-emerald-600', roles: ['Admin', 'User'] },
     { name: 'Status Board', href: '/status', icon: <ClipboardList className="h-6 w-6 text-white" />, color: 'bg-amber-600', roles: ['Admin', 'User'] },
+    { name: 'Dining Management', href: '/dining', icon: <UtensilsCrossed className="h-6 w-6 text-white" />, color: 'bg-indigo-600', roles: ['Admin', 'User'] },
     { name: 'Items Management', href: '/items', icon: <UtensilsCrossed className="h-6 w-6 text-white" />, color: 'bg-violet-600', roles: ['Admin'] },
     { name: 'Sales Revenue', href: '/reports/sales', icon: <TrendingUp className="h-6 w-6 text-white" />, color: 'bg-emerald-600', roles: ['Admin'] },
   ];

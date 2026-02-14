@@ -1,27 +1,34 @@
-'use client';
-
+import { useState } from 'react';
 import { useOrderStore } from '@/lib/store/useOrderStore';
 import { LastOrder, Order } from '@/lib/types';
+import { Loader2 } from 'lucide-react';
 
 interface BillPrinterProps {
     order: LastOrder | null;
+    onComplete?: () => void;
 }
 
-export default function BillPrinter({ order }: BillPrinterProps) {
+export default function BillPrinter({ order, onComplete }: BillPrinterProps) {
 
     const clearLastOrder = useOrderStore(s => s.clearLastOrder);
+    const [isPrinting, setIsPrinting] = useState(false);
 
     async function handlePrint() {
         if (!order) return;
+        setIsPrinting(true);
         try {
             await sendPrint(order);
             // Optional: wait a bit or just close
             clearLastOrder();
+            if (onComplete) onComplete();
         } catch (error) {
             console.error("Print failed:", error);
             // Maybe don't close if it fails? Or notify user?
             // For now, let's just close as requested.
             clearLastOrder();
+            if (onComplete) onComplete();
+        } finally {
+            setIsPrinting(false);
         }
     }
 
@@ -98,10 +105,19 @@ export default function BillPrinter({ order }: BillPrinterProps) {
                 {/* Actions */}
                 <div className="p-5 bg-slate-50 border-t border-slate-100">
                     <button
+                        type='button'
                         onClick={handlePrint}
-                        className="w-full bg-primary text-white py-3 rounded-2xl font-black text-base hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest cursor-pointer"
+                        disabled={isPrinting}
+                        className="w-full bg-primary text-white py-3 rounded-2xl font-black text-base hover:shadow-xl hover:shadow-primary/30 transition-all active:scale-95 flex items-center justify-center gap-2 uppercase tracking-widest cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
                     >
-                        <span>Print Bill</span>
+                        {isPrinting ? (
+                            <>
+                                <Loader2 className="w-5 h-5 animate-spin" />
+                                <span>Printing...</span>
+                            </>
+                        ) : (
+                            <span>Print Bill</span>
+                        )}
                     </button>
                 </div>
             </div>
