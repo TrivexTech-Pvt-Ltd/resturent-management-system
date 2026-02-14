@@ -6,9 +6,10 @@ interface PaymentModalProps {
     onClose: () => void;
     total: number;
     onConfirm: (method: 'CASH' | 'CARD') => void;
+    isLoading?: boolean;
 }
 
-function PaymentModal({ isOpen, onClose, total, onConfirm }: PaymentModalProps) {
+function PaymentModal({ isOpen, onClose, total, onConfirm, isLoading = false }: PaymentModalProps) {
     const [method, setMethod] = useState<'CASH' | 'CARD'>('CASH');
     const [receivedAmount, setReceivedAmount] = useState<string>('');
 
@@ -26,7 +27,7 @@ function PaymentModal({ isOpen, onClose, total, onConfirm }: PaymentModalProps) 
     const handleConfirm = () => {
         if (method === 'CASH' && received < total) return;
         onConfirm(method);
-        setReceivedAmount('');
+        // Don't clear immediately, let parent handle close
     };
 
     if (!isOpen) return null;
@@ -38,7 +39,7 @@ function PaymentModal({ isOpen, onClose, total, onConfirm }: PaymentModalProps) 
             <div className="bg-white w-full max-w-sm rounded-4xl p-6 overflow-hidden shadow-2xl" style={{ willChange: 'transform' }}>
                 <div className="flex justify-between items-center mb-5">
                     <h2 className="text-xl font-bold italic tracking-tight uppercase">Checkout</h2>
-                    <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-lg transition-all text-secondary cursor-pointer">✕</button>
+                    <button onClick={onClose} disabled={isLoading} className="p-2 hover:bg-slate-100 rounded-lg transition-all text-secondary cursor-pointer disabled:opacity-50">✕</button>
                 </div>
 
                 <div className="bg-slate-50 p-5 rounded-2xl mb-5 text-center border border-slate-100">
@@ -49,16 +50,16 @@ function PaymentModal({ isOpen, onClose, total, onConfirm }: PaymentModalProps) 
                 <div className="flex gap-3 mb-5">
                     <button
                         onClick={() => setMethod('CASH')}
-                        className={`flex-1 p-4 rounded-xl border-2 flex items-center justify-center gap-2 transition-all cursor-pointer ${method === 'CASH' ? 'border-primary bg-primary/5 text-primary' : 'border-transparent bg-slate-50 text-slate-400'
-                            }`}
+                        disabled={isLoading}
+                        className={`flex-1 p-4 rounded-xl border-2 flex items-center justify-center gap-2 transition-all cursor-pointer ${method === 'CASH' ? 'border-primary bg-primary/5 text-primary' : 'border-transparent bg-slate-50 text-slate-400'} ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                         <span className="text-xl">💵</span>
                         <span className="font-black uppercase text-[10px] tracking-widest">Cash</span>
                     </button>
                     <button
                         onClick={() => setMethod('CARD')}
-                        className={`flex-1 p-4 rounded-xl border-2 flex items-center justify-center gap-2 transition-all cursor-pointer ${method === 'CARD' ? 'border-primary bg-primary/5 text-primary' : 'border-transparent bg-slate-50 text-slate-400'
-                            }`}
+                        disabled={isLoading}
+                        className={`flex-1 p-4 rounded-xl border-2 flex items-center justify-center gap-2 transition-all cursor-pointer ${method === 'CARD' ? 'border-primary bg-primary/5 text-primary' : 'border-transparent bg-slate-50 text-slate-400'} ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
                         <span className="text-xl">💳</span>
                         <span className="font-black uppercase text-[10px] tracking-widest">Card</span>
@@ -76,7 +77,8 @@ function PaymentModal({ isOpen, onClose, total, onConfirm }: PaymentModalProps) 
                                     onChange={(e) => setReceivedAmount(e.target.value)}
                                     placeholder="0.00"
                                     autoFocus
-                                    className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-primary/30 focus:ring-4 focus:ring-primary/5 outline-none transition-all font-black text-xl text-slate-800 placeholder:text-slate-200"
+                                    disabled={isLoading}
+                                    className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-primary/30 focus:ring-4 focus:ring-primary/5 outline-none transition-all font-black text-xl text-slate-800 placeholder:text-slate-200 disabled:opacity-50"
                                 />
                             </div>
                         </div>
@@ -103,10 +105,15 @@ function PaymentModal({ isOpen, onClose, total, onConfirm }: PaymentModalProps) 
 
                 <button
                     onClick={handleConfirm}
-                    disabled={method === 'CASH' && (received < total || !receivedAmount)}
-                    className="w-full bg-slate-900 text-white py-4 rounded-xl font-black text-base hover:bg-slate-800 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-xl shadow-slate-200 uppercase tracking-widest cursor-pointer"
+                    disabled={(method === 'CASH' && (received < total || !receivedAmount)) || isLoading}
+                    className="w-full bg-slate-900 text-white py-4 rounded-xl font-black text-base hover:bg-slate-800 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-xl shadow-slate-200 uppercase tracking-widest cursor-pointer flex justify-center items-center gap-2"
                 >
-                    Confirm Order
+                    {isLoading ? (
+                        <>
+                            <span className="animate-spin">⏳</span>
+                            Processing...
+                        </>
+                    ) : "Confirm Order"}
                 </button>
             </div>
         </div>

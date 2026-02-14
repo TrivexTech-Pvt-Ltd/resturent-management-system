@@ -17,6 +17,7 @@ import {
     ChevronLeft,
     ChevronRight,
 } from "lucide-react";
+import { toast } from "react-hot-toast";
 
 import { getMenu, addMenuItem, updateMenuItem, deleteMenuItem } from "@/lib/db";
 import { MenuItem } from "@/lib/types";
@@ -69,25 +70,37 @@ export default function ItemsPage() {
         mutationFn: addMenuItem,
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["menu"] });
+            toast.success("Item added successfully");
             closeFormModal();
         },
+        onError: () => {
+            toast.error("Failed to add item");
+        }
     });
 
     const updateMutation = useMutation({
         mutationFn: ({ id, data }: { id: string; data: MenuItem }) => updateMenuItem(id, data),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["menu"] });
+            toast.success("Item updated successfully");
             closeFormModal();
         },
+        onError: () => {
+            toast.error("Failed to update item");
+        }
     });
 
     const deleteMutation = useMutation({
         mutationFn: (id: string) => deleteMenuItem(id),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ["menu"] });
+            toast.success("Item deleted successfully");
             setIsDeleteModalOpen(false);
             setDeletingItem(null);
         },
+        onError: () => {
+            toast.error("Failed to delete item");
+        }
     });
 
     // Handlers
@@ -388,10 +401,12 @@ export default function ItemsPage() {
                             <option value="Rice">Rice</option>
                             <option value="Kottu">Kottu</option>
                             <option value="Noodles">Noodles</option>
+                            <option value="Pasta">Pasta</option>
                             <option value="Chicken">Chicken</option>
                             <option value="Beverages">Beverages</option>
                             <option value="Tea/Coffee">Tea/Coffee</option>
                             <option value="Desserts">Desserts</option>
+                            <option value="RiceCurry">Rice & Curry</option>
                         </select>
                         {errors.category && <p className="mt-1 text-xs font-bold text-red-500">{errors.category.message}</p>}
                     </div>
@@ -481,14 +496,14 @@ export default function ItemsPage() {
                         <button
                             type="button"
                             onClick={closeFormModal}
-                            className="flex-1 px-6 py-4 border-2 border-slate-100 text-slate-400 font-bold rounded-2xl hover:bg-slate-50 transition-all uppercase text-xs tracking-[0.2em]"
+                            className="flex-1 cursor-pointer px-6 py-4 border-2 border-slate-100 text-slate-400 font-bold rounded-2xl hover:bg-slate-50 transition-all uppercase text-xs tracking-[0.2em]"
                         >
                             Cancel
                         </button>
                         <button
                             type="submit"
                             disabled={createMutation.isPending || updateMutation.isPending}
-                            className="flex-2 bg-primary text-white font-black rounded-2xl py-4 hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center justify-center uppercase text-xs tracking-[0.2em] disabled:opacity-50"
+                            className="flex-2 cursor-pointer bg-primary text-white font-black rounded-2xl py-4 hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center justify-center uppercase text-xs tracking-[0.2em] disabled:opacity-50"
                         >
                             {(createMutation.isPending || updateMutation.isPending) ? (
                                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -505,8 +520,8 @@ export default function ItemsPage() {
                 isOpen={isDeleteModalOpen}
                 onClose={() => setIsDeleteModalOpen(false)}
                 onConfirm={() => deletingItem && deleteMutation.mutate(deletingItem.id)}
-                title="Security Verification"
-                description={`This will permanently purge "${deletingItem?.name}" from the active database. This action is irreversible.`}
+                title="Delete Item"
+                description={`This will permanently delete "${deletingItem?.name}" from the database. This action cannot be undone.`}
                 isLoading={deleteMutation.isPending}
             />
         </div>
