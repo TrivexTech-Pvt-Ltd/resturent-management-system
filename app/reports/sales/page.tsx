@@ -67,7 +67,7 @@ export default function SalesReportPage() {
         queryFn: getOrders,
     });
 
-    console.log(orders,"orders")
+    console.log(orders, "orders")
 
     // Filter logic
     const getFilteredOrders = () => {
@@ -440,6 +440,7 @@ export default function SalesReportPage() {
                         <table className="w-full text-left border-collapse">
                             <thead className="bg-[#F8FAFC]/50 border-b border-slate-100">
                                 <tr>
+                                    <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">No.</th>
                                     <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Order ID</th>
                                     <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Timestamp</th>
                                     <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Method</th>
@@ -450,19 +451,22 @@ export default function SalesReportPage() {
                             <tbody>
                                 {isLoading ? (
                                     <tr>
-                                        <td colSpan={5} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest text-sm">
+                                        <td colSpan={6} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest text-sm">
                                             Synchronizing Ledger...
                                         </td>
                                     </tr>
                                 ) : filteredOrders.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest text-sm">
+                                        <td colSpan={6} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest text-sm">
                                             Zero records for selected parameters
                                         </td>
                                     </tr>
                                 ) : (
-                                    paginatedOrders.map((order) => (
+                                    paginatedOrders.map((order, index) => (
                                         <tr key={order.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
+                                            <td className="p-6">
+                                                <span className="font-bold text-slate-500">{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</span>
+                                            </td>
                                             <td className="p-6">
                                                 <span className="font-bold text-slate-900">#{order.orderNumber}</span>
                                             </td>

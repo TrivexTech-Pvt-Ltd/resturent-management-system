@@ -145,7 +145,6 @@ export default function ItemsPage() {
                 MenuItemId: editingItem?.id || ""
             })) || []
         };
-
         if (editingItem) {
             updateMutation.mutate({
                 id: editingItem.id,
@@ -158,6 +157,7 @@ export default function ItemsPage() {
         } else {
             createMutation.mutate(payload as any);
         }
+        
     };
 
     const confirmDelete = (item: MenuItem) => {
