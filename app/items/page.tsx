@@ -157,7 +157,7 @@ export default function ItemsPage() {
         } else {
             createMutation.mutate(payload as any);
         }
-        
+
     };
 
     const confirmDelete = (item: MenuItem) => {
@@ -413,6 +413,7 @@ export default function ItemsPage() {
                             <option value="Tea/Coffee">Tea/Coffee</option>
                             <option value="Desserts">Desserts</option>
                             <option value="Rice & Curry">Rice & Curry</option>
+                            <option value="Roti/Hoppers">Roti/Hoppers</option>
                         </select>
                         {errors.category && <p className="mt-1 text-xs font-bold text-red-500">{errors.category.message}</p>}
                     </div>
