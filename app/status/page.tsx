@@ -21,7 +21,7 @@ export default function StatusPage() {
     useEffect(() => {
         setIsMounted(true);
         fetchOrders();
-        const interval = setInterval(fetchOrders, 1000);
+        const interval = setInterval(fetchOrders, 30000);
         return () => clearInterval(interval);
     }, []);
 
