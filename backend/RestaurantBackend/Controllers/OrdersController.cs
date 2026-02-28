@@ -20,7 +20,7 @@ namespace RestaurantBackend.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
         {
-            return await _context.Orders.Include(o => o.Items).ToListAsync();
+            return await _context.Orders.Include(o => o.Items).OrderBy(x=>x.OrderNumber).ThenBy(x => x.CreatedAt).ToListAsync();
         }
 
         [HttpPost]
