@@ -16,7 +16,9 @@ import {
     CalendarDays,
     ArrowUpRight,
     ArrowDownRight,
-    Download
+    Download,
+    Eye,
+    X
 } from "lucide-react";
 import {
     format,
@@ -60,6 +62,8 @@ export default function SalesReportPage() {
     const [customStartDate, setCustomStartDate] = useState(format(subDays(new Date(), 7), 'yyyy-MM-dd'));
     const [customEndDate, setCustomEndDate] = useState(format(new Date(), 'yyyy-MM-dd'));
     const [currentPage, setCurrentPage] = useState(1);
+    const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const ITEMS_PER_PAGE = 10;
 
     const { data: orders = [], isLoading } = useQuery({
@@ -195,6 +199,16 @@ export default function SalesReportPage() {
         if (newPage >= 1 && newPage <= totalPages) {
             setCurrentPage(newPage);
         }
+    };
+
+    const openOrderDetails = (order: Order) => {
+        setSelectedOrder(order);
+        setIsModalOpen(true);
+    };
+
+    const closeOrderDetails = () => {
+        setIsModalOpen(false);
+        setSelectedOrder(null);
     };
 
     return (
@@ -445,7 +459,8 @@ export default function SalesReportPage() {
                                     <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Timestamp</th>
                                     <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Method</th>
                                     <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Amount</th>
-                                    <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider text-right">Status</th>
+                                    <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Status</th>
+                                    <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider text-right">Order Details</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -484,7 +499,7 @@ export default function SalesReportPage() {
                                             <td className="p-6 font-black text-slate-900">
                                                 {order.total.toFixed(2)}
                                             </td>
-                                            <td className="p-6 text-right">
+                                            <td className="p-6">
                                                 <span className={cn(
                                                     "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-wider",
                                                     order.status === 'COMPLETED' || order.status === 'PAID'
@@ -497,6 +512,14 @@ export default function SalesReportPage() {
                                                 )}>
                                                     {order.status}
                                                 </span>
+                                            </td>
+                                            <td className="p-6 text-right">
+                                                <button
+                                                    onClick={() => openOrderDetails(order)}
+                                                    className="p-2 hover:bg-slate-100 rounded-xl transition-all text-slate-400 hover:text-primary cursor-pointer"
+                                                >
+                                                    <Eye className="h-5 w-5" />
+                                                </button>
                                             </td>
                                         </tr>
                                     ))
@@ -557,6 +580,64 @@ export default function SalesReportPage() {
                 </div>
 
             </div>
+
+            {/* Order Details Modal */}
+            {isModalOpen && selectedOrder && (
+                <div className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
+                    <div className="bg-white w-full max-w-lg rounded-[2.5rem] p-8 overflow-hidden shadow-2xl border border-white animate-in fade-in zoom-in duration-200">
+                        <div className="flex justify-between items-center mb-6">
+                            <div>
+                                <h2 className="text-2xl font-black italic tracking-tight uppercase text-slate-900">Order Details</h2>
+                                <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mt-1">Ref: #{selectedOrder.orderNumber}</p>
+                            </div>
+                            <button
+                                onClick={closeOrderDetails}
+                                className="p-3 hover:bg-slate-100 rounded-2xl transition-all text-slate-400 hover:text-rose-500 cursor-pointer"
+                            >
+                                <X className="h-6 w-6" />
+                            </button>
+                        </div>
+
+                        <div className="space-y-6">
+                            <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100">
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Ordered Items</p>
+                                <div className="space-y-4 max-h-[40vh] overflow-y-auto pr-2 custom-scrollbar">
+                                    {selectedOrder.items.map((item, idx) => (
+                                        <div key={idx} className="flex justify-between items-center bg-white p-4 rounded-2xl border border-slate-50 shadow-sm">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-10 h-10 bg-slate-100 rounded-xl flex items-center justify-center text-xs font-black text-slate-400">
+                                                    {item.quantity}x
+                                                </div>
+                                                <div>
+                                                    <p className="font-bold text-slate-800">{item.name}</p>
+                                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Unit: {item.price.toFixed(2)}</p>
+                                                </div>
+                                            </div>
+                                            <p className="font-black text-slate-900">{(item.price * item.quantity).toFixed(2)}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Time</p>
+                                    <p className="font-bold text-slate-700">{format(new Date(selectedOrder.createdAt), 'HH:mm • MMM dd')}</p>
+                                </div>
+                                <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Payment</p>
+                                    <p className="font-bold text-slate-700">{selectedOrder.paymentMethod}</p>
+                                </div>
+                            </div>
+
+                            <div className="flex justify-between items-center p-6 bg-slate-900 rounded-3xl shadow-xl shadow-slate-200">
+                                <span className="text-xs font-black text-slate-400 uppercase tracking-widest">Total Amount</span>
+                                <span className="text-3xl font-black text-white italic tracking-tighter tabular-nums">{selectedOrder.total.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
