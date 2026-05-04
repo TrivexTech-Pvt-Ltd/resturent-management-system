@@ -190,7 +190,7 @@ export default function SalesReportPage() {
 
     // Pagination calculations
     const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
-    const paginatedOrders = [...filteredOrders].sort((a, b) => a.orderNumber - b.orderNumber).slice(
+    const paginatedOrders = [...filteredOrders].sort((a, b) => Number(a.orderNumber) - Number(b.orderNumber)).slice(
         (currentPage - 1) * ITEMS_PER_PAGE,
         currentPage * ITEMS_PER_PAGE
     );
