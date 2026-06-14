@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { Order } from '@/lib/types';
-import { getOrders, updateOrderStatus } from '@/lib/db';
 
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
@@ -12,25 +11,17 @@ export default function KitchenPage() {
 
     const [isMounted, setIsMounted] = useState(false);
 
-    const fetchOrders = async () => {
-        const data = await getOrders();
-        // Only show incomplete orders
-        setOrders(data.filter((o: Order) => o.status !== 'COMPLETED'));
-    };
-
     useEffect(() => {
         setIsMounted(true);
-        fetchOrders();
-        const interval = setInterval(fetchOrders, 1000); // Poll every 1 second
-        return () => clearInterval(interval);
     }, []);
 
-    const updateStatus = async (id: string, newStatus: Order['status']) => {
-        await updateOrderStatus(id, newStatus);
-        fetchOrders();
+    const updateStatus = (id: string, newStatus: Order['status']) => {
+        setOrders(prevOrders =>
+            prevOrders
+                .map(order => order.id === id ? { ...order, status: newStatus } : order)
+                .filter(order => order.status !== 'COMPLETED')
+        );
     };
-
-    console.log(orders);
 
     return (
         <div className="min-h-screen bg-slate-900 text-white p-4 md:p-8">

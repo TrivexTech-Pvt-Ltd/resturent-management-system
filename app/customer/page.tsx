@@ -10,24 +10,7 @@ export default function CustomerDisplay() {
     const [cart, setCart] = useState<OrderItem[]>([]);
     const [total, setTotal] = useState(0);
     const [isOrdered, setIsOrdered] = useState(false);
-    const [readyOrders, setReadyOrders] = useState<Order[]>([]);
-
-    const fetchReadyOrders = async () => {
-        try {
-            const res = await fetch('/api/orders');
-            const data: Order[] = await res.json();
-            setReadyOrders(data.filter(o => o.status === 'READY'));
-        } catch (error) {
-            console.error('Failed to fetch orders:', error);
-        }
-    };
-
-    useEffect(() => {
-        fetchReadyOrders();
-        const interval = setInterval(fetchReadyOrders, 2000);
-        return () => clearInterval(interval);
-    }, []);
-
+    const [readyOrders] = useState<Order[]>([]);
 
     useEffect(() => {
         const handleStorage = () => {
