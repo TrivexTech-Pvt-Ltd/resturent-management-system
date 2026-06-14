@@ -64,8 +64,8 @@ app.MapPost("/print", (
     var kotText = kotFormatter.Format(invoice);
     RawPrinterHelper.SendStringToPrinter(printerName, kotText);
 
-    var referenceBil = thermalFormatter.Format(invoice);
-    RawPrinterHelper.SendStringToPrinter(printerName, referenceBil);
+    //var referenceBil = thermalFormatter.Format(invoice);
+    //RawPrinterHelper.SendStringToPrinter(printerName, referenceBil);
 
     return Results.Ok("Bill and KOT printed successfully");
 });
@@ -88,8 +88,8 @@ app.MapPost("/print-dienein", (
     var billText = thermalFormatter.Format(invoice);
     RawPrinterHelper.SendStringToPrinter(printerName, billText);
 
-    var referenceBil = thermalFormatter.Format(invoice);
-    RawPrinterHelper.SendStringToPrinter(printerName, referenceBil);
+    //var referenceBil = thermalFormatter.Format(invoice);
+    //RawPrinterHelper.SendStringToPrinter(printerName, referenceBil);
 
     return Results.Ok("Dienen Bill and printed successfully");
 });
