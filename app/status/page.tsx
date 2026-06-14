@@ -5,24 +5,13 @@ import { Order } from '@/lib/types';
 
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import { api } from '@/lib/api';
-import { getOrders } from '@/lib/db';
-
 export default function StatusPage() {
-    const [orders, setOrders] = useState<Order[]>([]);
-
-    const fetchOrders = async () => {
-        const res = await getOrders();
-        setOrders(res);
-    };
+    const [orders] = useState<Order[]>([]);
 
     const [isMounted, setIsMounted] = useState(false);
 
     useEffect(() => {
         setIsMounted(true);
-        fetchOrders();
-        const interval = setInterval(fetchOrders, 30000);
-        return () => clearInterval(interval);
     }, []);
 
     const inProgress = orders.filter(o => ['PENDING', 'PREPARING'].includes(o.status) && o.orderType !== 'DINEIN');
