@@ -56,6 +56,19 @@ import autoTable from "jspdf-autotable";
 type TimeRange = 'daily' | 'weekly' | 'monthly' | 'custom';
 type PaymentFilter = 'ALL' | 'CASH' | 'CARD';
 
+// Helper to parse backend dates as UTC and convert to local browser time (Sri Lankan time)
+const parseOrderDate = (dateStr: string) => {
+    if (!dateStr) return new Date();
+    let normalized = dateStr.trim();
+    if (normalized.includes(' ') && !normalized.includes('T')) {
+        normalized = normalized.replace(' ', 'T');
+    }
+    const hasTimezone = normalized.endsWith('Z') || 
+                        normalized.includes('+') || 
+                        (normalized.includes('T') && normalized.split('T')[1].includes('-'));
+    return new Date(hasTimezone ? normalized : `${normalized}Z`);
+};
+
 export default function SalesReportPage() {
     const [timeRange, setTimeRange] = useState<TimeRange>('daily');
     const [paymentFilter, setPaymentFilter] = useState<PaymentFilter>('ALL');
@@ -98,7 +111,7 @@ export default function SalesReportPage() {
         let endLimit = timeRange === 'custom' ? endOfDay(new Date(customEndDate)) : endOfDay(now);
 
         return orders.filter(order => {
-            const orderDate = new Date(order.createdAt);
+            const orderDate = parseOrderDate(order.createdAt);
             const matchesDate = isWithinInterval(orderDate, { start: startLimit, end: endLimit });
             const matchesPayment = paymentFilter === 'ALL' || order.paymentMethod === paymentFilter;
             return matchesDate && matchesPayment;
@@ -145,7 +158,7 @@ export default function SalesReportPage() {
             head: [['Order ID', 'Timestamp', 'Method', 'Amount', 'Status']],
             body: filteredOrders.map(o => [
                 `#${o.orderNumber}`,
-                format(new Date(o.createdAt), 'MMM dd, HH:mm'),
+                format(parseOrderDate(o.createdAt), 'MMM dd, HH:mm'),
                 o.paymentMethod,
                 o.total.toFixed(2),
                 o.status
@@ -177,7 +190,7 @@ export default function SalesReportPage() {
         const days = eachDayOfInterval(interval);
 
         return days.map(day => {
-            const dayOrders = orders.filter(o => isSameDay(new Date(o.createdAt), day));
+            const dayOrders = orders.filter(o => isSameDay(parseOrderDate(o.createdAt), day));
             const sales = dayOrders.reduce((sum, o) => sum + (o.paymentMethod === paymentFilter || paymentFilter === 'ALL' ? o.total : 0), 0);
             return {
                 date: format(day, 'MMM dd'),
@@ -486,7 +499,7 @@ export default function SalesReportPage() {
                                                 <span className="font-bold text-slate-900">#{order.orderNumber}</span>
                                             </td>
                                             <td className="p-6 text-slate-500 font-medium">
-                                                {format(new Date(order.createdAt), 'MMM dd, yyyy • HH:mm')}
+                                                {format(parseOrderDate(order.createdAt), 'MMM dd, yyyy • HH:mm')}
                                             </td>
                                             <td className="p-6">
                                                 <span className={cn(
@@ -622,7 +635,7 @@ export default function SalesReportPage() {
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Time</p>
-                                    <p className="font-bold text-slate-700">{format(new Date(selectedOrder.createdAt), 'HH:mm • MMM dd')}</p>
+                                    <p className="font-bold text-slate-700">{format(parseOrderDate(selectedOrder.createdAt), 'HH:mm • MMM dd')}</p>
                                 </div>
                                 <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                                     <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Payment</p>
