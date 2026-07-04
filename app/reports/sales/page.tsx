@@ -110,11 +110,20 @@ export default function SalesReportPage() {
 
         let endLimit = timeRange === 'custom' ? endOfDay(new Date(customEndDate)) : endOfDay(now);
 
-        return orders.filter(order => {
+        const filtered = orders.filter(order => {
             const orderDate = parseOrderDate(order.createdAt);
             const matchesDate = isWithinInterval(orderDate, { start: startLimit, end: endLimit });
             const matchesPayment = paymentFilter === 'ALL' || order.paymentMethod === paymentFilter;
             return matchesDate && matchesPayment;
+        });
+
+        return filtered.sort((a, b) => {
+            if (timeRange === 'weekly' || timeRange === 'monthly' || timeRange === 'custom') {
+                const dateA = parseOrderDate(a.createdAt).getTime();
+                const dateB = parseOrderDate(b.createdAt).getTime();
+                return dateA - dateB; // Ascending: oldest to newest (by month, date, and time)
+            }
+            return Number(a.orderNumber) - Number(b.orderNumber);
         });
     };
 
@@ -203,7 +212,7 @@ export default function SalesReportPage() {
 
     // Pagination calculations
     const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
-    const paginatedOrders = [...filteredOrders].sort((a, b) => Number(a.orderNumber) - Number(b.orderNumber)).slice(
+    const paginatedOrders = filteredOrders.slice(
         (currentPage - 1) * ITEMS_PER_PAGE,
         currentPage * ITEMS_PER_PAGE
     );
