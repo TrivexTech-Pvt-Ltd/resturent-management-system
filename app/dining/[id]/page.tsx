@@ -192,6 +192,7 @@ export default function DiningDetailsPage() {
             // Prepare order for printing
             const printOrder: LastOrder = {
                 orderNo: currentOrder.tableNo.toString(),
+                IsDieneinMidOrder: false,
                 total: total,
                 items: currentOrder.items.map(item => ({
                     name: item.name,
@@ -301,6 +302,20 @@ export default function DiningDetailsPage() {
         };
 
         saveOrderMutation.mutate(payload as DiningOrder);
+
+        // Prepare order for printing
+        const printOrder: LastOrder = {
+            orderNo: currentOrder.tableNo.toString(),
+            IsDieneinMidOrder: true,
+            total: 0,
+            items: currentOrder.items.map(item => ({
+                name: item.name,
+                qty: item.quantity,
+                price: item.price
+            }))
+        };
+
+        setOrderToPrint(printOrder);
     };
 
     const total = currentOrder.items.reduce((sum, item) => sum + item.price * item.quantity, 0);

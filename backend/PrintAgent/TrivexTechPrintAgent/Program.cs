@@ -74,7 +74,8 @@ app.MapPost("/print-dienein", (
     HttpRequest request,
     InvoiceDto invoice,
     PrinterService printerService,
-    ThermalInvoiceFormatter thermalFormatter
+    ThermalInvoiceFormatter thermalFormatter,
+    ThermalKotFormatter kotFormatter
 ) =>
 {
     if (!IsAuthorized(request))
@@ -84,12 +85,18 @@ app.MapPost("/print-dienein", (
     if (!printerService.PrinterExists(printerName))
         return Results.BadRequest($"Printer '{printerName}' not found");
 
-    // Print Customer Bill
-    var billText = thermalFormatter.Format(invoice);
-    RawPrinterHelper.SendStringToPrinter(printerName, billText);
-
-    //var referenceBil = thermalFormatter.Format(invoice);
-    //RawPrinterHelper.SendStringToPrinter(printerName, referenceBil);
+    if (invoice.IsDieneinMidOrder)
+    {
+        // Print KOT
+        var kotText = kotFormatter.Format(invoice);
+        RawPrinterHelper.SendStringToPrinter(printerName, kotText);
+    }
+    else
+    {
+        // Print Customer Bill
+        var billText = thermalFormatter.Format(invoice);
+        RawPrinterHelper.SendStringToPrinter(printerName, billText);
+    }
 
     return Results.Ok("Dienen Bill and printed successfully");
 });

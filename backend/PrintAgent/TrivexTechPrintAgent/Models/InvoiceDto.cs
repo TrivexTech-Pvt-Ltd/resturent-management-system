@@ -5,6 +5,7 @@ public class InvoiceDto
     public List<InvoiceItemDto> Items { get; set; } = [];
     public decimal Total { get; set; }
     public string OrderNo { get; set; } = "";
+    public bool IsDieneinMidOrder { get; set; } = false;
 }
 
 public class InvoiceItemDto
