@@ -54,7 +54,6 @@ export default function DiningDetailsPage() {
     const router = useRouter();
     const queryClient = useQueryClient();
     const tableId = params.id as string;
-
     const [isMounted, setIsMounted] = useState(false);
 
     // State to hold the FULL order object
@@ -181,7 +180,7 @@ export default function DiningDetailsPage() {
     const [paymentMethod, setPaymentMethod] = useState<"CASH" | "CARD">("CASH");
     const [cashAmount, setCashAmount] = useState<string>("");
     const [orderToPrint, setOrderToPrint] = useState<LastOrder | null>(null);
-
+    const [orderCurrentItemsToKot, setOrderCurrentItemsToKot] = useState<LastOrder | null>(null);
     const closeOrderMutation = useMutation({
         mutationFn: async (payload: { Id: string; Total: number; PaymentMethod: string }) => {
             return await api.post("/dinein/close-dinein-order", payload);
@@ -254,6 +253,39 @@ export default function DiningDetailsPage() {
                 items: newItems
             };
         });
+
+        // Track only current/new items for KOT
+        setOrderCurrentItemsToKot((prev) => {
+            const currentKotItems = prev?.items ?? [];
+
+            const existingKotItemIndex = currentKotItems.findIndex(
+                (item) => item.name === itemName
+            );
+
+            const newKotItems = [...currentKotItems];
+
+            if (existingKotItemIndex > -1) {
+                const existingKotItem = newKotItems[existingKotItemIndex];
+
+                newKotItems[existingKotItemIndex] = {
+                    ...existingKotItem,
+                    qty: existingKotItem.qty + 1
+                };
+            } else {
+                newKotItems.push({
+                    name: itemName,
+                    qty: 1,
+                    price: portion.price
+                });
+            }
+
+            return {
+                orderNo: currentOrder.tableNo.toString(),
+                total: 0,
+                IsDieneinMidOrder: true,
+                items: newKotItems
+            };
+        });
     };
 
     const removeFromCart = (name: string) => {
@@ -270,19 +302,96 @@ export default function DiningDetailsPage() {
                 i.name === name ? { ...i, quantity: i.quantity + 1 } : i
             )
         }));
+
+        // Add +1 to current KOT items
+        setOrderCurrentItemsToKot((prev) => {
+            const orderItem = currentOrder.items.find(
+                (item) => item.name === name
+            );
+
+            if (!orderItem) return prev;
+
+            const currentKotItems = prev?.items ?? [];
+
+            const existingKotItemIndex = currentKotItems.findIndex(
+                (item) => item.name === name
+            );
+
+            const newKotItems = [...currentKotItems];
+
+            if (existingKotItemIndex > -1) {
+                newKotItems[existingKotItemIndex] = {
+                    ...newKotItems[existingKotItemIndex],
+                    qty: newKotItems[existingKotItemIndex].qty + 1
+                };
+            } else {
+                newKotItems.push({
+                    name: orderItem.name,
+                    qty: 1,
+                    price: orderItem.price
+                });
+            }
+
+            return {
+                orderNo: currentOrder.tableNo.toString(),
+                total: 0,
+                IsDieneinMidOrder: true,
+                items: newKotItems
+            };
+        });
     };
 
     const decrementQuantity = (name: string) => {
+        let canDecrement = false;
+
         setCurrentOrder((prev) => {
             const newItems = prev.items.map((i) => {
                 if (i.name === name) {
                     if (i.quantity === 1) return i;
+                    canDecrement = true;
                     return { ...i, quantity: i.quantity - 1 };
                 }
                 return i;
             });
 
             return { ...prev, items: newItems };
+        });
+
+        if (!canDecrement) return;
+
+        // Remove -1 from current KOT quantity
+        setOrderCurrentItemsToKot((prev) => {
+            if (!prev) return prev;
+
+            const existingKotItem = prev.items.find(
+                (item) => item.name === name
+            );
+
+            // Item was already sent in previous KOT
+            // Don't reduce current KOT
+            if (!existingKotItem) {
+                return prev;
+            }
+
+            const newKotItems = prev.items
+                .map((item) =>
+                    item.name === name
+                        ? {
+                            ...item,
+                            qty: item.qty - 1
+                        }
+                        : item
+                )
+                .filter((item) => item.qty > 0);
+
+            if (newKotItems.length === 0) {
+                return null;
+            }
+
+            return {
+                ...prev,
+                items: newKotItems
+            };
         });
     };
 
@@ -303,19 +412,24 @@ export default function DiningDetailsPage() {
 
         saveOrderMutation.mutate(payload as DiningOrder);
 
-        // Prepare order for printing
-        const printOrder: LastOrder = {
-            orderNo: currentOrder.tableNo.toString(),
-            IsDieneinMidOrder: true,
-            total: 0,
-            items: currentOrder.items.map(item => ({
-                name: item.name,
-                qty: item.quantity,
-                price: item.price
-            }))
-        };
+        // Print only items added since previous KOT
+        if (
+            orderCurrentItemsToKot &&
+            orderCurrentItemsToKot.items.length > 0
+        ) {
+            const printOrder: LastOrder = {
+                orderNo: currentOrder.tableNo.toString(),
+                IsDieneinMidOrder: true,
+                total: 0,
+                items: orderCurrentItemsToKot.items
+            };
 
-        setOrderToPrint(printOrder);
+            setOrderToPrint(printOrder);
+
+            // Clear KOT tracking after sending to print
+            setOrderCurrentItemsToKot(null);
+        }
+
     };
 
     const total = currentOrder.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
