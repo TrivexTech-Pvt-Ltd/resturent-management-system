@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 
 import { api } from "@/lib/api";
+import { toast } from "react-hot-toast";
 import { MenuItem, Portion } from "@/lib/types";
 import MenuItemCard from "@/components/MenuItemCard";
 import { cn } from "@/lib/utils";
@@ -159,13 +160,20 @@ export default function DiningDetailsPage() {
             // which will have new IDs for any newly added items
             if (data.data) {
                 setCurrentOrder(data.data);
+                queryClient.setQueryData(["dining-order", tableId], data.data);
             }
+            queryClient.invalidateQueries({ queryKey: ["dining-tables"] });
+            toast.success("Order updated successfully!");
 
             // Reset success state after 2 seconds
             setTimeout(() => {
                 saveOrderMutation.reset();
             }, 2000);
         },
+        onError: (error: any) => {
+            toast.error("Failed to update order");
+            console.error(error);
+        }
     });
 
     // Close order mutation
@@ -296,6 +304,27 @@ export default function DiningDetailsPage() {
     };
 
     const total = currentOrder.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
+    const hasUnsavedChanges = () => {
+        const savedItems = existingOrder?.items || [];
+        const currentItems = currentOrder.items || [];
+
+        if (currentItems.length !== savedItems.length) {
+            return true;
+        }
+
+        for (const item of currentItems) {
+            const savedItem = savedItems.find((si) => si.name === item.name);
+            if (!savedItem) {
+                return true;
+            }
+            if (savedItem.quantity !== item.quantity) {
+                return true;
+            }
+        }
+
+        return false;
+    };
 
     const categories: string[] = ["All", ...Array.from(new Set(menu.map((item: MenuItem) => item.category)))];
 
@@ -563,6 +592,10 @@ export default function DiningDetailsPage() {
                             <button
                                 disabled={currentOrder.items.length === 0}
                                 onClick={() => {
+                                    if (hasUnsavedChanges()) {
+                                        toast.error("Please click 'Update' to save the order changes before settling.");
+                                        return;
+                                    }
                                     setCashAmount("");
                                     setIsSettleModalOpen(true);
                                 }}
