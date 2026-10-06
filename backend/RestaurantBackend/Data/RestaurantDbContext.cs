@@ -15,6 +15,9 @@ namespace RestaurantBackend.Data
         public DbSet<OrderItem> OrderItems { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<MenuItemPortion> MenuItemPortions { get; set; }
+        public DbSet<DishEstimation> DishEstimations { get; set; }
+        public DbSet<EstimationIngredient> EstimationIngredients { get; set; }
+        public DbSet<MasterIngredient> MasterIngredients { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -35,6 +38,12 @@ namespace RestaurantBackend.Data
             modelBuilder.Entity<Order>()
                 .Property(o => o.Status)
                 .HasConversion<string>();
+
+            modelBuilder.Entity<DishEstimation>()
+                .HasMany(d => d.Ingredients)
+                .WithOne(i => i.DishEstimation)
+                .HasForeignKey(i => i.DishEstimationId)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

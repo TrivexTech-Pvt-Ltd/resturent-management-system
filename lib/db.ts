@@ -83,3 +83,128 @@ export const register = async (userData: any): Promise<User> => {
     const response = await api.post("/Auth/register", userData);
     return response.data;
 };
+
+// ─── Dish Estimations ────────────────────────────────────────────────────────
+
+import { EstimationRecord } from "./types";
+
+export const getEstimations = async (): Promise<EstimationRecord[]> => {
+    try {
+        const response = await api.get("/Estimations");
+        // Normalise decimal numbers coming as strings from the backend
+        return (response.data as any[]).map(normalizeEstimation);
+    } catch (error) {
+        console.error("Error fetching estimations:", error);
+        return [];
+    }
+};
+
+export const createEstimation = async (
+    record: Omit<EstimationRecord, "id" | "createdAt" | "updatedAt">
+): Promise<EstimationRecord> => {
+    const response = await api.post("/Estimations", record);
+    return normalizeEstimation(response.data);
+};
+
+export const updateEstimation = async (
+    id: string,
+    record: EstimationRecord
+): Promise<EstimationRecord> => {
+    const response = await api.put(`/Estimations/${id}`, { ...record, id });
+    return normalizeEstimation(response.data);
+};
+
+export const deleteEstimation = async (id: string): Promise<boolean> => {
+    try {
+        await api.delete(`/Estimations/${id}`);
+        return true;
+    } catch (error) {
+        console.error("Error deleting estimation:", error);
+        throw error;
+    }
+};
+
+/** Convert string numerics returned by the backend into JS numbers */
+function normalizeEstimation(raw: any): EstimationRecord {
+    return {
+        ...raw,
+        sellingPrice: Number(raw.sellingPrice ?? 0),
+        totalCost: Number(raw.totalCost ?? 0),
+        grossProfit: Number(raw.grossProfit ?? 0),
+        profitMargin: Number(raw.profitMargin ?? 0),
+        foodCostPercentage: Number(raw.foodCostPercentage ?? 0),
+        ingredients: (raw.ingredients ?? []).map((i: any) => ({
+            ...i,
+            quantity: Number(i.quantity ?? 0),
+            cost: Number(i.cost ?? 0),
+        })),
+    };
+}
+
+// ─── Master Ingredients ──────────────────────────────────────────────────────
+
+import { MasterIngredient } from "./types";
+
+export const getMasterIngredients = async (): Promise<MasterIngredient[]> => {
+    try {
+        const response = await api.get("/Ingredients");
+        return (response.data as any[]).map((i: any) => ({
+            ...i,
+            standardQuantity: Number(i.standardQuantity ?? 1),
+            unitCost: Number(i.unitCost ?? 0),
+            stockQuantity: Number(i.stockQuantity ?? 0),
+        }));
+    } catch (error) {
+        console.error("Error fetching master ingredients:", error);
+        return [];
+    }
+};
+
+export const createMasterIngredient = async (
+    ingredient: Omit<MasterIngredient, "id">
+): Promise<MasterIngredient> => {
+    const response = await api.post("/Ingredients", ingredient);
+    return {
+        ...response.data,
+        standardQuantity: Number(response.data.standardQuantity ?? 1),
+        unitCost: Number(response.data.unitCost ?? 0),
+        stockQuantity: Number(response.data.stockQuantity ?? 0),
+    };
+};
+
+export const updateMasterIngredient = async (
+    id: string,
+    ingredient: Partial<MasterIngredient>
+): Promise<MasterIngredient> => {
+    const response = await api.put(`/Ingredients/${id}`, ingredient);
+    return {
+        ...response.data,
+        standardQuantity: Number(response.data.standardQuantity ?? 1),
+        unitCost: Number(response.data.unitCost ?? 0),
+        stockQuantity: Number(response.data.stockQuantity ?? 0),
+    };
+};
+
+export const adjustIngredientStock = async (
+    id: string,
+    delta: number
+): Promise<MasterIngredient> => {
+    const response = await api.patch(`/Ingredients/${id}/adjust-stock`, { delta });
+    return {
+        ...response.data,
+        standardQuantity: Number(response.data.standardQuantity ?? 1),
+        unitCost: Number(response.data.unitCost ?? 0),
+        stockQuantity: Number(response.data.stockQuantity ?? 0),
+    };
+};
+
+export const deleteMasterIngredient = async (id: string): Promise<boolean> => {
+    try {
+        await api.delete(`/Ingredients/${id}`);
+        return true;
+    } catch (error) {
+        console.error("Error deleting master ingredient:", error);
+        throw error;
+    }
+};
+

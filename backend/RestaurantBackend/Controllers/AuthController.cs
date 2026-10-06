@@ -22,7 +22,7 @@ namespace RestaurantBackend.Controllers
         [HttpPost("register")]
         public async Task<ActionResult<UserResponseDto>> Register(RegisterDto dto)
         {
-            if (await _context.Users.AnyAsync(u => u.Username == dto.Username))
+            if (await _context.Users.AnyAsync(u => u.Username.ToLower() == dto.Username.ToLower()))
             {
                 return BadRequest("Username already exists");
             }
@@ -50,7 +50,7 @@ namespace RestaurantBackend.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UserResponseDto>> Login(LoginDto dto)
         {
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username == dto.Username);
+            var user = await _context.Users.FirstOrDefaultAsync(u => u.Username.ToLower() == dto.Username.ToLower());
 
             if (user == null || !VerifyPassword(dto.Password, user.PasswordHash))
             {

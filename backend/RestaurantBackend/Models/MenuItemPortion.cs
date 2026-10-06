@@ -1,4 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RestaurantBackend.Models;
@@ -18,6 +18,7 @@ public class MenuItemPortion
     public string Size { get; set; } = null!; // M, L, XL
 
     [Required]
+    [Column(TypeName = "decimal(18,2)")]
     public decimal Price { get; set; }
 
     public bool IsAvailable { get; set; } = true;

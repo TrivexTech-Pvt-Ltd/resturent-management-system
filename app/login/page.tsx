@@ -23,7 +23,7 @@ export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
 
-    const { register, handleSubmit, formState: { errors } } = useForm<LoginFormValues>({
+    const { register, handleSubmit, setValue, formState: { errors } } = useForm<LoginFormValues>({
         resolver: zodResolver(loginSchema),
     });
 
@@ -36,18 +36,15 @@ export default function LoginPage() {
             router.push("/");
         } catch (err: any) {
             console.error("Login error:", err);
-            const message = err.response?.data;
-            if (typeof message === 'string') {
-                setError(message);
-            } else if (err.request) {
-                console.error("Network Error:", err.request);
-                setError("No response from server. Ensure you are running 'npm run dev'.");
-            } else {
-                setError("Authentication failed: " + err.message);
-            }
+            setError(err.message || "Authentication failed. Please check your credentials.");
         } finally {
             setIsLoading(false);
         }
+    };
+
+    const handleQuickFillAdmin = () => {
+        setValue("username", "Admin");
+        setValue("password", "Admin@123");
     };
 
     return (
@@ -106,13 +103,27 @@ export default function LoginPage() {
                         <button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full bg-primary text-white font-black rounded-2xl py-5 hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center justify-center uppercase text-xs tracking-[0.2em] active:scale-[0.98] disabled:opacity-50"
+                            className="w-full bg-primary text-white font-black rounded-2xl py-5 hover:bg-primary/90 transition-all shadow-xl shadow-primary/20 flex items-center justify-center uppercase text-xs tracking-[0.2em] active:scale-[0.98] disabled:opacity-50 cursor-pointer"
                         >
                             {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Login"}
                         </button>
                     </form>
 
-                    <p className="text-center mt-8 text-slate-500 font-bold text-sm hidden">
+                    <div className="mt-6 p-4 bg-amber-50/70 border border-amber-200/60 rounded-2xl text-xs text-amber-900">
+                        <div className="flex items-center justify-between font-bold mb-1">
+                            <span>Default Admin Credentials:</span>
+                            <button
+                                type="button"
+                                onClick={handleQuickFillAdmin}
+                                className="text-primary hover:underline cursor-pointer font-bold"
+                            >
+                                Auto Fill
+                            </button>
+                        </div>
+                        <p className="text-amber-800/80">Username: <span className="font-mono font-bold">Admin</span> | Password: <span className="font-mono font-bold">Admin@123</span></p>
+                    </div>
+
+                    <p className="text-center mt-6 text-slate-500 font-bold text-sm">
                         New user?&nbsp;
                         <Link href="/register" className="text-primary hover:underline underline-offset-4">
                             Register Credentials
