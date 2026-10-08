@@ -13,7 +13,8 @@ import {
   UtensilsCrossed,
   TrendingUp,
   Calculator,
-  Boxes
+  Boxes,
+  ChefHat
 } from 'lucide-react';
 
 export default function Home() {
@@ -31,6 +32,7 @@ export default function Home() {
     { name: 'Stock & Ingredients', href: '/ingredients', icon: <Boxes className="h-6 w-6 text-white" />, color: 'bg-emerald-600', roles: ['Admin', 'User'] },
     { name: 'Dish Estimations', href: '/estimations', icon: <Calculator className="h-6 w-6 text-white" />, color: 'bg-sky-600', roles: ['Admin', 'User'] },
     { name: 'Sales Revenue', href: '/reports/sales', icon: <TrendingUp className="h-6 w-6 text-white" />, color: 'bg-emerald-600', roles: ['Admin'] },
+    { name: 'Ingredients Usage Report', href: '/reports/ingredients', icon: <ChefHat className="h-6 w-6 text-white" />, color: 'bg-indigo-600', roles: ['Admin', 'User'] },
   ];
 
   const allowedScreens = screens.filter(s => s.roles.includes(user?.role || ''));

@@ -26,7 +26,8 @@ import {
     ShoppingBag,
     Trophy,
     SlidersHorizontal,
-    FileSpreadsheet
+    FileSpreadsheet,
+    ChefHat
 } from "lucide-react";
 import {
     format,
