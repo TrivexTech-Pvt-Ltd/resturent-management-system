@@ -12,7 +12,8 @@ public static class DbSeed
         {
             var context = scope.ServiceProvider.GetRequiredService<RestaurantDbContext>();
 
-            if (!context.Users.Any())
+            var adminUser = context.Users.FirstOrDefault(u => u.Username.ToLower() == "admin");
+            if (adminUser == null)
             {
                 context.Users.Add(new User
                 {
@@ -21,6 +22,11 @@ public static class DbSeed
                     Role = UserRole.Admin,
                     FullName = "Administrator",
                 });
+                context.SaveChanges();
+            }
+            else
+            {
+                adminUser.PasswordHash = CustomPasswordHasher.HashPassword("Admin@123");
                 context.SaveChanges();
             }
 

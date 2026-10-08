@@ -42,11 +42,6 @@ export default function LoginPage() {
         }
     };
 
-    const handleQuickFillAdmin = () => {
-        setValue("username", "Admin");
-        setValue("password", "Admin@123");
-    };
-
     return (
         <div className="min-h-screen bg-linear-to-br from-slate-50 to-white relative flex items-center justify-center p-6 overflow-hidden">
             {/* Background Decorative Elements */}
@@ -108,20 +103,6 @@ export default function LoginPage() {
                             {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : "Login"}
                         </button>
                     </form>
-
-                    <div className="mt-6 p-4 bg-amber-50/70 border border-amber-200/60 rounded-2xl text-xs text-amber-900">
-                        <div className="flex items-center justify-between font-bold mb-1">
-                            <span>Default Admin Credentials:</span>
-                            <button
-                                type="button"
-                                onClick={handleQuickFillAdmin}
-                                className="text-primary hover:underline cursor-pointer font-bold"
-                            >
-                                Auto Fill
-                            </button>
-                        </div>
-                        <p className="text-amber-800/80">Username: <span className="font-mono font-bold">Admin</span> | Password: <span className="font-mono font-bold">Admin@123</span></p>
-                    </div>
 
                     <p className="text-center mt-6 text-slate-500 font-bold text-sm">
                         New user?&nbsp;
