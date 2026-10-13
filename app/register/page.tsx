@@ -38,17 +38,7 @@ export default function RegisterPage() {
             router.push("/login");
         } catch (err: any) {
             console.error("Registration error:", err);
-            const message = err.response?.data;
-            if (typeof message === 'string') {
-                setError(message);
-            } else if (typeof message === 'object' && message !== null) {
-                setError(JSON.stringify(message));
-            } else if (err.request) {
-                console.error("Network Error:", err.request);
-                setError("No response from server. Ensure you are running 'npm run dev' or check your internet connection.");
-            } else {
-                setError("Registration failed: " + err.message);
-            }
+            setError(err.message || "Registration failed");
         } finally {
             setIsLoading(false);
         }

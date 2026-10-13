@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RestaurantBackend.Models
 {
@@ -28,6 +29,7 @@ namespace RestaurantBackend.Models
         [Key]
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public required string Name { get; set; }
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Price { get; set; }
         public int Quantity { get; set; }
         public string? Category { get; set; }
@@ -44,6 +46,7 @@ namespace RestaurantBackend.Models
         public string Id { get; set; } = Guid.NewGuid().ToString();
         public string? OrderNumber { get; set; }
         public List<OrderItem> Items { get; set; } = new();
+        [Column(TypeName = "decimal(18,2)")]
         public decimal Total { get; set; }
         public PaymentMethod PaymentMethod { get; set; }
         public OrderStatus Status { get; set; }

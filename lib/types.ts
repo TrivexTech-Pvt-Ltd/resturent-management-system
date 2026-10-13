@@ -57,3 +57,40 @@ export interface LastOrder {
     price: number;
   }[];
 }
+
+export interface IngredientItem {
+  id: string;
+  name: string;
+  quantity: number;
+  unit: string;
+  cost: number;
+  masterIngredientId?: string;
+}
+
+export interface MasterIngredient {
+  id: string;
+  name: string;
+  unit: string;
+  standardQuantity: number;
+  unitCost: number;
+  stockQuantity: number;
+  category?: string;
+}
+
+export interface EstimationRecord {
+  id: string;
+  category: string;
+  itemId: string;
+  itemName: string;
+  portionSize: string;
+  sellingPrice: number;
+  ingredients: IngredientItem[];
+  totalCost: number;
+  grossProfit: number;
+  profitMargin: number;
+  foodCostPercentage: number;
+  notes?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
