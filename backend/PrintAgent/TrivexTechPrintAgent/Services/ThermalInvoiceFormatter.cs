@@ -20,8 +20,8 @@ public class ThermalInvoiceFormatter : IInvoiceFormatter
     private const int PRICE_WIDTH = 9;
     private const int AMOUNT_WIDTH = 10;
 
-    private static readonly string LINE = new string('-', CONTENT_WIDTH);
-    private static readonly string DLINE = new string('=', CONTENT_WIDTH);
+    private static readonly string LINE   = new string('-', CONTENT_WIDTH);
+    private static readonly string DLINE  = new string('=', CONTENT_WIDTH);
 
     // Set to false if your printer does not support CODE128 barcodes
     private const bool PRINT_BARCODE = true;

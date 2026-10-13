@@ -30,7 +30,7 @@ public class RawPrinterHelper
     {
         OpenPrinter(printerName, out var hPrinter, IntPtr.Zero);
 
-        var bytes = Encoding.ASCII.GetBytes(text);
+        var bytes = Encoding.Latin1.GetBytes(text);
         var pBytes = Marshal.AllocHGlobal(bytes.Length);
         Marshal.Copy(bytes, 0, pBytes, bytes.Length);
 
