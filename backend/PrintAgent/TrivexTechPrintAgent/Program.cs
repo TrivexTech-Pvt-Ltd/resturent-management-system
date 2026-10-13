@@ -64,10 +64,41 @@ app.MapPost("/print", (
     var kotText = kotFormatter.Format(invoice);
     RawPrinterHelper.SendStringToPrinter(printerName, kotText);
 
-    var referenceBil = thermalFormatter.Format(invoice);
-    RawPrinterHelper.SendStringToPrinter(printerName, referenceBil);
+    //var referenceBil = thermalFormatter.Format(invoice);
+    //RawPrinterHelper.SendStringToPrinter(printerName, referenceBil);
 
     return Results.Ok("Bill and KOT printed successfully");
+});
+
+app.MapPost("/print-dienein", (
+    HttpRequest request,
+    InvoiceDto invoice,
+    PrinterService printerService,
+    ThermalInvoiceFormatter thermalFormatter,
+    ThermalKotFormatter kotFormatter
+) =>
+{
+    if (!IsAuthorized(request))
+        return Results.Unauthorized();
+
+    var printerName = printerService.GetPrinterName();
+    if (!printerService.PrinterExists(printerName))
+        return Results.BadRequest($"Printer '{printerName}' not found");
+
+    if (invoice.IsDieneinMidOrder)
+    {
+        // Print KOT
+        var kotText = kotFormatter.Format(invoice);
+        RawPrinterHelper.SendStringToPrinter(printerName, kotText);
+    }
+    else
+    {
+        // Print Customer Bill
+        var billText = thermalFormatter.Format(invoice);
+        RawPrinterHelper.SendStringToPrinter(printerName, billText);
+    }
+
+    return Results.Ok("Dienen Bill and printed successfully");
 });
 
 app.MapGet("/health", () => Results.Ok("Print Agent Running"));

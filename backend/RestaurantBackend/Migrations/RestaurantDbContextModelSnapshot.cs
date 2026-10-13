@@ -22,6 +22,121 @@ namespace RestaurantBackend.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("RestaurantBackend.Models.DishEstimation", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Category")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal>("FoodCostPercentage")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("GrossProfit")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("ItemName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("MenuItemId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Notes")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PortionSize")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("ProfitMargin")
+                        .HasColumnType("decimal(5,2)");
+
+                    b.Property<decimal>("SellingPrice")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DishEstimations");
+                });
+
+            modelBuilder.Entity("RestaurantBackend.Models.EstimationIngredient", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<string>("DishEstimationId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("MasterIngredientId")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("Quantity")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DishEstimationId");
+
+                    b.ToTable("EstimationIngredients");
+                });
+
+            modelBuilder.Entity("RestaurantBackend.Models.MasterIngredient", b =>
+                {
+                    b.Property<string>("Id")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("Category")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("StandardQuantity")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<decimal>("StockQuantity")
+                        .HasColumnType("decimal(18,4)");
+
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("MasterIngredients");
+                });
+
             modelBuilder.Entity("RestaurantBackend.Models.MenuItem", b =>
                 {
                     b.Property<string>("Id")
@@ -161,6 +276,17 @@ namespace RestaurantBackend.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("RestaurantBackend.Models.EstimationIngredient", b =>
+                {
+                    b.HasOne("RestaurantBackend.Models.DishEstimation", "DishEstimation")
+                        .WithMany("Ingredients")
+                        .HasForeignKey("DishEstimationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("DishEstimation");
+                });
+
             modelBuilder.Entity("RestaurantBackend.Models.MenuItemPortion", b =>
                 {
                     b.HasOne("RestaurantBackend.Models.MenuItem", "MenuItem")
@@ -178,6 +304,11 @@ namespace RestaurantBackend.Migrations
                         .WithMany("Items")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("RestaurantBackend.Models.DishEstimation", b =>
+                {
+                    b.Navigation("Ingredients");
                 });
 
             modelBuilder.Entity("RestaurantBackend.Models.MenuItem", b =>

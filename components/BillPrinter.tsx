@@ -5,10 +5,11 @@ import { Loader2 } from 'lucide-react';
 
 interface BillPrinterProps {
     order: LastOrder | null;
+    endPoint: string;
     onComplete?: () => void;
 }
 
-export default function BillPrinter({ order, onComplete }: BillPrinterProps) {
+export default function BillPrinter({ order, endPoint, onComplete }: BillPrinterProps) {
 
     const clearLastOrder = useOrderStore(s => s.clearLastOrder);
     const [isPrinting, setIsPrinting] = useState(false);
@@ -33,7 +34,7 @@ export default function BillPrinter({ order, onComplete }: BillPrinterProps) {
     }
 
     async function sendPrint(data: any) {
-        await fetch(`http://localhost:5000/print`, {
+        await fetch(`http://localhost:5000/${endPoint}`, {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",

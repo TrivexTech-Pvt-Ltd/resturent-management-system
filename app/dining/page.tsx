@@ -18,6 +18,7 @@ import {
 import { z } from "zod";
 
 import { api } from "@/lib/api";
+import Pagination from "@/components/ui/Pagination";
 import Modal from "@/components/ui/Modal";
 import DeleteConfirmModal from "@/components/ui/DeleteConfirmModal";
 import { cn } from "@/lib/utils";
@@ -47,7 +48,7 @@ export default function DiningPage() {
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 8;
+    const [itemsPerPage, setItemsPerPage] = useState(8);
 
     // React Hook Form
     const {
@@ -248,47 +249,18 @@ export default function DiningPage() {
                             </div>
 
                             {/* Pagination UI */}
-                            {filteredTables.length > itemsPerPage && (
-                                <div className="mt-6 pt-6 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
-                                    <p className="text-sm font-bold text-slate-500">
-                                        Showing <span className="text-slate-900">{Math.min(filteredTables.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredTables.length, currentPage * itemsPerPage)}</span> of <span className="text-slate-900">{filteredTables.length}</span> tables
-                                    </p>
-
-                                    <div className="flex items-center gap-2">
-                                        <button
-                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                            disabled={currentPage === 1}
-                                            className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
-                                        >
-                                            <ChevronLeft className="h-5 w-5" />
-                                        </button>
-
-                                        <div className="flex items-center gap-1">
-                                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                                <button
-                                                    key={page}
-                                                    onClick={() => setCurrentPage(page)}
-                                                    className={cn(
-                                                        "w-10 h-10 rounded-xl font-bold transition-all active:scale-95",
-                                                        currentPage === page
-                                                            ? "bg-primary text-white shadow-lg shadow-primary/20"
-                                                            : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
-                                                    )}
-                                                >
-                                                    {page}
-                                                </button>
-                                            ))}
-                                        </div>
-
-                                        <button
-                                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                            disabled={currentPage === totalPages}
-                                            className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
-                                        >
-                                            <ChevronRight className="h-5 w-5" />
-                                        </button>
-                                    </div>
-                                </div>
+                            {filteredTables.length > 0 && (
+                                <Pagination
+                                    currentPage={currentPage}
+                                    totalPages={totalPages}
+                                    totalItems={filteredTables.length}
+                                    itemsPerPage={itemsPerPage}
+                                    onPageChange={setCurrentPage}
+                                    onItemsPerPageChange={setItemsPerPage}
+                                    pageSizeOptions={[5, 8, 10, 20, 50]}
+                                    itemName="dining tables"
+                                    className="mt-6 pt-6 border-t border-slate-100 rounded-2xl"
+                                />
                             )}
                         </>
                     )}

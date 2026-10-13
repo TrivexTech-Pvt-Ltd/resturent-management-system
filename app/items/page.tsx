@@ -22,6 +22,7 @@ import { toast } from "react-hot-toast";
 import { getMenu, addMenuItem, updateMenuItem, deleteMenuItem } from "@/lib/db";
 import { MenuItem } from "@/lib/types";
 import { menuItemSchema, MenuItemFormData } from "@/lib/schemas";
+import Pagination from "@/components/ui/Pagination";
 import Modal from "@/components/ui/Modal";
 import DeleteConfirmModal from "@/components/ui/DeleteConfirmModal";
 import { cn } from "@/lib/utils";
@@ -36,7 +37,7 @@ export default function ItemsPage() {
 
     // Pagination State
     const [currentPage, setCurrentPage] = useState(1);
-    const itemsPerPage = 8;
+    const [itemsPerPage, setItemsPerPage] = useState(8);
 
     // React Hook Form
     const {
@@ -145,7 +146,6 @@ export default function ItemsPage() {
                 MenuItemId: editingItem?.id || ""
             })) || []
         };
-
         if (editingItem) {
             updateMutation.mutate({
                 id: editingItem.id,
@@ -158,6 +158,7 @@ export default function ItemsPage() {
         } else {
             createMutation.mutate(payload as any);
         }
+
     };
 
     const confirmDelete = (item: MenuItem) => {
@@ -324,46 +325,16 @@ export default function ItemsPage() {
 
                     {/* Pagination UI */}
                     {filteredItems.length > 0 && (
-                        <div className="p-6 bg-slate-50/50 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-4">
-                            <p className="text-sm font-bold text-slate-500">
-                                Showing <span className="text-slate-900">{Math.min(filteredItems.length, (currentPage - 1) * itemsPerPage + 1)}-{Math.min(filteredItems.length, currentPage * itemsPerPage)}</span> of <span className="text-slate-900">{filteredItems.length}</span> items
-                            </p>
-
-                            <div className="flex items-center gap-2">
-                                <button
-                                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                                    disabled={currentPage === 1}
-                                    className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
-                                >
-                                    <ChevronLeft className="h-5 w-5" />
-                                </button>
-
-                                <div className="flex items-center gap-1">
-                                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-                                        <button
-                                            key={page}
-                                            onClick={() => setCurrentPage(page)}
-                                            className={cn(
-                                                "w-10 h-10 rounded-xl font-bold transition-all active:scale-95",
-                                                currentPage === page
-                                                    ? "bg-primary text-white shadow-lg shadow-primary/20"
-                                                    : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
-                                            )}
-                                        >
-                                            {page}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                <button
-                                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                                    disabled={currentPage === totalPages}
-                                    className="p-2 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all active:scale-95"
-                                >
-                                    <ChevronRight className="h-5 w-5" />
-                                </button>
-                            </div>
-                        </div>
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={filteredItems.length}
+                            itemsPerPage={itemsPerPage}
+                            onPageChange={setCurrentPage}
+                            onItemsPerPageChange={setItemsPerPage}
+                            pageSizeOptions={[5, 8, 10, 20, 50, 100]}
+                            itemName="menu items"
+                        />
                     )}
                 </div>
             </div>
@@ -398,15 +369,22 @@ export default function ItemsPage() {
                             )}
                         >
                             <option value="">Select Category</option>
-                            <option value="Rice">Rice</option>
+                            <option value="Fried Rice (Basmati)">Fried Rice (Basmati)</option>
+                            <option value="Fried Rice (Keeri Samba)">Fried Rice (Keeri Samba)</option>
+                            <option value="Special Rice (Basmati)">Special Rice (Basmati)</option>
+                            <option value="Pasta Special">Pasta Special</option>
+                            <option value="Cheese Pasta">Cheese Pasta</option>
                             <option value="Kottu">Kottu</option>
+                            <option value="Cheese Kottu">Cheese Kottu</option>
+                            <option value="Dolphin Kottu">Dolphin Kottu</option>
+                            <option value="Dolphin Kottu - Cheese">Dolphin Kottu - Cheese</option>
                             <option value="Noodles">Noodles</option>
-                            <option value="Pasta">Pasta</option>
-                            <option value="Chicken">Chicken</option>
+                            <option value="Bites">Bites</option>
                             <option value="Beverages">Beverages</option>
                             <option value="Tea/Coffee">Tea/Coffee</option>
                             <option value="Desserts">Desserts</option>
-                            <option value="RiceCurry">Rice & Curry</option>
+                            <option value="Rice & Curry">Rice & Curry</option>
+                            <option value="Roti/Hoppers">Roti/Hoppers</option>
                         </select>
                         {errors.category && <p className="mt-1 text-xs font-bold text-red-500">{errors.category.message}</p>}
                     </div>
