@@ -20,57 +20,59 @@ public class ThermalInvoiceFormatter : IInvoiceFormatter
     private const int PRICE_WIDTH = 9;
     private const int AMOUNT_WIDTH = 10;
 
+    private static readonly string LINE = new string('-', CONTENT_WIDTH);
+    private static readonly string DLINE = new string('=', CONTENT_WIDTH);
+
+    // Set to false if your printer does not support CODE128 barcodes
+    private const bool PRINT_BARCODE = true;
+
     public string Format(InvoiceDto invoice)
     {
         var sb = new StringBuilder();
 
         // ================= INIT =================
         sb.Append("\x1B\x40"); // Initialize printer
-
-        // ================= ORDER NUMBER =================
-        sb.Append("\x1B\x61\x01"); // Center
-        sb.Append("\x1B\x45\x01"); // Bold ON
-        sb.AppendLine("ORDER NO");
-
-        sb.Append("\x1D\x21\x11"); // Double size
-        sb.AppendLine(invoice.OrderNo);
-        sb.Append("\x1D\x21\x00"); // Normal size
-
-        sb.Append("\x1B\x45\x00"); // Bold OFF
+        sb.Append("\x1B\x33\x00"); // Set line spacing to 0
+        // ================= LOGO =================
+        sb.Append("\x1B\x61\x01");            // Center
+        sb.Append(LogoData.GetEscPosString());  // Logo image
         sb.AppendLine();
-        sb.Append("\x1B\x61\x00"); // Left
-
-        // ================= TOP MARGIN =================
-        for (int i = 0; i < TOP_MARGIN_LINES; i++)
-            sb.AppendLine();
 
         // ================= STORE NAME =================
-        sb.Append("\x1B\x61\x01"); // Center
         sb.Append("\x1D\x21\x11"); // Double size
         sb.Append("\x1B\x45\x01"); // Bold ON
         sb.AppendLine("LOTTERIA");
         sb.Append("\x1D\x21\x00");
-        sb.Append("\x1B\x45\x00");
         sb.AppendLine("CHINESE RESTAURANT");
-        sb.Append("\x1B\x61\x00");
-
+        sb.Append("\x1B\x45\x00");
+        sb.AppendLine("* * * * * * * * * *");
         sb.AppendLine();
 
         // ================= ADDRESS =================
-        sb.Append("\x1B\x61\x01"); // Center alignment
-
         sb.AppendLine("No 434, Athurugiriya Road");
         sb.AppendLine("Hokandara North");
         sb.AppendLine("Tel: 0117987100 / 0719440100");
+        sb.Append("\x1B\x61\x00"); // Left
 
-        sb.Append("\x1B\x61\x00"); // Back to left alignment
-        sb.AppendLine(LEFT_PADDING + "--------------------------------------");
+        sb.AppendLine(LEFT_PADDING + DLINE);
+
+        // ================= ORDER NUMBER =================
+        sb.Append("\x1B\x61\x01");
+        sb.Append("\x1B\x45\x01");
+        sb.AppendLine("ORDER NO");
+        sb.Append("\x1D\x21\x11");
+        sb.AppendLine(invoice.OrderNo);
+        sb.Append("\x1D\x21\x00");
+        sb.Append("\x1B\x45\x00");
+        sb.Append("\x1B\x61\x00");
+
+        sb.AppendLine(LEFT_PADDING + DLINE);
 
         // ================= INVOICE INFO =================
         sb.AppendLine(LEFT_PADDING + $"Order No : {invoice.OrderNo}");
         sb.AppendLine(LEFT_PADDING + $"Date     : {DateTime.Now:yyyy-MM-dd HH:mm}");
 
-        sb.AppendLine(LEFT_PADDING + "--------------------------------------");
+        sb.AppendLine(LEFT_PADDING + LINE);
 
         // ================= TABLE HEADER =================
         sb.Append("\x1B\x45\x01"); // Bold ON
@@ -83,7 +85,7 @@ public class ThermalInvoiceFormatter : IInvoiceFormatter
         );
         sb.Append("\x1B\x45\x00"); // Bold OFF
 
-        sb.AppendLine(LEFT_PADDING + "--------------------------------------");
+        sb.AppendLine(LEFT_PADDING + LINE);
 
         // ================= ITEMS =================
         foreach (var item in invoice.Items)
@@ -108,17 +110,14 @@ public class ThermalInvoiceFormatter : IInvoiceFormatter
                 }
                 else
                 {
-                    sb.AppendLine(
-                        LEFT_PADDING +
-                        wrappedLines[i].PadRight(ITEM_COL_WIDTH)
-                    );
+                    sb.AppendLine(LEFT_PADDING + wrappedLines[i].PadRight(ITEM_COL_WIDTH));
                 }
             }
 
             sb.AppendLine();
         }
 
-        sb.AppendLine(LEFT_PADDING + "--------------------------------------");
+        sb.AppendLine(LEFT_PADDING + LINE);
 
         // ================= TOTALS =================
         sb.AppendLine(
@@ -133,20 +132,42 @@ public class ThermalInvoiceFormatter : IInvoiceFormatter
             "0.00".PadLeft(10)
         );
 
-        sb.AppendLine(LEFT_PADDING + "--------------------------------------");
+        sb.AppendLine(LEFT_PADDING + DLINE);
 
-        sb.Append("\x1B\x45\x01"); // Bold ON
+        sb.Append("\x1B\x45\x01");  // Bold ON
+        sb.Append("\x1D\x21\x01");  // Double height
         sb.AppendLine(
             LEFT_PADDING +
             "GRAND TOTAL".PadRight(28) +
             invoice.Total.ToString("0.00").PadLeft(10)
         );
-        sb.Append("\x1B\x45\x00"); // Bold OFF
+        sb.Append("\x1D\x21\x00");
+        sb.Append("\x1B\x45\x00");
+
+        sb.AppendLine(LEFT_PADDING + DLINE);
 
         // ================= FOOTER =================
         sb.AppendLine();
         sb.Append("\x1B\x61\x01"); // Center
+        sb.Append("\x1B\x45\x01");
         sb.AppendLine("Thank You! Come Again");
+        sb.Append("\x1B\x45\x00");
+        sb.AppendLine();
+
+        // ================= BARCODE (Order No) =================
+        if (PRINT_BARCODE && !string.IsNullOrWhiteSpace(invoice.OrderNo))
+        {
+            sb.Append("\x1D\x68\x40");  // Height 64
+            sb.Append("\x1D\x77\x02");  // Width 2
+            sb.Append("\x1D\x48\x02");  // Number printed below barcode
+            sb.Append("\x1D\x6B\x49");  // CODE128
+            sb.Append((char)(invoice.OrderNo.Length + 2));
+            sb.Append("{B" + invoice.OrderNo);
+            sb.AppendLine();
+        }
+
+        sb.AppendLine();
+        sb.AppendLine(". . . . . . . . . . . . . . . .");
         sb.AppendLine("SYSTEM BY TrivexTech Pvt Ltd");
         sb.AppendLine("www.trivextech.lk");
         sb.Append("\x1B\x61\x00"); // Left
