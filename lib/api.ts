@@ -25,9 +25,17 @@ async function parseErrorMessage(res: Response): Promise<string> {
 }
 
 export const api = {
-  async get(url: string) {
+  async get(url: string, params?: Record<string, string | number | undefined>) {
     try {
-      const res = await fetch(`${API_BASE_URL}${url}`);
+      let fullUrl = `${API_BASE_URL}${url}`;
+      if (params) {
+        const qs = Object.entries(params)
+          .filter(([, v]) => v !== undefined && v !== null && v !== "")
+          .map(([k, v]) => `${encodeURIComponent(k)}=${encodeURIComponent(String(v))}`)
+          .join("&");
+        if (qs) fullUrl += `?${qs}`;
+      }
+      const res = await fetch(fullUrl);
       if (!res.ok) {
         const errorMsg = await parseErrorMessage(res);
         throw new Error(errorMsg);

@@ -55,7 +55,7 @@ import {
     Cell
 } from "recharts";
 
-import { getOrders, getMenu } from "@/lib/db";
+import { getOrders, getMenu, getOrdersPaged, getItemSalesPaged } from "@/lib/db";
 import { Order, MenuItem, OrderItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
@@ -162,6 +162,70 @@ export default function SalesReportPage() {
         queryKey: ["menu"],
         queryFn: getMenu,
     });
+
+    // Server-side paged orders query (used for Transaction Log in financials view)
+    const pagedStartDate = timeRange === 'custom'
+        ? customStartDate
+        : timeRange === 'daily'
+            ? format(startOfDay(new Date()), "yyyy-MM-dd'T'HH:mm:ss")
+            : timeRange === 'weekly'
+                ? format(subWeeks(new Date(), 1), "yyyy-MM-dd'T'HH:mm:ss")
+                : format(subMonths(new Date(), 1), "yyyy-MM-dd'T'HH:mm:ss");
+    const pagedEndDate = timeRange === 'custom'
+        ? `${customEndDate}T23:59:59`
+        : format(endOfDay(new Date()), "yyyy-MM-dd'T'HH:mm:ss");
+
+    const { data: pagedOrdersResult, isLoading: isLoadingPagedOrders } = useQuery({
+        queryKey: ["orders-paged", currentPage, ITEMS_PER_PAGE, pagedStartDate, pagedEndDate, paymentFilter],
+        queryFn: () => getOrdersPaged({
+            page: currentPage,
+            pageSize: ITEMS_PER_PAGE,
+            startDate: pagedStartDate,
+            endDate: pagedEndDate,
+            paymentMethod: paymentFilter === 'ALL' ? undefined : paymentFilter,
+        }),
+        placeholderData: (prev) => prev,
+    });
+
+    const pagedOrders = pagedOrdersResult?.data ?? [];
+    const serverTotalCount = pagedOrdersResult?.totalCount ?? 0;
+    const serverTotalPages = pagedOrdersResult?.totalPages ?? 1;
+
+    // Server-side paged item sales query (used for Item-wise table in items view)
+    const { data: pagedItemResult, isLoading: isLoadingPagedItems } = useQuery({
+        queryKey: [
+            "item-sales-paged",
+            itemPage,
+            ITEM_TABLE_PER_PAGE,
+            pagedStartDate,
+            pagedEndDate,
+            paymentFilter,
+            selectedCategory,
+            selectedItemName,
+            selectedPortion,
+            itemSearchQuery,
+            sortBy,
+        ],
+        queryFn: () => getItemSalesPaged({
+            page: itemPage,
+            pageSize: ITEM_TABLE_PER_PAGE,
+            startDate: pagedStartDate,
+            endDate: pagedEndDate,
+            paymentMethod: paymentFilter,
+            category: selectedCategory,
+            itemName: selectedItemName,
+            portionSize: selectedPortion,
+            search: itemSearchQuery,
+            sortBy: sortBy,
+        }),
+        placeholderData: (prev) => prev,
+    });
+
+    const pagedItems = pagedItemResult?.data ?? [];
+    const serverItemTotalCount = pagedItemResult?.totalCount ?? 0;
+    const serverItemTotalPages = pagedItemResult?.totalPages ?? 1;
+    const serverItemTotalRevenue = pagedItemResult?.totalRevenue ?? 0;
+
 
     // Date interval calculation
     const dateInterval = useMemo(() => {
@@ -465,27 +529,14 @@ export default function SalesReportPage() {
         }));
     }, [itemSalesData]);
 
-    // Pagination calculations
-    const totalPages = Math.ceil(filteredOrders.length / ITEMS_PER_PAGE);
-    const paginatedOrders = filteredOrders.slice(
-        (currentPage - 1) * ITEMS_PER_PAGE,
-        currentPage * ITEMS_PER_PAGE
-    );
-
-    const totalItemPages = Math.ceil(itemSalesData.length / ITEM_TABLE_PER_PAGE);
-    const paginatedItems = itemSalesData.slice(
-        (itemPage - 1) * ITEM_TABLE_PER_PAGE,
-        itemPage * ITEM_TABLE_PER_PAGE
-    );
-
     const handlePageChange = (newPage: number) => {
-        if (newPage >= 1 && newPage <= totalPages) {
+        if (newPage >= 1 && newPage <= serverTotalPages) {
             setCurrentPage(newPage);
         }
     };
 
     const handleItemPageChange = (newPage: number) => {
-        if (newPage >= 1 && newPage <= totalItemPages) {
+        if (newPage >= 1 && newPage <= serverItemTotalPages) {
             setItemPage(newPage);
         }
     };
@@ -588,6 +639,7 @@ export default function SalesReportPage() {
                                     value={customStartDate}
                                     onChange={(e) => {
                                         setCustomStartDate(e.target.value);
+                                        setCurrentPage(1);
                                         setItemPage(1);
                                     }}
                                     className="bg-white px-3 py-2 rounded-xl text-xs font-bold text-slate-700 outline-none border border-transparent focus:border-primary/30"
@@ -598,6 +650,7 @@ export default function SalesReportPage() {
                                     value={customEndDate}
                                     onChange={(e) => {
                                         setCustomEndDate(e.target.value);
+                                        setCurrentPage(1);
                                         setItemPage(1);
                                     }}
                                     className="bg-white px-3 py-2 rounded-xl text-xs font-bold text-slate-700 outline-none border border-transparent focus:border-primary/30"
@@ -745,7 +798,10 @@ export default function SalesReportPage() {
                                 <div className="flex items-center gap-2">
                                     <select
                                         value={sortBy}
-                                        onChange={(e) => setSortBy(e.target.value as SortOption)}
+                                        onChange={(e) => {
+                                            setSortBy(e.target.value as SortOption);
+                                            setItemPage(1);
+                                        }}
                                         className="px-4 py-3 bg-slate-900 text-white rounded-2xl font-bold text-xs outline-none cursor-pointer shadow-sm"
                                     >
                                         <option value="revenue_desc">Highest Revenue</option>
@@ -850,7 +906,7 @@ export default function SalesReportPage() {
                                     <p className="text-xs text-slate-400 font-medium">Detailed sales breakdown by food item and portion size</p>
                                 </div>
                                 <span className="bg-primary/10 text-primary px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-widest whitespace-nowrap">
-                                    {itemSalesData.length} ITEMS FOUND
+                                    {serverItemTotalCount} ITEMS FOUND
                                 </span>
                             </div>
 
@@ -869,22 +925,23 @@ export default function SalesReportPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {isLoadingOrders ? (
+                                        {isLoadingPagedItems ? (
                                             <tr>
                                                 <td colSpan={8} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest text-sm">
                                                     Calculating Item Performance...
                                                 </td>
                                             </tr>
-                                        ) : itemSalesData.length === 0 ? (
+                                        ) : serverItemTotalCount === 0 ? (
                                             <tr>
                                                 <td colSpan={8} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest text-sm">
                                                     No item sales recorded for the selected range and filters
                                                 </td>
                                             </tr>
                                         ) : (
-                                            paginatedItems.map((item, index) => {
+                                            pagedItems.map((item, index) => {
                                                 const portionStyle = PORTION_COLORS[item.portionSize] || PORTION_COLORS['STANDARD'];
-                                                const sharePct = totalItemRevenue > 0 ? (item.totalRevenue / totalItemRevenue) * 100 : 0;
+                                                const baselineRevenue = serverItemTotalRevenue > 0 ? serverItemTotalRevenue : totalItemRevenue;
+                                                const sharePct = baselineRevenue > 0 ? (item.totalRevenue / baselineRevenue) * 100 : 0;
 
                                                 return (
                                                     <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
@@ -940,10 +997,10 @@ export default function SalesReportPage() {
                             </div>
 
                             {/* Item Table Pagination */}
-                            {!isLoadingOrders && itemSalesData.length > 0 && (
+                            {!isLoadingPagedItems && serverItemTotalCount > 0 && (
                                 <div className="p-6 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/50">
                                     <p className="text-sm font-bold text-slate-500">
-                                        Showing <span className="text-slate-900">{(itemPage - 1) * ITEM_TABLE_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(itemPage * ITEM_TABLE_PER_PAGE, itemSalesData.length)}</span> of <span className="text-slate-900">{itemSalesData.length}</span> item variations
+                                        Showing <span className="text-slate-900">{(itemPage - 1) * ITEM_TABLE_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(itemPage * ITEM_TABLE_PER_PAGE, serverItemTotalCount)}</span> of <span className="text-slate-900">{serverItemTotalCount}</span> item variations
                                     </p>
                                     <div className="flex items-center gap-2">
                                         <button
@@ -955,8 +1012,8 @@ export default function SalesReportPage() {
                                         </button>
 
                                         <div className="flex items-center gap-1">
-                                            {Array.from({ length: totalItemPages }, (_, i) => i + 1)
-                                                .filter(page => page === 1 || page === totalItemPages || Math.abs(page - itemPage) <= 1)
+                                            {Array.from({ length: serverItemTotalPages }, (_, i) => i + 1)
+                                                .filter(page => page === 1 || page === serverItemTotalPages || Math.abs(page - itemPage) <= 1)
                                                 .map((page, index, array) => (
                                                     <div key={page} className="flex items-center gap-1">
                                                         {index > 0 && array[index - 1] !== page - 1 && (
@@ -980,7 +1037,7 @@ export default function SalesReportPage() {
 
                                         <button
                                             onClick={() => handleItemPageChange(itemPage + 1)}
-                                            disabled={itemPage === totalItemPages}
+                                            disabled={itemPage === serverItemTotalPages}
                                             className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                                         >
                                             <ChevronRight className="h-5 w-5" />
@@ -1116,7 +1173,7 @@ export default function SalesReportPage() {
                             <div className="p-8 border-b border-slate-50 flex justify-between items-center">
                                 <h2 className="text-xl font-black text-slate-900 italic uppercase">TRANSACTION LOG</h2>
                                 <span className="bg-slate-100 text-slate-500 px-3 py-1 rounded-full text-xs font-black uppercase tracking-widest whitespace-nowrap">
-                                    {filteredOrders.length} ENTRIES FOUND
+                                    {serverTotalCount} ENTRIES FOUND
                                 </span>
                             </div>
                             <div className="overflow-x-auto">
@@ -1133,20 +1190,20 @@ export default function SalesReportPage() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {isLoadingOrders ? (
+                                        {isLoadingPagedOrders ? (
                                             <tr>
                                                 <td colSpan={7} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest text-sm">
                                                     Synchronizing Ledger...
                                                 </td>
                                             </tr>
-                                        ) : filteredOrders.length === 0 ? (
+                                        ) : pagedOrders.length === 0 ? (
                                             <tr>
                                                 <td colSpan={7} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest text-sm">
                                                     Zero records for selected parameters
                                                 </td>
                                             </tr>
                                         ) : (
-                                            paginatedOrders.map((order, index) => (
+                                            pagedOrders.map((order, index) => (
                                                 <tr key={order.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
                                                     <td className="p-6">
                                                         <span className="font-bold text-slate-500">{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</span>
@@ -1198,10 +1255,10 @@ export default function SalesReportPage() {
                             </div>
 
                             {/* Transactions Pagination */}
-                            {!isLoadingOrders && filteredOrders.length > 0 && (
+                            {!isLoadingPagedOrders && serverTotalCount > 0 && (
                                 <div className="p-6 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/50">
                                     <p className="text-sm font-bold text-slate-500">
-                                        Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, filteredOrders.length)}</span> of <span className="text-slate-900">{filteredOrders.length}</span> transactions
+                                        Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, serverTotalCount)}</span> of <span className="text-slate-900">{serverTotalCount}</span> transactions
                                     </p>
                                     <div className="flex items-center gap-2">
                                         <button
@@ -1213,8 +1270,8 @@ export default function SalesReportPage() {
                                         </button>
 
                                         <div className="flex items-center gap-1">
-                                            {Array.from({ length: totalPages }, (_, i) => i + 1)
-                                                .filter(page => page === 1 || page === totalPages || Math.abs(page - currentPage) <= 1)
+                                            {Array.from({ length: serverTotalPages }, (_, i) => i + 1)
+                                                .filter(page => page === 1 || page === serverTotalPages || Math.abs(page - currentPage) <= 1)
                                                 .map((page, index, array) => (
                                                     <div key={page} className="flex items-center gap-1">
                                                         {index > 0 && array[index - 1] !== page - 1 && (
@@ -1238,7 +1295,7 @@ export default function SalesReportPage() {
 
                                         <button
                                             onClick={() => handlePageChange(currentPage + 1)}
-                                            disabled={currentPage === totalPages}
+                                            disabled={currentPage === serverTotalPages}
                                             className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
                                         >
                                             <ChevronRight className="h-5 w-5" />
