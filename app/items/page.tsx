@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import AppLayout from "@/components/AppLayout";
 import {
     Search,
     Plus,
@@ -12,10 +13,11 @@ import {
     Trash2,
     Loader2,
     UtensilsCrossed,
-    X,
-    ArrowLeft,
-    ChevronLeft,
+    LayoutGrid,
+    ArrowUpDown,
+    ChevronDown,
     ChevronRight,
+    Home,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
 
@@ -27,9 +29,13 @@ import Modal from "@/components/ui/Modal";
 import DeleteConfirmModal from "@/components/ui/DeleteConfirmModal";
 import { cn } from "@/lib/utils";
 
+
 export default function ItemsPage() {
     const queryClient = useQueryClient();
     const [searchQuery, setSearchQuery] = useState("");
+    const [selectedCategory, setSelectedCategory] = useState("all");
+    const [sortOption, setSortOption] = useState("name-asc");
+
     const [isFormModalOpen, setIsFormModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [editingItem, setEditingItem] = useState<MenuItem | null>(null);
@@ -63,8 +69,6 @@ export default function ItemsPage() {
         queryKey: ["menu"],
         queryFn: getMenu,
     });
-
-
 
     // Mutations
     const createMutation = useMutation({
@@ -134,7 +138,6 @@ export default function ItemsPage() {
     };
 
     const onSubmit = (data: MenuItemFormData) => {
-        // Construct the payload with portions
         const payload = {
             name: data.name,
             category: data.category,
@@ -154,11 +157,9 @@ export default function ItemsPage() {
                     ...payload
                 } as any
             });
-            console.log(data, editingItem.id)
         } else {
             createMutation.mutate(payload as any);
         }
-
     };
 
     const confirmDelete = (item: MenuItem) => {
@@ -166,10 +167,50 @@ export default function ItemsPage() {
         setIsDeleteModalOpen(true);
     };
 
-    const filteredItems = items.filter((item) =>
-        item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    // Extract unique categories
+    const categories = useMemo(() => {
+        const set = new Set<string>();
+        items.forEach(item => {
+            if (item.category) set.add(item.category);
+        });
+        return Array.from(set).sort();
+    }, [items]);
+
+    // Filter and sort items
+    const filteredItems = useMemo(() => {
+        return items
+            .filter(item => {
+                const matchesSearch =
+                    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    item.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                    item.id.toLowerCase().includes(searchQuery.toLowerCase());
+
+                const matchesCategory =
+                    selectedCategory === "all" ||
+                    item.category.toLowerCase() === selectedCategory.toLowerCase();
+
+                return matchesSearch && matchesCategory;
+            })
+            .sort((a, b) => {
+                if (sortOption === "name-asc") {
+                    return a.name.localeCompare(b.name);
+                }
+                if (sortOption === "name-desc") {
+                    return b.name.localeCompare(a.name);
+                }
+                if (sortOption === "price-asc") {
+                    const minA = Math.min(...(a.portions?.map(p => p.price) || [0]));
+                    const minB = Math.min(...(b.portions?.map(p => p.price) || [0]));
+                    return minA - minB;
+                }
+                if (sortOption === "price-desc") {
+                    const maxA = Math.max(...(a.portions?.map(p => p.price) || [0]));
+                    const maxB = Math.max(...(b.portions?.map(p => p.price) || [0]));
+                    return maxB - maxA;
+                }
+                return 0;
+            });
+    }, [items, searchQuery, selectedCategory, sortOption]);
 
     // Pagination Calculations
     const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
@@ -178,166 +219,279 @@ export default function ItemsPage() {
         currentPage * itemsPerPage
     );
 
-    // Reset pagination when search changes
     const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchQuery(e.target.value);
         setCurrentPage(1);
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-10">
-            <div className="max-w-6xl mx-auto">
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                    <div>
-                        <Link href="/" className="inline-flex items-center text-slate-400 hover:text-primary transition-colors text-sm font-bold gap-1 mb-2">
-                            <ArrowLeft className="h-4 w-4" />
-                            DASHBOARD
+        <AppLayout>
+            <div className="min-h-[calc(100vh-64px)] p-6 md:p-8 bg-transparent">
+                <div className="max-w-[1400px] mx-auto">
+                    {/* Breadcrumb */}
+                    <div className="flex items-center gap-2 text-xs font-semibold text-slate-400 mb-4">
+                        <Link href="/" className="hover:text-indigo-600 transition-colors">
+                            <Home className="h-3.5 w-3.5" />
                         </Link>
-                        <h1 className="text-3xl font-black text-slate-900 tracking-tight italic flex items-center gap-3">
-                            <UtensilsCrossed className="text-primary h-8 w-8" />
-                            MENU ITEMS
-                        </h1>
-                        <p className="text-slate-500 font-medium mt-1">Manage your professional restaurant catalog</p>
+                        <ChevronRight className="h-3 w-3 text-slate-300" />
+                        <span className="text-slate-500">Dashboard</span>
+                        <ChevronRight className="h-3 w-3 text-slate-300" />
+                        <span className="text-slate-600 font-bold">Menu Items</span>
                     </div>
-                    <button
-                        onClick={openAddModal}
-                        className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-xl shadow-primary/20 flex items-center gap-2 w-fit active:scale-95"
-                    >
-                        <Plus className="h-5 w-5" />
-                        Add New Item
-                    </button>
-                </div>
 
-                {/* Search and Filters */}
-                <div className="glass-card p-4 rounded-3xl mb-8 flex flex-col md:flex-row gap-4 items-center">
-                    <div className="relative flex-1 w-full">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-                        <input
-                            type="text"
-                            placeholder="Search by name or category..."
-                            className="w-full pl-12 pr-4 py-4 bg-slate-50/50 border-none rounded-2xl focus:ring-2 focus:ring-primary/20 outline-none font-medium text-slate-700 placeholder:text-slate-400 transition-all"
-                            value={searchQuery}
-                            onChange={handleSearchChange}
-                        />
+                    {/* Header */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
+                        <div className="flex items-center gap-3.5">
+                            <div className="w-12 h-12 rounded-2xl bg-indigo-50 border border-indigo-100/80 flex items-center justify-center text-indigo-600 shadow-xs">
+                                <UtensilsCrossed className="h-6 w-6" />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl md:text-3xl font-black tracking-tight italic uppercase">
+                                    <span className="text-black">MENU</span>{" "}
+                                    <span className="text-blue-600">ITEMS</span>
+                                </h1>
+                                <p className="text-xs md:text-sm font-semibold text-slate-400 mt-0.5">
+                                    Manage your professional restaurant catalog
+                                </p>
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={openAddModal}
+                            className="bg-[#4338CA] hover:bg-[#3730A3] text-white px-5 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-indigo-600/25 flex items-center gap-2 w-fit active:scale-95 cursor-pointer text-sm"
+                        >
+                            <Plus className="h-4 w-4" />
+                            Add New Item
+                        </button>
                     </div>
-                </div>
 
-                {/* Items Table */}
-                <div className="glass-card rounded-[2.5rem] overflow-hidden border border-white">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
-                            <thead className="bg-[#F8FAFC]/50 border-b border-slate-100">
-                                <tr>
-                                    <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Item Details</th>
-                                    <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Category</th>
-                                    <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Portions</th>
-                                    <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider">Price</th>
-                                    <th className="p-6 font-bold text-slate-800 uppercase text-xs tracking-wider text-right">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {isLoading ? (
+                    {/* Search and Filters Bar */}
+                    <div className="bg-white rounded-2xl p-2.5 border border-slate-100 shadow-xs flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 mb-6">
+                        {/* Search Input */}
+                        <div className="relative flex-1">
+                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                            <input
+                                type="text"
+                                placeholder="Search by item name or category..."
+                                className="w-full pl-10 pr-4 py-2 bg-slate-50/70 border border-slate-200/60 rounded-xl text-xs font-semibold text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 transition-all"
+                                value={searchQuery}
+                                onChange={handleSearchChange}
+                            />
+                        </div>
+
+                        {/* Filter & Sort Controls */}
+                        <div className="flex flex-wrap items-center gap-2.5">
+                            {/* Category Filter */}
+                            <div className="relative">
+                                <select
+                                    value={selectedCategory}
+                                    onChange={(e) => {
+                                        setSelectedCategory(e.target.value);
+                                        setCurrentPage(1);
+                                    }}
+                                    className="appearance-none bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl pl-8 pr-8 py-2 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer shadow-2xs transition-all"
+                                >
+                                    <option value="all">All Categories</option>
+                                    {categories.map((cat) => (
+                                        <option key={cat} value={cat}>
+                                            {cat}
+                                        </option>
+                                    ))}
+                                </select>
+                                <LayoutGrid className="h-3.5 w-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                <ChevronDown className="h-3.5 w-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            </div>
+
+
+
+                            {/* Sort Option */}
+                            <div className="relative">
+                                <select
+                                    value={sortOption}
+                                    onChange={(e) => {
+                                        setSortOption(e.target.value);
+                                        setCurrentPage(1);
+                                    }}
+                                    className="appearance-none bg-white border border-slate-200/80 hover:border-slate-300 rounded-xl pl-8 pr-8 py-2 text-xs font-bold text-slate-700 outline-none focus:ring-2 focus:ring-indigo-500/20 cursor-pointer shadow-2xs transition-all"
+                                >
+                                    <option value="name-asc">Name (A - Z)</option>
+                                    <option value="name-desc">Name (Z - A)</option>
+                                    <option value="price-asc">Price (Low to High)</option>
+                                    <option value="price-desc">Price (High to Low)</option>
+                                </select>
+                                <ArrowUpDown className="h-3.5 w-3.5 text-slate-500 absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                                <ChevronDown className="h-3.5 w-3.5 text-slate-400 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Items Table Card */}
+                    <div className="bg-white rounded-2xl shadow-xs border border-slate-100 overflow-hidden">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left border-collapse">
+                                <thead className="bg-slate-100/80 border-b border-slate-200/80">
                                     <tr>
-                                        <td colSpan={5} className="p-20 text-center">
-                                            <div className="flex flex-col items-center gap-4">
-                                                <Loader2 className="h-10 w-10 text-primary animate-spin" />
-                                                <span className="text-slate-400 font-bold uppercase tracking-widest text-sm">Loading Menu Library...</span>
-                                            </div>
-                                        </td>
+                                        <th className="w-14 px-5 py-3.5 text-xs font-bold text-slate-700 uppercase tracking-wider">#</th>
+                                        <th className="px-4 py-3.5 text-xs font-bold text-slate-700 uppercase tracking-wider">Item Details</th>
+                                        <th className="px-4 py-3.5 text-xs font-bold text-slate-700 uppercase tracking-wider">Category</th>
+                                        <th className="px-4 py-3.5 text-xs font-bold text-slate-700 uppercase tracking-wider">Portions</th>
+                                        <th className="px-4 py-3.5 text-xs font-bold text-slate-700 uppercase tracking-wider">Price (Rs.)</th>
+                                        <th className="px-6 py-3.5 text-xs font-bold text-slate-700 uppercase tracking-wider text-right">Actions</th>
                                     </tr>
-                                ) : filteredItems.length === 0 ? (
-                                    <tr>
-                                        <td colSpan={5} className="p-20 text-center">
-                                            <div className="flex flex-col items-center gap-4">
-                                                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center">
-                                                    <Search className="text-slate-300 h-8 w-8" />
-                                                </div>
-                                                <span className="text-slate-400 font-bold uppercase tracking-widest text-sm">No items match your search</span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ) : (
-                                    paginatedItems.map((item) => (
-                                        <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
-                                            <td className="p-6">
-                                                <div className="flex items-center gap-4">
-                                                    <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-slate-100 to-slate-200 flex items-center justify-center text-2xl shadow-inner overflow-hidden border-2 border-white">
-                                                        {item.image ? (
-                                                            <img src={item.image} alt={item.name} className="w-full h-full object-cover" />
-                                                        ) : (
-                                                            <UtensilsCrossed className="h-6 w-6 text-slate-300" />
-                                                        )}
-                                                    </div>
-                                                    <div>
-                                                        <span className="font-bold text-slate-900 block text-lg">{item.name}</span>
-                                                        <span className="text-xs font-bold text-slate-400 uppercase tracking-tighter">ID: {item.id.slice(0, 8)}</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td className="p-6">
-                                                <span className="px-3 py-1 bg-indigo-50 text-indigo-600 rounded-full text-xs font-black uppercase tracking-wider">
-                                                    {item.category}
-                                                </span>
-                                            </td>
-                                            <td className="p-6">
-                                                <div className="flex gap-1 flex-wrap">
-                                                    {item.portions?.map((p, idx) => (
-                                                        <span key={idx} className="px-2 py-1 bg-slate-100 text-slate-600 rounded-md text-xs font-bold border border-slate-200">
-                                                            {p.size}
-                                                        </span>
-                                                    ))}
-                                                </div>
-                                            </td>
-                                            <td className="p-6">
-                                                <div className="flex flex-col gap-1">
-                                                    {item.portions?.map((p, idx) => (
-                                                        <div key={idx} className="flex items-baseline gap-1 text-sm">
-                                                            <span className="text-slate-400 font-medium">{p.size}:</span>
-                                                            <span className="font-black text-primary">{p.price.toFixed(2)}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </td>
-                                            <td className="p-6 text-right">
-                                                <div className="flex justify-end gap-3">
-                                                    <button
-                                                        onClick={() => openEditModal(item)}
-                                                        className="w-10 h-10 cursor-pointer flex items-center justify-center bg-primary text-white hover:shadow-lg border border-primary rounded-xl transition-all hover:scale-110"
-                                                        title="Edit Item"
-                                                    >
-                                                        <Edit2 className="h-4 w-4" />
-                                                    </button>
-                                                    <button
-                                                        onClick={() => confirmDelete(item)}
-                                                        className="w-10 h-10 cursor-pointer flex items-center justify-center bg-red-400 text-white hover:shadow-lg border border-red-400 rounded-xl transition-all hover:scale-110"
-                                                        title="Delete Item"
-                                                    >
-                                                        <Trash2 className="h-4 w-4" />
-                                                    </button>
+                                </thead>
+                                <tbody>
+                                    {isLoading ? (
+                                        <tr>
+                                            <td colSpan={6} className="p-20 text-center">
+                                                <div className="flex flex-col items-center gap-4">
+                                                    <Loader2 className="h-8 w-8 text-indigo-600 animate-spin" />
+                                                    <span className="text-slate-400 font-bold uppercase tracking-widest text-xs">Loading Menu Items...</span>
                                                 </div>
                                             </td>
                                         </tr>
-                                    ))
-                                )}
-                            </tbody>
-                        </table>
-                    </div>
+                                    ) : filteredItems.length === 0 ? (
+                                        <tr>
+                                            <td colSpan={6} className="p-20 text-center">
+                                                <div className="flex flex-col items-center gap-3">
+                                                    <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center">
+                                                        <Search className="text-slate-300 h-6 w-6" />
+                                                    </div>
+                                                    <span className="text-slate-400 font-bold text-xs">No items match your criteria</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        paginatedItems.map((item, index) => {
+                                            const itemNumber = String((currentPage - 1) * itemsPerPage + index + 1).padStart(2, "0");
 
-                    {/* Pagination UI */}
-                    {filteredItems.length > 0 && (
-                        <Pagination
-                            currentPage={currentPage}
-                            totalPages={totalPages}
-                            totalItems={filteredItems.length}
-                            itemsPerPage={itemsPerPage}
-                            onPageChange={setCurrentPage}
-                            onItemsPerPageChange={setItemsPerPage}
-                            pageSizeOptions={[5, 8, 10, 20, 50, 100]}
-                            itemName="menu items"
-                        />
-                    )}
+                                            return (
+                                                <tr
+                                                    key={item.id}
+                                                    className="border-b border-slate-50/80 hover:bg-slate-50/50 transition-colors group"
+                                                >
+                                                    {/* # Column */}
+                                                    <td className="px-5 py-4 text-xs font-semibold text-slate-400">
+                                                        {itemNumber}
+                                                    </td>
+
+                                                    {/* Item Details */}
+                                                    <td className="px-4 py-4">
+                                                        <div className="flex items-center gap-3.5">
+                                                            <div className="w-12 h-12 rounded-xl bg-slate-100 overflow-hidden border border-slate-100 shadow-2xs shrink-0 flex items-center justify-center">
+                                                                {item.image ? (
+                                                                    <img
+                                                                        src={item.image}
+                                                                        alt={item.name}
+                                                                        className="w-full h-full object-cover"
+                                                                    />
+                                                                ) : (
+                                                                    <div className="w-full h-full bg-linear-to-br from-indigo-50 to-slate-100 flex items-center justify-center text-indigo-400">
+                                                                        <UtensilsCrossed className="h-5 w-5 opacity-60" />
+                                                                    </div>
+                                                                )}
+                                                            </div>
+                                                            <div className="min-w-0">
+                                                                <span className="font-bold text-slate-900 block text-sm tracking-tight truncate max-w-[220px]">
+                                                                    {item.name}
+                                                                </span>
+                                                                <span className="text-[11px] font-semibold text-slate-400 tracking-wider">
+                                                                    ID: {item.id.slice(0, 8).toUpperCase()}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+                                                    </td>
+
+                                                    {/* Category */}
+                                                    <td className="px-4 py-4">
+                                                        <span className="inline-flex items-center px-3 py-1.5 rounded-xl text-[11px] font-bold uppercase tracking-wider bg-purple-50 text-purple-700 border border-purple-200/70">
+                                                            {item.category}
+                                                        </span>
+                                                    </td>
+
+                                                    {/* Portions */}
+                                                    <td className="px-4 py-4">
+                                                        <div className="flex items-center gap-1.5 flex-wrap">
+                                                            {item.portions && item.portions.length > 0 ? (
+                                                                item.portions.map((p, idx) => (
+                                                                    <span
+                                                                        key={idx}
+                                                                        className="inline-flex items-center justify-center min-w-[28px] h-7 px-2 bg-slate-50 border border-slate-200/80 rounded-lg text-xs font-semibold text-slate-700 shadow-2xs"
+                                                                    >
+                                                                        {p.size}
+                                                                    </span>
+                                                                ))
+                                                            ) : (
+                                                                <span className="text-xs text-slate-400">-</span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+
+                                                    {/* Price (Rs.) */}
+                                                    <td className="px-4 py-4">
+                                                        <div className="flex flex-col gap-1">
+                                                            {item.portions && item.portions.length > 0 ? (
+                                                                item.portions.map((p, idx) => (
+                                                                    <div key={idx} className="flex items-center gap-3">
+                                                                        <span className="text-slate-400 font-semibold text-xs w-5 text-left">
+                                                                            {p.size}
+                                                                        </span>
+                                                                        <span className="font-bold text-slate-800 text-sm tracking-tight">
+                                                                            {p.price.toLocaleString("en-US", {
+                                                                                minimumFractionDigits: 2,
+                                                                                maximumFractionDigits: 2,
+                                                                            })}
+                                                                        </span>
+                                                                    </div>
+                                                                ))
+                                                            ) : (
+                                                                <span className="text-xs text-slate-400">-</span>
+                                                            )}
+                                                        </div>
+                                                    </td>
+
+                                                    {/* Actions */}
+                                                    <td className="px-6 py-4 text-right">
+                                                        <div className="flex items-center justify-end gap-2">
+                                                            <button
+                                                                onClick={() => openEditModal(item)}
+                                                                className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-indigo-50/80 hover:bg-indigo-100 text-indigo-600 border border-indigo-100/80 font-semibold text-xs transition-all active:scale-95 cursor-pointer shadow-2xs"
+                                                                title="Edit Item"
+                                                            >
+                                                                <Edit2 className="h-3.5 w-3.5" />
+                                                                <span>Edit</span>
+                                                            </button>
+                                                            <button
+                                                                onClick={() => confirmDelete(item)}
+                                                                className="p-2 rounded-xl bg-rose-50/80 hover:bg-rose-100 text-rose-500 border border-rose-100/80 transition-all active:scale-95 cursor-pointer shadow-2xs flex items-center justify-center"
+                                                                title="Delete Item"
+                                                            >
+                                                                <Trash2 className="h-3.5 w-3.5" />
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            );
+                                        })
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* Pagination UI */}
+                        {filteredItems.length > 0 && (
+                            <Pagination
+                                currentPage={currentPage}
+                                totalPages={totalPages}
+                                totalItems={filteredItems.length}
+                                itemsPerPage={itemsPerPage}
+                                onPageChange={setCurrentPage}
+                                onItemsPerPageChange={setItemsPerPage}
+                                pageSizeOptions={[5, 8, 10, 20, 50, 100]}
+                                itemName="menu items"
+                            />
+                        )}
+                    </div>
                 </div>
-            </div>
 
             {/* Add/Edit Modal */}
             <Modal
@@ -503,5 +657,6 @@ export default function ItemsPage() {
                 isLoading={deleteMutation.isPending}
             />
         </div>
+        </AppLayout>
     );
 }

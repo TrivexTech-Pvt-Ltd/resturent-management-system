@@ -1,112 +1,372 @@
 "use client";
 
 import Link from 'next/link';
+import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
 import {
   LogOut,
   User as UserIcon,
   ShieldCheck,
   CreditCard,
-  Utensils,
+  ChefHat,
   Monitor,
-  ClipboardList,
+  BarChart2,
   UtensilsCrossed,
-  TrendingUp,
+  Box,
+  Leaf,
   Calculator,
-  Boxes,
-  ChefHat
+  TrendingUp,
+  PieChart,
+  ChevronDown,
+  ArrowRight,
 } from 'lucide-react';
+
+interface Screen {
+  name: string;
+  href: string;
+  icon: React.ReactNode;
+  bgColor: string;
+  bgLight: string;
+  ghostIcon: React.ReactNode;
+  description: string;
+  badge: string;
+  badgeIcon: React.ReactNode;
+  badgeBg: string;
+  arrowBg: string;
+  roles: string[];
+}
 
 export default function Home() {
   const { user, logout, isLoading } = useAuth();
 
   if (isLoading) return null;
 
-  const screens = [
-    { name: 'Cashier / Billing', href: '/cashier', icon: <CreditCard className="h-6 w-6 text-white" />, color: 'bg-indigo-600', roles: ['Admin', 'User'] },
-    { name: 'Kitchen Display', href: '/kitchen', icon: <Utensils className="h-6 w-6 text-white" />, color: 'bg-rose-600', roles: ['Admin', 'User'] },
-    { name: 'Customer Display', href: '/customer', icon: <Monitor className="h-6 w-6 text-white" />, color: 'bg-emerald-600', roles: ['Admin', 'User'] },
-    { name: 'Status Board', href: '/status', icon: <ClipboardList className="h-6 w-6 text-white" />, color: 'bg-amber-600', roles: ['Admin', 'User'] },
-    { name: 'Dining Management', href: '/dining', icon: <UtensilsCrossed className="h-6 w-6 text-white" />, color: 'bg-indigo-600', roles: ['Admin', 'User'] },
-    { name: 'Items Management', href: '/items', icon: <UtensilsCrossed className="h-6 w-6 text-white" />, color: 'bg-violet-600', roles: ['Admin'] },
-    { name: 'Stock & Ingredients', href: '/ingredients', icon: <Boxes className="h-6 w-6 text-white" />, color: 'bg-emerald-600', roles: ['Admin', 'User'] },
-    { name: 'Dish Estimations', href: '/estimations', icon: <Calculator className="h-6 w-6 text-white" />, color: 'bg-sky-600', roles: ['Admin', 'User'] },
-    { name: 'Sales Revenue', href: '/reports/sales', icon: <TrendingUp className="h-6 w-6 text-white" />, color: 'bg-emerald-600', roles: ['Admin'] },
-    { name: 'Ingredients Usage Report', href: '/reports/ingredients', icon: <ChefHat className="h-6 w-6 text-white" />, color: 'bg-indigo-600', roles: ['Admin', 'User'] },
+  const screens: Screen[] = [
+    {
+      name: 'Cashier / Billing',
+      href: '/cashier',
+      icon: <CreditCard className="h-6 w-6 text-white" />,
+      bgColor: 'bg-indigo-600',
+      bgLight: 'bg-indigo-50',
+      ghostIcon: <CreditCard className="h-20 w-20 text-indigo-200" />,
+      description: 'Create orders, manage payments and generate bills.',
+      badge: 'Fast & Easy Billing',
+      badgeIcon: <CreditCard className="h-3.5 w-3.5 text-indigo-500" />,
+      badgeBg: 'bg-white border border-indigo-100 text-indigo-600',
+      arrowBg: 'bg-indigo-600',
+      roles: ['Admin', 'User'],
+    },
+    {
+      name: 'Kitchen Display',
+      href: '/kitchen',
+      icon: <ChefHat className="h-6 w-6 text-white" />,
+      bgColor: 'bg-rose-500',
+      bgLight: 'bg-rose-50',
+      ghostIcon: <ChefHat className="h-20 w-20 text-rose-200" />,
+      description: 'View and manage kitchen orders in real-time.',
+      badge: 'Live Order Tracking',
+      badgeIcon: <div className="h-3 w-3 rounded-full bg-rose-500 animate-pulse" />,
+      badgeBg: 'bg-white border border-rose-100 text-rose-600',
+      arrowBg: 'bg-rose-500',
+      roles: ['Admin', 'User'],
+    },
+    {
+      name: 'Customer Display',
+      href: '/customer',
+      icon: <Monitor className="h-6 w-6 text-white" />,
+      bgColor: 'bg-emerald-600',
+      bgLight: 'bg-emerald-50',
+      ghostIcon: <Monitor className="h-20 w-20 text-emerald-200" />,
+      description: 'Show live orders for your customers.',
+      badge: 'Real-time Updates',
+      badgeIcon: <Monitor className="h-3.5 w-3.5 text-emerald-500" />,
+      badgeBg: 'bg-white border border-emerald-100 text-emerald-600',
+      arrowBg: 'bg-emerald-600',
+      roles: ['Admin', 'User'],
+    },
+    {
+      name: 'Status Board',
+      href: '/status',
+      icon: <BarChart2 className="h-6 w-6 text-white" />,
+      bgColor: 'bg-amber-500',
+      bgLight: 'bg-amber-50',
+      ghostIcon: <BarChart2 className="h-20 w-20 text-amber-200" />,
+      description: 'Monitor orders, table status and overall operations.',
+      badge: 'Live Status',
+      badgeIcon: <BarChart2 className="h-3.5 w-3.5 text-amber-500" />,
+      badgeBg: 'bg-white border border-amber-100 text-amber-600',
+      arrowBg: 'bg-amber-500',
+      roles: ['Admin', 'User'],
+    },
+    {
+      name: 'Dining Management',
+      href: '/dining',
+      icon: <UtensilsCrossed className="h-6 w-6 text-white" />,
+      bgColor: 'bg-sky-600',
+      bgLight: 'bg-sky-50',
+      ghostIcon: <UtensilsCrossed className="h-20 w-20 text-sky-200" />,
+      description: 'Manage tables, reservations and dine-in orders.',
+      badge: 'Table Management',
+      badgeIcon: <UtensilsCrossed className="h-3.5 w-3.5 text-sky-500" />,
+      badgeBg: 'bg-white border border-sky-100 text-sky-600',
+      arrowBg: 'bg-sky-600',
+      roles: ['Admin', 'User'],
+    },
+    {
+      name: 'Items Management',
+      href: '/items',
+      icon: <Box className="h-6 w-6 text-white" />,
+      bgColor: 'bg-violet-600',
+      bgLight: 'bg-violet-50',
+      ghostIcon: <Box className="h-20 w-20 text-violet-200" />,
+      description: 'Add, edit and manage menu items and categories.',
+      badge: 'Menu Control',
+      badgeIcon: <Box className="h-3.5 w-3.5 text-violet-500" />,
+      badgeBg: 'bg-white border border-violet-100 text-violet-600',
+      arrowBg: 'bg-violet-600',
+      roles: ['Admin'],
+    },
+    {
+      name: 'Stock & Ingredients',
+      href: '/ingredients',
+      icon: <Leaf className="h-6 w-6 text-white" />,
+      bgColor: 'bg-emerald-600',
+      bgLight: 'bg-emerald-50',
+      ghostIcon: <Leaf className="h-20 w-20 text-emerald-200" />,
+      description: 'Track ingredients, manage stock and get low stock alerts.',
+      badge: 'Inventory Control',
+      badgeIcon: <Leaf className="h-3.5 w-3.5 text-emerald-500" />,
+      badgeBg: 'bg-white border border-emerald-100 text-emerald-600',
+      arrowBg: 'bg-emerald-600',
+      roles: ['Admin', 'User'],
+    },
+    {
+      name: 'Dish Estimations',
+      href: '/estimations',
+      icon: <Calculator className="h-6 w-6 text-white" />,
+      bgColor: 'bg-sky-600',
+      bgLight: 'bg-sky-50',
+      ghostIcon: <Calculator className="h-20 w-20 text-sky-200" />,
+      description: 'Calculate dish costs and manage profit margins.',
+      badge: 'Cost Estimation',
+      badgeIcon: <Calculator className="h-3.5 w-3.5 text-sky-500" />,
+      badgeBg: 'bg-white border border-sky-100 text-sky-600',
+      arrowBg: 'bg-sky-600',
+      roles: ['Admin', 'User'],
+    },
+    {
+      name: 'Sales Revenue',
+      href: '/reports/sales',
+      icon: <TrendingUp className="h-6 w-6 text-white" />,
+      bgColor: 'bg-yellow-500',
+      bgLight: 'bg-yellow-50',
+      ghostIcon: <TrendingUp className="h-20 w-20 text-yellow-200" />,
+      description: 'View sales reports, revenue and business insights.',
+      badge: 'Business Growth',
+      badgeIcon: <TrendingUp className="h-3.5 w-3.5 text-yellow-500" />,
+      badgeBg: 'bg-white border border-yellow-100 text-yellow-600',
+      arrowBg: 'bg-yellow-500',
+      roles: ['Admin'],
+    },
+    {
+      name: 'Ingredients Usage Report',
+      href: '/reports/ingredients',
+      icon: <PieChart className="h-6 w-6 text-white" />,
+      bgColor: 'bg-fuchsia-600',
+      bgLight: 'bg-fuchsia-50',
+      ghostIcon: <PieChart className="h-20 w-20 text-fuchsia-200" />,
+      description: 'View detailed ingredient usage and consumption reports.',
+      badge: 'Usage Reports',
+      badgeIcon: <PieChart className="h-3.5 w-3.5 text-fuchsia-500" />,
+      badgeBg: 'bg-white border border-fuchsia-100 text-fuchsia-600',
+      arrowBg: 'bg-fuchsia-600',
+      roles: ['Admin', 'User'],
+    },
   ];
 
   const allowedScreens = screens.filter(s => s.roles.includes(user?.role || ''));
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] flex flex-col p-4 md:p-8 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-indigo-50/50 via-white to-white">
+    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #eef0fb 0%, #f3f4fd 50%, #eef0fb 100%)' }}>
       {/* Top Navigation */}
-      <div className="max-w-6xl w-full mx-auto flex flex-col md:flex-row justify-between items-center mb-6 md:mb-8 gap-4">
-        <div className="flex items-center gap-4 bg-white p-2 pr-6 rounded-full shadow-sm border border-slate-100 w-full md:w-auto justify-between md:justify-start">
-          <div className="flex items-center gap-4">
-            <div className="w-10 h-10 bg-primary/10 rounded-full flex items-center justify-center">
-              <UserIcon className="h-5 w-5 text-primary" />
+      <nav className="w-full bg-white shadow-sm border-b border-slate-100">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+          {/* Logo */}
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
+              <Image
+                src="/logo-letter.webp"
+                alt="NextServe Logo"
+                width={40}
+                height={40}
+                className="w-full h-full object-cover"
+              />
             </div>
-            <div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Authenticated As</p>
-              <p className="text-sm font-bold text-slate-900">{user?.fullName || user?.username}</p>
+            <div className="flex flex-col justify-center">
+              <div className="text-[20px] font-black tracking-tight leading-tight">
+                <span className="text-slate-900">Next</span>
+                <span className="text-indigo-600">Serve</span>
+              </div>
+              <p className="text-[8.5px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-none mt-0.5">
+                Food Business Management Platform
+              </p>
             </div>
           </div>
-          <div className="flex items-center gap-1 px-2 py-1 bg-slate-50 text-[10px] font-black text-slate-500 rounded-lg uppercase tracking-wider">
-            {user?.role === 'Admin' && <ShieldCheck className="h-3 w-3 text-primary" />}
-            {user?.role}
+
+          {/* Right side */}
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-2xl px-4 py-2">
+              <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                <UserIcon className="h-4 w-4 text-indigo-600" />
+              </div>
+              <div>
+                <p className="text-sm font-bold text-slate-800 leading-none">{user?.fullName || user?.username}</p>
+                <p className="text-[10px] text-slate-400 leading-none mt-0.5">{user?.role === 'Admin' ? 'System Admin' : 'Staff'}</p>
+              </div>
+              <ChevronDown className="h-4 w-4 text-slate-400" />
+            </div>
+
+            <button
+              type="button"
+              onClick={logout}
+              className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-red-50 border-2 border-indigo-200 hover:border-red-200 text-slate-600 hover:text-red-500 font-semibold rounded-xl transition-all cursor-pointer active:scale-95 text-sm"
+            >
+              <LogOut className="h-4 w-4" />
+              <span>Log Out</span>
+            </button>
           </div>
         </div>
+      </nav>
 
-        <button
-          type='button'
-          onClick={logout}
-          className="flex items-center cursor-pointer justify-center gap-2 px-6 py-3 bg-white hover:bg-red-50 text-slate-400 hover:text-red-500 font-bold rounded-2xl transition-all border border-slate-100 shadow-sm active:scale-95 w-full md:w-auto"
+      {/* Hero Section */}
+      <div className="max-w-7xl mx-auto px-6 pt-8 pb-6">
+        <div
+          className="relative overflow-hidden rounded-3xl shadow-sm"
+          style={{
+            background: 'linear-gradient(135deg, #e8eaf6 0%, #ede9fe 40%, #e0e7ff 70%, #ddd6fe 100%)',
+            minHeight: '260px',
+          }}
         >
-          <LogOut className="h-4 w-4" />
-          <span className="text-xs uppercase tracking-widest">Log Out</span>
-        </button>
+          {/* Soft blob decorations */}
+          <div className="absolute inset-0 pointer-events-none overflow-hidden">
+            <div className="absolute -top-16 -left-16 w-72 h-72 rounded-full opacity-40"
+              style={{ background: 'radial-gradient(circle, #c7d2fe 0%, transparent 70%)' }} />
+            <div className="absolute bottom-0 left-1/4 w-56 h-56 rounded-full opacity-25"
+              style={{ background: 'radial-gradient(circle, #a5b4fc 0%, transparent 70%)' }} />
+            <div className="absolute -top-8 right-1/4 w-48 h-48 rounded-full opacity-20"
+              style={{ background: 'radial-gradient(circle, #818cf8 0%, transparent 70%)' }} />
+          </div>
+
+          <div className="relative z-10 grid grid-cols-[1fr_auto_auto] items-center gap-0 px-6 py-8 h-full">
+
+            {/* LEFT — text block */}
+            <div className="flex flex-col justify-center">
+              <p className="text-[11px] font-extrabold tracking-[0.25em] uppercase text-indigo-500 mb-3">
+                FOR RESTAURANTS · BAKERIES · CAFES
+              </p>
+              <h1 className="font-extrabold text-slate-900 leading-[1.1] mb-4" style={{ fontSize: 'clamp(2rem, 3.5vw, 2.8rem)' }}>
+                Food Business<br />
+                <span className="text-indigo-600">Management System</span>
+              </h1>
+              <div className="flex items-start gap-3">
+                <div className="w-[3px] self-stretch bg-indigo-600 rounded-full flex-shrink-0" style={{ minHeight: '40px' }} />
+                <p className="text-sm text-slate-500 leading-relaxed">
+                  Built for restaurants, bakeries &amp; cafes &mdash; manage<br />all operations with our all-in-one solution.
+                </p>
+              </div>
+            </div>
+
+            {/* CENTER — food image with circular glow */}
+            <div className="relative flex items-center justify-center mx-4" style={{ width: '320px', height: '240px' }}>
+              {/* Big circular glow */}
+              <div
+                className="absolute"
+                style={{
+                  width: '280px',
+                  height: '280px',
+                  borderRadius: '50%',
+                  background: 'radial-gradient(circle, rgba(199,210,254,0.9) 0%, rgba(199,210,254,0.4) 50%, transparent 75%)',
+                  top: '50%',
+                  left: '50%',
+                  transform: 'translate(-50%, -50%)',
+                }}
+              />
+              <Image
+                src="/hero-food.png"
+                alt="Restaurant food"
+                width={300}
+                height={220}
+                className="object-contain relative z-10 drop-shadow-2xl"
+                style={{ maxHeight: '230px', width: 'auto' }}
+              />
+            </div>
+
+            {/* RIGHT — cursive script text */}
+            <div className="flex-shrink-0 pl-4 hidden lg:flex flex-col items-start justify-center" style={{ fontFamily: 'var(--font-caveat), cursive' }}>
+              <p className="text-slate-500 leading-tight" style={{ fontSize: '2rem', lineHeight: '1.3' }}>
+                Good<br />
+                Food<br />
+                <span className="text-slate-600">Better</span><br />
+                <span className="text-slate-700">Business</span>
+              </p>
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="max-w-6xl w-full mx-auto flex-1 flex flex-col justify-center">
-        <div className="text-center mb-8 md:mb-12">
-          <h1 className="text-5xl md:text-6xl font-black text-slate-900 mb-2 tracking-tight italic">
-            <span className="text-indigo-600">Next</span>Serve
-          </h1>
-          <p className="text-base md:text-lg text-slate-500 font-medium tracking-tight">Next-Gen Restaurant Management System</p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+      {/* Module Grid */}
+      <div className="max-w-7xl mx-auto px-6 pb-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {allowedScreens.map((screen) => (
             <Link
               key={screen.href}
               href={screen.href}
-              className={`group relative overflow-hidden glass-card rounded-3xl md:rounded-3xl p-6 md:p-7 hover:scale-[1.02] transition-all hover:shadow-2xl hover:shadow-indigo-200/40 border border-white`}
+              className={`group relative overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-100/60 hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col justify-between`}
             >
-              <div className={`absolute top-0 right-0 w-24 h-24 ${screen.color} opacity-[0.03] rounded-bl-full translate-x-8 -translate-y-8 group-hover:scale-150 transition-transform duration-700`} />
-
-              <div className="flex flex-col gap-4 relative z-10">
-                <div className={`w-12 h-12 ${screen.color} rounded-xl flex items-center justify-center shadow-lg shadow-slate-200/50`}>
-                  {screen.icon}
-                </div>
-                <div>
-                  <h2 className="text-xl font-black text-slate-900 italic uppercase tracking-tight">{screen.name}</h2>
-                </div>
+              {/* Ghost icon background */}
+              <div className="absolute top-2 right-3 opacity-100 transition-opacity duration-300">
+                {screen.ghostIcon}
               </div>
 
-              <div className="mt-6 flex items-center text-indigo-600 font-black text-[10px] uppercase tracking-[0.2em] gap-2 opacity-0 group-hover:opacity-100 -translate-x-4 group-hover:translate-x-0 transition-all">
-                <span>Go to {screen.name}</span>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clipRule="evenodd" />
-                </svg>
+              <div className="relative z-10">
+                {/* Icon */}
+                <div className={`w-12 h-12 ${screen.bgColor} rounded-xl flex items-center justify-center shadow-lg mb-5`}>
+                  {screen.icon}
+                </div>
+
+                {/* Name & Description */}
+                <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-1.5">{screen.name}</h2>
+                <p className="text-xs text-slate-500 leading-relaxed mb-5">{screen.description}</p>
+
+                {/* Badge + Arrow row */}
+                <div className="flex items-center justify-between">
+                  <div className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg ${screen.badgeBg}`}>
+                    {screen.badgeIcon}
+                    <span>{screen.badge}</span>
+                  </div>
+                  <div className={`w-9 h-9 ${screen.arrowBg} rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300`}>
+                    <ArrowRight className="h-4 w-4 text-white" />
+                  </div>
+                </div>
               </div>
             </Link>
           ))}
         </div>
-
-        <div className="mt-16 md:mt-24 text-center text-slate-400 font-bold uppercase tracking-[0.3em] border-t border-slate-100 pt-10 text-[10px]">
-          <p>© Copyright 2026 TrivexTech Pvt Ltd || All Rights Reserved</p>
-        </div>
       </div>
+
+      {/* Footer */}
+      <footer className="border-t border-slate-200 bg-white">
+        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+          <p className="text-xs text-slate-400 font-medium">© 2026 TrivexTech Pvt Ltd. All rights reserved.</p>
+          <div className="flex items-center gap-4">
+            <p className="text-xs text-slate-400 font-medium">NextServe &nbsp;v1.0.0</p>
+            <div className="flex items-center gap-1.5">
+              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
+              <span className="text-xs text-emerald-600 font-semibold">System Online</span>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

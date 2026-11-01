@@ -59,6 +59,7 @@ import { getOrders, getMenu } from "@/lib/db";
 import { Order, MenuItem, OrderItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import AppLayout from "@/components/AppLayout";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -501,16 +502,14 @@ export default function SalesReportPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-10">
+        <AppLayout>
+        <div className="bg-transparent p-6 md:p-10">
             <div className="max-w-7xl mx-auto space-y-8">
 
                 {/* Header */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
                     <div className="space-y-1">
-                        <Link href="/" className="inline-flex items-center text-slate-400 hover:text-primary transition-colors text-sm font-bold gap-1 mb-2">
-                            <ArrowLeft className="h-4 w-4" />
-                            DASHBOARD
-                        </Link>
+
                         <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3 italic uppercase">
                             <TrendingUp className="text-primary h-10 w-10 not-italic" />
                             SALES & ITEM REVENUE
@@ -1310,5 +1309,6 @@ export default function SalesReportPage() {
                 </div>
             )}
         </div>
+        </AppLayout>
     );
 }
