@@ -1,5 +1,4 @@
-
-const API_BASE_URL = "http://localhost:5071/api";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
 async function parseErrorMessage(res: Response): Promise<string> {
   const text = await res.text().catch(() => "");
@@ -11,7 +10,11 @@ async function parseErrorMessage(res: Response): Promise<string> {
     if (json.title) return json.title;
     if (json.errors) {
       const firstKey = Object.keys(json.errors)[0];
-      if (firstKey && Array.isArray(json.errors[firstKey]) && json.errors[firstKey].length > 0) {
+      if (
+        firstKey &&
+        Array.isArray(json.errors[firstKey]) &&
+        json.errors[firstKey].length > 0
+      ) {
         return json.errors[firstKey][0];
       }
     }
