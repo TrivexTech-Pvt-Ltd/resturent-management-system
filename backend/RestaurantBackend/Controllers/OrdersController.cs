@@ -1,8 +1,10 @@
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RestaurantBackend.Data;
 using RestaurantBackend.Models;
 using RestaurantBackend.Models.Dto;
+
 
 namespace RestaurantBackend.Controllers
 {
@@ -22,6 +24,211 @@ namespace RestaurantBackend.Controllers
         {
             return await _context.Orders.Include(o => o.Items).OrderBy(x => x.OrderNumber).ThenBy(x => x.CreatedAt).ToListAsync();
         }
+
+        [HttpGet("paged")]
+        public async Task<ActionResult<PagedOrdersResult>> GetOrdersPaged(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? startDate = null,
+            [FromQuery] string? endDate = null,
+            [FromQuery] string? paymentMethod = null)
+        {
+            var query = _context.Orders.Include(o => o.Items).AsQueryable();
+
+            if (!string.IsNullOrEmpty(startDate) && DateTime.TryParse(startDate, out var start))
+                query = query.Where(o => o.CreatedAt >= start.ToUniversalTime());
+
+            if (!string.IsNullOrEmpty(endDate) && DateTime.TryParse(endDate, out var end))
+                query = query.Where(o => o.CreatedAt <= end.ToUniversalTime());
+
+            if (!string.IsNullOrEmpty(paymentMethod) && paymentMethod != "ALL"
+                && Enum.TryParse<PaymentMethod>(paymentMethod, true, out var parsedMethod))
+                query = query.Where(o => o.PaymentMethod == parsedMethod);
+
+            var totalCount = await query.CountAsync();
+
+            var data = await query
+                .OrderByDescending(o => o.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return Ok(new PagedOrdersResult
+            {
+                Data = data,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling((double)totalCount / pageSize)
+            });
+        }
+
+        private static readonly Regex ItemParenRegex = new(@"^(.*?)\s*\((S|M|L|XL|Small|Medium|Large|Extra Large|[A-Za-z0-9\s]+)\)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+        private static readonly Regex ItemSpaceRegex = new(@"^(.*?)\s+(S|M|L|XL|Small|Medium|Large|Extra Large)$", RegexOptions.IgnoreCase | RegexOptions.Compiled);
+
+        private static (string baseName, string portionSize, string category, string fullName) ParseItemDetails(
+            string? rawName, string? rawCategory, List<MenuItem> menuList)
+        {
+            string name = (rawName ?? string.Empty).Trim();
+            string baseName = name;
+            string portionSize = "STANDARD";
+
+            var parenMatch = ItemParenRegex.Match(name);
+            if (parenMatch.Success)
+            {
+                baseName = parenMatch.Groups[1].Value.Trim();
+                portionSize = parenMatch.Groups[2].Value.Trim().ToUpperInvariant();
+            }
+            else
+            {
+                var spaceMatch = ItemSpaceRegex.Match(name);
+                if (spaceMatch.Success)
+                {
+                    baseName = spaceMatch.Groups[1].Value.Trim();
+                    portionSize = spaceMatch.Groups[2].Value.Trim().ToUpperInvariant();
+                }
+            }
+
+            if (portionSize == "SMALL") portionSize = "S";
+            else if (portionSize == "MEDIUM") portionSize = "M";
+            else if (portionSize == "LARGE") portionSize = "L";
+            else if (portionSize == "EXTRA LARGE") portionSize = "XL";
+
+            string category = rawCategory ?? string.Empty;
+            if (string.IsNullOrWhiteSpace(category) && menuList.Count > 0)
+            {
+                var found = menuList.FirstOrDefault(m =>
+                    m.Name.Equals(baseName, StringComparison.OrdinalIgnoreCase) ||
+                    m.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                if (found != null && !string.IsNullOrWhiteSpace(found.Category))
+                {
+                    category = found.Category;
+                }
+            }
+
+            if (string.IsNullOrWhiteSpace(category)) category = "General";
+
+            return (baseName, portionSize, category, name);
+        }
+
+        [HttpGet("item-sales-paged")]
+        public async Task<ActionResult<PagedItemSalesResult>> GetItemSalesPaged(
+            [FromQuery] int page = 1,
+            [FromQuery] int pageSize = 10,
+            [FromQuery] string? startDate = null,
+            [FromQuery] string? endDate = null,
+            [FromQuery] string? paymentMethod = null,
+            [FromQuery] string? category = null,
+            [FromQuery] string? itemName = null,
+            [FromQuery] string? portionSize = null,
+            [FromQuery] string? search = null,
+            [FromQuery] string? sortBy = "revenue_desc")
+        {
+            var query = _context.Orders.AsNoTracking().Include(o => o.Items).AsQueryable();
+
+            if (!string.IsNullOrEmpty(startDate) && DateTime.TryParse(startDate, out var start))
+                query = query.Where(o => o.CreatedAt >= start.ToUniversalTime());
+
+            if (!string.IsNullOrEmpty(endDate) && DateTime.TryParse(endDate, out var end))
+                query = query.Where(o => o.CreatedAt <= end.ToUniversalTime());
+
+            if (!string.IsNullOrEmpty(paymentMethod) && paymentMethod != "ALL"
+                && Enum.TryParse<PaymentMethod>(paymentMethod, true, out var parsedMethod))
+                query = query.Where(o => o.PaymentMethod == parsedMethod);
+
+            var orders = await query.ToListAsync();
+            var menuList = await _context.MenuItems.AsNoTracking().ToListAsync();
+
+            var aggregated = new Dictionary<string, ItemSalesDto>();
+
+            foreach (var order in orders)
+            {
+                if (order.Items == null) continue;
+                foreach (var item in order.Items)
+                {
+                    var (bName, pSize, cat, fName) = ParseItemDetails(item.Name, item.Category, menuList);
+                    var key = $"{bName}___{pSize}";
+
+                    if (!aggregated.TryGetValue(key, out var dto))
+                    {
+                        dto = new ItemSalesDto
+                        {
+                            Id = key,
+                            FullName = fName,
+                            BaseName = bName,
+                            PortionSize = pSize,
+                            Category = cat,
+                            TotalQuantity = 0,
+                            TotalRevenue = 0,
+                            UnitPrice = item.Price,
+                            OrderCount = 0
+                        };
+                        aggregated[key] = dto;
+                    }
+
+                    int qty = item.Quantity > 0 ? item.Quantity : 1;
+                    dto.TotalQuantity += qty;
+                    dto.TotalRevenue += item.Price * qty;
+                    dto.OrderCount += 1;
+                }
+            }
+
+            var items = aggregated.Values.AsEnumerable();
+
+            if (!string.IsNullOrEmpty(category) && category != "ALL")
+            {
+                items = items.Where(i => i.Category.Equals(category, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrEmpty(itemName) && itemName != "ALL")
+            {
+                items = items.Where(i => i.BaseName.Equals(itemName, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrEmpty(portionSize) && portionSize != "ALL")
+            {
+                items = items.Where(i => i.PortionSize.Equals(portionSize, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var q = search.Trim();
+                items = items.Where(i =>
+                    i.BaseName.Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                    i.FullName.Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                    i.Category.Contains(q, StringComparison.OrdinalIgnoreCase) ||
+                    i.PortionSize.Contains(q, StringComparison.OrdinalIgnoreCase));
+            }
+
+            var filteredList = items.ToList();
+            var totalCount = filteredList.Count;
+            var totalRevenue = filteredList.Sum(i => i.TotalRevenue);
+            var totalQuantity = filteredList.Sum(i => i.TotalQuantity);
+
+            IEnumerable<ItemSalesDto> sorted = sortBy switch
+            {
+                "qty_desc" => filteredList.OrderByDescending(i => i.TotalQuantity),
+                "name_asc" => filteredList.OrderBy(i => i.BaseName, StringComparer.OrdinalIgnoreCase),
+                _ => filteredList.OrderByDescending(i => i.TotalRevenue)
+            };
+
+            var pagedData = sorted
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            return Ok(new PagedItemSalesResult
+            {
+                Data = pagedData,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize,
+                TotalPages = (int)Math.Ceiling((double)totalCount / pageSize),
+                TotalRevenue = totalRevenue,
+                TotalQuantity = totalQuantity
+            });
+        }
+
 
         [HttpPost]
         public async Task<IActionResult> CreateOrder([FromBody] Order order)
