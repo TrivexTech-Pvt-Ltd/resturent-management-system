@@ -413,6 +413,84 @@ export default function EstimationsPage() {
   // RENDER
   // ─────────────────────────────────────────────────────────────────────────
 
+  // Full-page skeleton loader
+  if ((isLoadingMenu || isLoadingEstimations || isLoadingMasterIng) && (!menuList.length || !masterIngredients.length)) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] p-4 sm:p-6 md:p-10">
+        <div className="max-w-7xl mx-auto space-y-8 animate-pulse">
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-3">
+              <div className="h-4 w-28 bg-slate-200 rounded-full" />
+              <div className="h-10 w-80 bg-slate-200 rounded-2xl" />
+              <div className="h-4 w-64 bg-slate-100 rounded-full" />
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="h-12 w-44 bg-slate-200 rounded-2xl" />
+              <div className="h-12 w-36 bg-slate-200 rounded-2xl" />
+            </div>
+          </div>
+
+          {/* KPI Summary Cards */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            {[...Array(4)].map((_, i) => (
+              <div key={i} className="glass-card p-5 rounded-3xl border border-white space-y-3">
+                <div className="h-10 w-10 bg-slate-200 rounded-xl" />
+                <div className="h-3 w-20 bg-slate-200 rounded-full" />
+                <div className="h-7 w-28 bg-slate-300 rounded-xl" />
+              </div>
+            ))}
+          </div>
+
+          {/* Dish selection card skeleton */}
+          <div className="glass-card p-6 sm:p-8 rounded-[2.5rem] border border-white space-y-6">
+            <div className="h-6 w-56 bg-slate-200 rounded-xl" />
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+              {[...Array(3)].map((_, i) => (
+                <div key={i} className="space-y-2">
+                  <div className="h-3 w-24 bg-slate-200 rounded-full" />
+                  <div className="h-12 w-full bg-slate-100 rounded-2xl" />
+                </div>
+              ))}
+            </div>
+
+            {/* Recipe table skeleton */}
+            <div className="glass-card p-6 rounded-3xl border border-slate-100 space-y-4">
+              <div className="h-5 w-44 bg-slate-200 rounded-xl" />
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex gap-4 items-center">
+                  <div className="h-11 flex-1 bg-slate-100 rounded-xl" />
+                  <div className="h-11 w-28 bg-slate-100 rounded-xl" />
+                  <div className="h-11 w-24 bg-slate-100 rounded-xl" />
+                  <div className="h-11 w-28 bg-slate-100 rounded-xl" />
+                  <div className="h-11 w-11 bg-slate-200 rounded-xl" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Saved History Skeleton */}
+          <div className="glass-card rounded-[2.5rem] overflow-hidden border border-white">
+            <div className="p-8 border-b border-slate-50 flex justify-between items-center">
+              <div className="h-6 w-52 bg-slate-200 rounded-xl" />
+              <div className="h-6 w-24 bg-slate-100 rounded-full" />
+            </div>
+            <div className="p-6 space-y-3">
+              {[...Array(4)].map((_, i) => (
+                <div key={i} className="flex gap-4 items-center py-3 border-b border-slate-50">
+                  <div className="h-5 w-36 bg-slate-100 rounded-lg" />
+                  <div className="h-5 flex-1 bg-slate-100 rounded-lg" />
+                  <div className="h-5 w-24 bg-slate-100 rounded-lg" />
+                  <div className="h-5 w-20 bg-slate-100 rounded-lg" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#F8FAFC] p-4 sm:p-6 md:p-10">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -504,8 +582,8 @@ export default function EstimationsPage() {
                     <label className="block text-xs font-black text-slate-400 uppercase tracking-wider">Category *</label>
                     <div className="relative">
                       {isLoadingMenu ? (
-                        <div className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl flex items-center gap-2 text-slate-400 text-sm">
-                          <Loader2 className="h-4 w-4 animate-spin" /> Loading...
+                        <div className="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl animate-pulse">
+                          <div className="h-5 w-32 bg-slate-200 rounded-lg" />
                         </div>
                       ) : (
                         <select
@@ -899,9 +977,31 @@ export default function EstimationsPage() {
 
             {/* List */}
             {isLoadingEstimations ? (
-              <div className="glass-card p-16 rounded-[2.5rem] border border-white flex flex-col items-center gap-4">
-                <Loader2 className="h-10 w-10 text-indigo-500 animate-spin" />
-                <span className="text-slate-400 font-bold uppercase tracking-widest text-sm">Loading from database…</span>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-pulse">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="glass-card p-6 rounded-[2rem] border border-white space-y-4">
+                    <div className="flex items-start justify-between">
+                      <div className="space-y-2">
+                        <div className="h-5 w-20 bg-slate-200 rounded-full" />
+                        <div className="h-6 w-36 bg-slate-200 rounded-xl" />
+                      </div>
+                      <div className="h-6 w-12 bg-slate-100 rounded-lg" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 p-3 bg-slate-50 rounded-xl">
+                      {[...Array(4)].map((__, j) => (
+                        <div key={j} className="space-y-1">
+                          <div className="h-2.5 w-12 bg-slate-200 rounded" />
+                          <div className="h-4 w-16 bg-slate-200 rounded" />
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex gap-2 pt-2">
+                      <div className="h-9 flex-1 bg-slate-100 rounded-xl" />
+                      <div className="h-9 w-9 bg-slate-100 rounded-xl" />
+                      <div className="h-9 w-9 bg-slate-100 rounded-xl" />
+                    </div>
+                  </div>
+                ))}
               </div>
             ) : filteredHistory.length === 0 ? (
               <div className="glass-card p-16 rounded-[2.5rem] border border-white text-center space-y-4">

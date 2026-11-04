@@ -287,9 +287,13 @@ export default function IngredientsPage() {
         {/* Metric Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
-            <div>
+            <div className="space-y-1">
               <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Total Stock Items</p>
-              <h3 className="text-3xl font-black text-slate-900 mt-1">{stats.totalItems}</h3>
+              {isLoading ? (
+                <div className="h-9 w-20 bg-slate-200 rounded-xl animate-pulse mt-1" />
+              ) : (
+                <h3 className="text-3xl font-black text-slate-900 mt-1">{stats.totalItems}</h3>
+              )}
             </div>
             <div className="w-12 h-12 bg-indigo-50 text-indigo-600 rounded-2xl flex items-center justify-center font-bold">
               <Boxes className="h-6 w-6" />
@@ -297,9 +301,13 @@ export default function IngredientsPage() {
           </div>
 
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
-            <div>
+            <div className="space-y-1">
               <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Low Stock Warnings</p>
-              <h3 className="text-3xl font-black text-amber-600 mt-1">{stats.lowStockCount}</h3>
+              {isLoading ? (
+                <div className="h-9 w-16 bg-slate-200 rounded-xl animate-pulse mt-1" />
+              ) : (
+                <h3 className="text-3xl font-black text-amber-600 mt-1">{stats.lowStockCount}</h3>
+              )}
             </div>
             <div className="w-12 h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center font-bold">
               <AlertTriangle className="h-6 w-6" />
@@ -307,9 +315,13 @@ export default function IngredientsPage() {
           </div>
 
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
-            <div>
+            <div className="space-y-1">
               <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Out of Stock</p>
-              <h3 className="text-3xl font-black text-red-600 mt-1">{stats.outOfStockCount}</h3>
+              {isLoading ? (
+                <div className="h-9 w-16 bg-slate-200 rounded-xl animate-pulse mt-1" />
+              ) : (
+                <h3 className="text-3xl font-black text-red-600 mt-1">{stats.outOfStockCount}</h3>
+              )}
             </div>
             <div className="w-12 h-12 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center font-bold">
               <XCircle className="h-6 w-6" />
@@ -317,11 +329,15 @@ export default function IngredientsPage() {
           </div>
 
           <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center justify-between">
-            <div>
+            <div className="space-y-1">
               <p className="text-xs font-black text-slate-400 uppercase tracking-wider">Total Stock Value</p>
-              <h3 className="text-3xl font-black text-emerald-700 mt-1">
-                LKR {stats.totalValuation.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-              </h3>
+              {isLoading ? (
+                <div className="h-9 w-32 bg-slate-200 rounded-xl animate-pulse mt-1" />
+              ) : (
+                <h3 className="text-3xl font-black text-emerald-700 mt-1">
+                  LKR {stats.totalValuation.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                </h3>
+              )}
             </div>
             <div className="w-12 h-12 bg-emerald-50 text-emerald-600 rounded-2xl flex items-center justify-center font-bold">
               <DollarSign className="h-6 w-6" />
@@ -401,9 +417,37 @@ export default function IngredientsPage() {
         {/* Ingredients Table */}
         <div className="bg-white rounded-3xl border border-slate-100 shadow-sm overflow-hidden">
           {isLoading ? (
-            <div className="p-16 text-center text-slate-400 space-y-3">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto text-emerald-600" />
-              <p className="font-bold text-sm">Loading stock inventory...</p>
+            <div className="overflow-x-auto animate-pulse">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-100">
+                    {[...Array(7)].map((_, i) => (
+                      <th key={i} className="py-4 px-6">
+                        <div className="h-3 bg-slate-200 rounded-full" style={{ width: i === 0 ? '120px' : i === 6 ? '80px' : '90px' }} />
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {[...Array(6)].map((_, i) => (
+                    <tr key={i} className="border-b border-slate-50">
+                      <td className="py-4 px-6"><div className="h-4 w-36 bg-slate-100 rounded-lg" /></td>
+                      <td className="py-4 px-6"><div className="h-6 w-24 bg-slate-100 rounded-full" /></td>
+                      <td className="py-4 px-6"><div className="h-4 w-20 bg-slate-100 rounded-lg" /></td>
+                      <td className="py-4 px-6"><div className="h-4 w-16 bg-slate-100 rounded-lg" /></td>
+                      <td className="py-4 px-6"><div className="h-4 w-20 bg-slate-100 rounded-lg" /></td>
+                      <td className="py-4 px-6"><div className="h-6 w-16 bg-slate-100 rounded-full" /></td>
+                      <td className="py-4 px-6">
+                        <div className="flex gap-2">
+                          <div className="w-8 h-8 bg-slate-200 rounded-lg" />
+                          <div className="w-8 h-8 bg-slate-200 rounded-lg" />
+                          <div className="w-8 h-8 bg-slate-200 rounded-lg" />
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           ) : filteredIngredients.length === 0 ? (
             <div className="p-16 text-center text-slate-400 space-y-3">

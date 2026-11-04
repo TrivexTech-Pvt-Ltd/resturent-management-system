@@ -20,7 +20,42 @@ import {
 export default function Home() {
   const { user, logout, isLoading } = useAuth();
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#F8FAFC] flex flex-col p-4 md:p-8 animate-pulse">
+        <div className="max-w-6xl w-full mx-auto">
+          {/* Nav bar skeleton */}
+          <div className="flex justify-between items-center mb-8 gap-4">
+            <div className="flex items-center gap-4 bg-white p-2 pr-6 rounded-full shadow-sm border border-slate-100">
+              <div className="w-10 h-10 bg-slate-200 rounded-full" />
+              <div className="space-y-1">
+                <div className="h-2.5 w-20 bg-slate-200 rounded-full" />
+                <div className="h-4 w-32 bg-slate-200 rounded-full" />
+              </div>
+              <div className="h-6 w-16 bg-slate-100 rounded-lg ml-2" />
+            </div>
+            <div className="h-11 w-28 bg-slate-200 rounded-2xl" />
+          </div>
+
+          {/* Title skeleton */}
+          <div className="text-center mb-10 space-y-3">
+            <div className="h-14 w-56 bg-slate-200 rounded-2xl mx-auto" />
+            <div className="h-5 w-72 bg-slate-100 rounded-full mx-auto" />
+          </div>
+
+          {/* Cards grid skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className="glass-card rounded-3xl p-6 md:p-7 border border-white space-y-4">
+                <div className="w-12 h-12 bg-slate-200 rounded-xl" />
+                <div className="h-6 w-40 bg-slate-200 rounded-xl" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const screens = [
     { name: 'Cashier / Billing', href: '/cashier', icon: <CreditCard className="h-6 w-6 text-white" />, color: 'bg-indigo-600', roles: ['Admin', 'User'] },

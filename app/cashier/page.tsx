@@ -124,6 +124,61 @@ export default function CashierPage() {
         }
     };
 
+    if (isLoading) {
+        return (
+            <div className="flex flex-col h-screen overflow-hidden animate-pulse">
+                {/* Header skeleton */}
+                <header className="px-4 md:px-8 py-3 md:py-4 glass-card border-b flex justify-between items-center z-10">
+                    <div className="flex items-center gap-4">
+                        <div className="w-9 h-9 bg-slate-200 rounded-full" />
+                        <div className="h-7 w-32 bg-slate-200 rounded-xl" />
+                    </div>
+                    <div className="h-6 w-28 bg-slate-100 rounded-full" />
+                </header>
+
+                <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+                    {/* Menu section skeleton */}
+                    <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-slate-50/50">
+                        <div className="max-w-7xl mx-auto space-y-6">
+                            {/* Search + toggles skeleton */}
+                            <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                                <div className="h-12 w-full md:w-96 bg-slate-200 rounded-2xl" />
+                                <div className="h-12 w-24 bg-slate-200 rounded-2xl" />
+                            </div>
+                            {/* Category pills skeleton */}
+                            <div className="flex flex-wrap gap-2">
+                                {[...Array(6)].map((_, i) => (
+                                    <div key={i} className="h-10 bg-slate-200 rounded-2xl" style={{ width: `${60 + i * 15}px` }} />
+                                ))}
+                            </div>
+                            {/* Menu cards skeleton */}
+                            <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
+                                {[...Array(8)].map((_, i) => (
+                                    <div key={i} className="glass-card p-4 rounded-2xl h-20 bg-slate-200 rounded-2xl" />
+                                ))}
+                            </div>
+                        </div>
+                    </main>
+
+                    {/* Sidebar skeleton */}
+                    <aside className="w-full lg:w-[420px] xl:w-[480px] h-[45vh] lg:h-auto glass-card border-t lg:border-t-0 lg:border-l flex flex-col p-4 md:p-6 bg-white">
+                        <div className="h-7 w-36 bg-slate-200 rounded-xl mb-6" />
+                        <div className="flex-1 space-y-3">
+                            {[...Array(3)].map((_, i) => (
+                                <div key={i} className="h-16 bg-slate-100 rounded-2xl" />
+                            ))}
+                        </div>
+                        <div className="pt-4 border-t space-y-4 mt-4">
+                            <div className="h-5 w-full bg-slate-100 rounded-lg" />
+                            <div className="h-7 w-full bg-slate-200 rounded-lg" />
+                            <div className="h-14 w-full bg-slate-200 rounded-xl" />
+                        </div>
+                    </aside>
+                </div>
+            </div>
+        );
+    }
+
     return (
         <div className="flex flex-col h-screen overflow-hidden">
             {/* Header */}
@@ -187,7 +242,12 @@ export default function CashierPage() {
 
                             {/* Categories - Horizontal Scroll */}
                             <div className="flex flex-wrap gap-2 pb-2">
-                                {categories.map(category => (
+                                {isLoading ? (
+                                    [...Array(6)].map((_, i) => (
+                                        <div key={i} className="h-10 bg-slate-200 rounded-2xl animate-pulse" style={{ width: `${80 + (i % 3) * 20}px` }} />
+                                    ))
+                                ) : (
+                                categories.map(category => (
                                     <button
                                         key={category}
                                         onClick={() => setSelectedCategory(category)}
@@ -198,7 +258,8 @@ export default function CashierPage() {
                                     >
                                         {category}
                                     </button>
-                                ))}
+                                ))
+                                )}
                             </div>
                         </div>
 
@@ -220,7 +281,19 @@ export default function CashierPage() {
                             <div className={`grid grid-cols-1 ${cols === 2 ? 'xl:grid-cols-2' : 'xl:grid-cols-1'} gap-3`}>
                                 {isLoading ? (
                                     [...Array(8)].map((_, i) => (
-                                        <div key={i} className="glass-card p-4 rounded-2xl h-16 animate-pulse bg-slate-200" />
+                                        <div key={i} className="glass-card p-4 rounded-2xl border border-slate-100 flex items-center justify-between gap-4 animate-pulse">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-12 h-12 bg-slate-200 rounded-xl shrink-0" />
+                                                <div className="space-y-2">
+                                                    <div className="h-4 w-32 bg-slate-200 rounded-lg" />
+                                                    <div className="h-3 w-20 bg-slate-100 rounded-lg" />
+                                                </div>
+                                            </div>
+                                            <div className="flex gap-2">
+                                                <div className="h-8 w-14 bg-slate-100 rounded-xl" />
+                                                <div className="h-8 w-14 bg-slate-100 rounded-xl" />
+                                            </div>
+                                        </div>
                                     ))
                                 ) : (
                                     filteredMenu.map(item => (
