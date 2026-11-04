@@ -237,14 +237,30 @@ export default function ItemsPage() {
                             </thead>
                             <tbody>
                                 {isLoading ? (
-                                    <tr>
-                                        <td colSpan={5} className="p-20 text-center">
-                                            <div className="flex flex-col items-center gap-4">
-                                                <Loader2 className="h-10 w-10 text-primary animate-spin" />
-                                                <span className="text-slate-400 font-bold uppercase tracking-widest text-sm">Loading Menu Library...</span>
-                                            </div>
-                                        </td>
-                                    </tr>
+                                    <>
+                                        {[...Array(5)].map((_, i) => (
+                                            <tr key={i} className="animate-pulse border-b border-slate-50">
+                                                <td className="p-6">
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="w-14 h-14 bg-slate-200 rounded-2xl" />
+                                                        <div className="space-y-2">
+                                                            <div className="h-4 w-32 bg-slate-200 rounded-lg" />
+                                                            <div className="h-3 w-20 bg-slate-100 rounded-lg" />
+                                                        </div>
+                                                    </div>
+                                                </td>
+                                                <td className="p-6"><div className="h-6 w-20 bg-slate-100 rounded-full" /></td>
+                                                <td className="p-6"><div className="h-5 w-16 bg-slate-100 rounded-md" /></td>
+                                                <td className="p-6"><div className="h-5 w-16 bg-slate-100 rounded-md" /></td>
+                                                <td className="p-6 text-right">
+                                                    <div className="flex justify-end gap-3">
+                                                        <div className="w-10 h-10 bg-slate-200 rounded-xl" />
+                                                        <div className="w-10 h-10 bg-slate-200 rounded-xl" />
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </>
                                 ) : filteredItems.length === 0 ? (
                                     <tr>
                                         <td colSpan={5} className="p-20 text-center">

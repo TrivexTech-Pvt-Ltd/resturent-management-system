@@ -551,6 +551,93 @@ export default function SalesReportPage() {
         setSelectedOrder(null);
     };
 
+
+    // Full-page skeleton loader
+    if (isLoadingOrders) {
+        return (
+            <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-10">
+                <div className="max-w-7xl mx-auto space-y-8 animate-pulse">
+
+                    {/* Header skeleton */}
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                        <div className="space-y-3">
+                            <div className="h-4 w-28 bg-slate-200 rounded-full" />
+                            <div className="h-10 w-80 bg-slate-200 rounded-2xl" />
+                            <div className="h-3 w-56 bg-slate-100 rounded-full" />
+                        </div>
+                        <div className="h-12 w-44 bg-slate-200 rounded-2xl" />
+                    </div>
+
+                    {/* Controls bar skeleton */}
+                    <div className="glass-card p-6 rounded-[2.5rem] flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between border border-white">
+                        <div className="h-10 w-64 bg-slate-200 rounded-2xl" />
+                        <div className="flex gap-2">
+                            {[...Array(4)].map((_, i) => (
+                                <div key={i} className="h-10 w-20 bg-slate-200 rounded-xl" />
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* KPI cards skeleton */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className="glass-card p-6 rounded-4xl border border-white shadow-sm space-y-4">
+                                <div className="flex justify-between items-start">
+                                    <div className="h-14 w-14 bg-slate-200 rounded-2xl" />
+                                </div>
+                                <div className="space-y-2">
+                                    <div className="h-3 w-24 bg-slate-200 rounded-full" />
+                                    <div className="h-8 w-32 bg-slate-300 rounded-xl" />
+                                    <div className="h-3 w-20 bg-slate-100 rounded-full" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Chart area skeleton */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-2 glass-card p-8 rounded-[2.5rem] border border-white">
+                            <div className="h-6 w-56 bg-slate-200 rounded-xl mb-6" />
+                            <div className="h-[300px] bg-slate-100 rounded-2xl" />
+                        </div>
+                        <div className="glass-card p-8 rounded-[2.5rem] border border-white space-y-4">
+                            <div className="h-6 w-36 bg-slate-200 rounded-xl mb-2" />
+                            {[...Array(4)].map((_, i) => (
+                                <div key={i} className="space-y-1.5">
+                                    <div className="flex justify-between">
+                                        <div className="h-4 w-20 bg-slate-200 rounded-lg" />
+                                        <div className="h-4 w-24 bg-slate-200 rounded-lg" />
+                                    </div>
+                                    <div className="h-3 w-full bg-slate-100 rounded-full" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Table skeleton */}
+                    <div className="glass-card rounded-[2.5rem] overflow-hidden border border-white shadow-sm">
+                        <div className="p-8 border-b border-slate-50 flex justify-between items-center">
+                            <div className="h-6 w-56 bg-slate-200 rounded-xl" />
+                            <div className="h-6 w-28 bg-slate-100 rounded-full" />
+                        </div>
+                        <div className="p-6 space-y-3">
+                            {[...Array(7)].map((_, i) => (
+                                <div key={i} className="flex gap-4 items-center py-2">
+                                    <div className="h-5 w-6 bg-slate-100 rounded" />
+                                    <div className="h-5 flex-1 bg-slate-100 rounded-lg" />
+                                    <div className="h-5 w-24 bg-slate-100 rounded-lg" />
+                                    <div className="h-5 w-16 bg-slate-100 rounded-lg" />
+                                    <div className="h-5 w-16 bg-slate-100 rounded-lg" />
+                                    <div className="h-5 w-20 bg-slate-100 rounded-lg" />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        );
+    }
     return (
         <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-10">
             <div className="max-w-7xl mx-auto space-y-8">
@@ -702,7 +789,7 @@ export default function SalesReportPage() {
                                     </div>
                                     <div>
                                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</span>
-                                        <h3 className="text-2xl font-black text-slate-900 mt-1 truncate">{isLoadingOrders ? "---" : stat.value}</h3>
+                                        {isLoadingOrders ? <div className="h-8 w-28 bg-slate-200 rounded-xl animate-pulse mt-1" /> : <h3 className="text-2xl font-black text-slate-900 mt-1 truncate">{stat.value}</h3>}
                                         <p className="text-xs text-slate-400 font-medium mt-1">{stat.sub}</p>
                                     </div>
                                 </div>
@@ -827,7 +914,16 @@ export default function SalesReportPage() {
                                     </div>
                                 </div>
                                 <div className="h-[300px] w-full">
-                                    {topItemsChartData.length === 0 ? (
+                                    {isLoadingOrders ? (
+                                        <div className="h-full flex flex-col justify-around py-4 animate-pulse">
+                                            {[85, 70, 55, 40, 25].map((w, idx) => (
+                                                <div key={idx} className="flex items-center gap-4">
+                                                    <div className="w-28 h-4 bg-slate-200 rounded-lg shrink-0" />
+                                                    <div className="h-6 bg-indigo-100 rounded-r-xl" style={{ width: `${w}%` }} />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : topItemsChartData.length === 0 ? (
                                         <div className="h-full flex items-center justify-center text-slate-400 font-bold uppercase tracking-widest text-xs">
                                             No sales data available
                                         </div>
@@ -859,7 +955,19 @@ export default function SalesReportPage() {
                                 </div>
 
                                 <div className="space-y-4">
-                                    {portionChartData.length === 0 ? (
+                                    {isLoadingOrders ? (
+                                        <div className="space-y-4 animate-pulse">
+                                            {[...Array(4)].map((_, idx) => (
+                                                <div key={idx} className="space-y-1.5">
+                                                    <div className="flex justify-between items-center">
+                                                        <div className="h-4 w-16 bg-slate-200 rounded-lg" />
+                                                        <div className="h-4 w-20 bg-slate-200 rounded-lg" />
+                                                    </div>
+                                                    <div className="h-3 w-full bg-slate-100 rounded-full" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : portionChartData.length === 0 ? (
                                         <p className="text-center text-slate-400 text-xs font-bold uppercase py-10">No portion data</p>
                                     ) : (
                                         portionChartData.map(p => {
@@ -926,11 +1034,17 @@ export default function SalesReportPage() {
                                     </thead>
                                     <tbody>
                                         {isLoadingPagedItems ? (
-                                            <tr>
-                                                <td colSpan={8} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest text-sm">
-                                                    Calculating Item Performance...
-                                                </td>
-                                            </tr>
+                                            <>
+                                                {[...Array(5)].map((_, i) => (
+                                                    <tr key={i} className="animate-pulse border-b border-slate-50">
+                                                        {[...Array(8)].map((__, j) => (
+                                                            <td key={j} className="p-6">
+                                                                <div className="h-4 bg-slate-100 rounded-lg" style={{ width: j === 1 ? '80%' : j === 7 ? '60%' : '70%' }} />
+                                                            </td>
+                                                        ))}
+                                                    </tr>
+                                                ))}
+                                            </>
                                         ) : serverItemTotalCount === 0 ? (
                                             <tr>
                                                 <td colSpan={8} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest text-sm">
@@ -1078,7 +1192,7 @@ export default function SalesReportPage() {
                                     </div>
                                     <div>
                                         <span className="text-xs font-black text-slate-400 uppercase tracking-widest">{stat.label}</span>
-                                        <h3 className="text-3xl font-black text-slate-900 mt-1">{isLoadingOrders ? "---" : stat.value}</h3>
+                                        {isLoadingOrders ? <div className="h-9 w-28 bg-slate-200 rounded-xl animate-pulse mt-1" /> : <h3 className="text-3xl font-black text-slate-900 mt-1">{stat.value}</h3>}
                                     </div>
                                 </div>
                             ))}
@@ -1098,6 +1212,13 @@ export default function SalesReportPage() {
                                     </div>
                                 </div>
                                 <div className="h-[350px] w-full">
+                                    {isLoadingOrders ? (
+                                        <div className="h-full flex items-end gap-3 px-6 pb-6 animate-pulse">
+                                            {[40, 65, 30, 85, 50, 95, 70, 80, 60, 90, 75, 85].map((h, idx) => (
+                                                <div key={idx} className="flex-1 bg-indigo-100 rounded-t-xl" style={{ height: `${h}%` }} />
+                                            ))}
+                                        </div>
+                                    ) : (
                                     <ResponsiveContainer width="100%" height="100%">
                                         <AreaChart data={chartData}>
                                             <defs>
@@ -1132,12 +1253,27 @@ export default function SalesReportPage() {
                                             />
                                         </AreaChart>
                                     </ResponsiveContainer>
+                                    )}
                                 </div>
                             </div>
 
                             <div className="glass-card p-8 rounded-[2.5rem] border border-white">
                                 <h2 className="text-xl font-black text-slate-900 italic mb-8 uppercase">PAYMENT DISTRIBUTION</h2>
                                 <div className="space-y-6">
+                                    {isLoadingOrders ? (
+                                        <div className="space-y-6 animate-pulse">
+                                            {[...Array(2)].map((_, idx) => (
+                                                <div key={idx} className="space-y-2">
+                                                    <div className="flex justify-between">
+                                                        <div className="h-4 w-32 bg-slate-200 rounded-lg" />
+                                                        <div className="h-4 w-16 bg-slate-200 rounded-lg" />
+                                                    </div>
+                                                    <div className="h-4 w-full bg-slate-100 rounded-full" />
+                                                </div>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                    <>
                                     <div className="space-y-2">
                                         <div className="flex justify-between font-bold text-sm">
                                             <span className="text-slate-500 uppercase">Cash Transactions</span>
@@ -1163,6 +1299,8 @@ export default function SalesReportPage() {
                                             />
                                         </div>
                                     </div>
+                                    </>
+                                    )}
                                 </div>
                             </div>
 
@@ -1191,11 +1329,17 @@ export default function SalesReportPage() {
                                     </thead>
                                     <tbody>
                                         {isLoadingPagedOrders ? (
-                                            <tr>
-                                                <td colSpan={7} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest text-sm">
-                                                    Synchronizing Ledger...
-                                                </td>
-                                            </tr>
+                                            <>
+                                                {[...Array(5)].map((_, i) => (
+                                                    <tr key={i} className="animate-pulse border-b border-slate-50">
+                                                        {[...Array(7)].map((__, j) => (
+                                                            <td key={j} className="p-6">
+                                                                <div className="h-4 bg-slate-100 rounded-lg" style={{ width: j === 2 ? '75%' : j === 6 ? '40%' : '65%' }} />
+                                                            </td>
+                                                        ))}
+                                                    </tr>
+                                                ))}
+                                            </>
                                         ) : pagedOrders.length === 0 ? (
                                             <tr>
                                                 <td colSpan={7} className="p-20 text-center text-slate-400 font-bold uppercase tracking-widest text-sm">
