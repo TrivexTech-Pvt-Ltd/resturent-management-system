@@ -11,6 +11,99 @@ export const getOrders = async (): Promise<Order[]> => {
     }
 };
 
+export interface PagedOrdersResponse {
+    data: Order[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+}
+
+export const getOrdersPaged = async (params: {
+    page: number;
+    pageSize: number;
+    startDate?: string;
+    endDate?: string;
+    paymentMethod?: string;
+}): Promise<PagedOrdersResponse> => {
+    try {
+        const response = await api.get("/Orders/paged", {
+            page: params.page,
+            pageSize: params.pageSize,
+            startDate: params.startDate,
+            endDate: params.endDate,
+            paymentMethod: params.paymentMethod,
+        });
+        return response.data as PagedOrdersResponse;
+    } catch (error) {
+        console.error("Error fetching paged orders:", error);
+        return { data: [], totalCount: 0, page: params.page, pageSize: params.pageSize, totalPages: 0 };
+    }
+};
+
+export interface ItemSalesRow {
+    id: string;
+    fullName: string;
+    baseName: string;
+    portionSize: string;
+    category: string;
+    totalQuantity: number;
+    totalRevenue: number;
+    unitPrice: number;
+    orderCount: number;
+}
+
+export interface PagedItemSalesResponse {
+    data: ItemSalesRow[];
+    totalCount: number;
+    page: number;
+    pageSize: number;
+    totalPages: number;
+    totalRevenue: number;
+    totalQuantity: number;
+}
+
+export const getItemSalesPaged = async (params: {
+    page: number;
+    pageSize: number;
+    startDate?: string;
+    endDate?: string;
+    paymentMethod?: string;
+    category?: string;
+    itemName?: string;
+    portionSize?: string;
+    search?: string;
+    sortBy?: string;
+}): Promise<PagedItemSalesResponse> => {
+    try {
+        const response = await api.get("/Orders/item-sales-paged", {
+            page: params.page,
+            pageSize: params.pageSize,
+            startDate: params.startDate,
+            endDate: params.endDate,
+            paymentMethod: params.paymentMethod === 'ALL' ? undefined : params.paymentMethod,
+            category: params.category === 'ALL' ? undefined : params.category,
+            itemName: params.itemName === 'ALL' ? undefined : params.itemName,
+            portionSize: params.portionSize === 'ALL' ? undefined : params.portionSize,
+            search: params.search?.trim() ? params.search.trim() : undefined,
+            sortBy: params.sortBy,
+        });
+        return response.data as PagedItemSalesResponse;
+    } catch (error) {
+        console.error("Error fetching paged item sales:", error);
+        return {
+            data: [],
+            totalCount: 0,
+            page: params.page,
+            pageSize: params.pageSize,
+            totalPages: 0,
+            totalRevenue: 0,
+            totalQuantity: 0,
+        };
+    }
+};
+
+
 export const saveOrder = async (order: Partial<Order>) => {
     try {
         const response = await api.post("/Orders", order);

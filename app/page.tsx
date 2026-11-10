@@ -3,9 +3,8 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useAuth } from '@/context/AuthContext';
+import AppLayout from '@/components/AppLayout';
 import {
-  LogOut,
-  User as UserIcon,
   ShieldCheck,
   CreditCard,
   ChefHat,
@@ -17,7 +16,6 @@ import {
   Calculator,
   TrendingUp,
   PieChart,
-  ChevronDown,
   ArrowRight,
 } from 'lucide-react';
 
@@ -37,9 +35,31 @@ interface Screen {
 }
 
 export default function Home() {
-  const { user, logout, isLoading } = useAuth();
+  const { user, isLoading } = useAuth();
 
-  if (isLoading) return null;
+  if (isLoading) {
+    return (
+      <AppLayout showBackButton={false}>
+        <div className="max-w-6xl w-full mx-auto p-4 md:p-8 animate-pulse">
+          {/* Title skeleton */}
+          <div className="text-center mb-10 space-y-3">
+            <div className="h-14 w-56 bg-slate-200 rounded-2xl mx-auto" />
+            <div className="h-5 w-72 bg-slate-100 rounded-full mx-auto" />
+          </div>
+
+          {/* Cards grid skeleton */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5">
+            {[...Array(6)].map((_, i) => (
+              <div key={i} className={`glass-card rounded-3xl p-6 md:p-7 border border-white space-y-4 ${i >= 2 ? 'hidden md:block' : ''}`}>
+                <div className="w-12 h-12 bg-slate-200 rounded-xl" />
+                <div className="h-6 w-40 bg-slate-200 rounded-xl" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </AppLayout>
+    );
+  }
 
   const screens: Screen[] = [
     {
@@ -187,59 +207,9 @@ export default function Home() {
   const allowedScreens = screens.filter(s => s.roles.includes(user?.role || ''));
 
   return (
-    <div className="min-h-screen" style={{ background: 'linear-gradient(135deg, #eef0fb 0%, #f3f4fd 50%, #eef0fb 100%)' }}>
-      {/* Top Navigation */}
-      <nav className="w-full bg-white shadow-sm border-b border-slate-100">
-        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-          {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 shadow-md">
-              <Image
-                src="/logo-letter.webp"
-                alt="NextServe Logo"
-                width={40}
-                height={40}
-                className="w-full h-full object-cover"
-              />
-            </div>
-            <div className="flex flex-col justify-center">
-              <div className="text-[20px] font-black tracking-tight leading-tight">
-                <span className="text-slate-900">Next</span>
-                <span className="text-indigo-600">Serve</span>
-              </div>
-              <p className="text-[8.5px] font-bold uppercase tracking-[0.18em] text-slate-400 leading-none mt-0.5">
-                Food Business Management Platform
-              </p>
-            </div>
-          </div>
-
-          {/* Right side */}
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-2xl px-4 py-2">
-              <div className="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
-                <UserIcon className="h-4 w-4 text-indigo-600" />
-              </div>
-              <div>
-                <p className="text-sm font-bold text-slate-800 leading-none">{user?.fullName || user?.username}</p>
-                <p className="text-[10px] text-slate-400 leading-none mt-0.5">{user?.role === 'Admin' ? 'System Admin' : 'Staff'}</p>
-              </div>
-              <ChevronDown className="h-4 w-4 text-slate-400" />
-            </div>
-
-            <button
-              type="button"
-              onClick={logout}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white hover:bg-red-50 border-2 border-indigo-200 hover:border-red-200 text-slate-600 hover:text-red-500 font-semibold rounded-xl transition-all cursor-pointer active:scale-95 text-sm"
-            >
-              <LogOut className="h-4 w-4" />
-              <span>Log Out</span>
-            </button>
-          </div>
-        </div>
-      </nav>
-
+    <AppLayout showBackButton={false}>
       {/* Hero Section */}
-      <div className="max-w-7xl mx-auto px-6 pt-8 pb-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pt-6 sm:pt-8 pb-6 w-full">
         <div
           className="relative overflow-hidden rounded-3xl shadow-sm"
           style={{
@@ -257,10 +227,10 @@ export default function Home() {
               style={{ background: 'radial-gradient(circle, #818cf8 0%, transparent 70%)' }} />
           </div>
 
-          <div className="relative z-10 grid grid-cols-[1fr_auto_auto] items-center gap-0 px-6 py-8 h-full">
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 px-6 sm:px-10 py-8 h-full">
 
             {/* LEFT — text block */}
-            <div className="flex flex-col justify-center">
+            <div className="flex-1 min-w-0 flex flex-col justify-center">
               <p className="text-[11px] font-extrabold tracking-[0.25em] uppercase text-indigo-500 mb-3">
                 FOR RESTAURANTS · BAKERIES · CAFES
               </p>
@@ -271,13 +241,13 @@ export default function Home() {
               <div className="flex items-start gap-3">
                 <div className="w-[3px] self-stretch bg-indigo-600 rounded-full flex-shrink-0" style={{ minHeight: '40px' }} />
                 <p className="text-sm text-slate-500 leading-relaxed">
-                  Built for restaurants, bakeries &amp; cafes &mdash; manage<br />all operations with our all-in-one solution.
+                  Built for restaurants, bakeries &amp; cafes &mdash; manage<br className="hidden sm:inline" />all operations with our all-in-one solution.
                 </p>
               </div>
             </div>
 
             {/* CENTER — food image with circular glow */}
-            <div className="relative flex items-center justify-center mx-4" style={{ width: '320px', height: '240px' }}>
+            <div className="relative hidden md:flex items-center justify-center shrink-0 mx-2 lg:mx-6" style={{ width: '300px', height: '240px' }}>
               {/* Big circular glow */}
               <div
                 className="absolute"
@@ -296,13 +266,14 @@ export default function Home() {
                 alt="Restaurant food"
                 width={300}
                 height={220}
+                priority
                 className="object-contain relative z-10 drop-shadow-2xl"
                 style={{ maxHeight: '230px', width: 'auto' }}
               />
             </div>
 
             {/* RIGHT — cursive script text */}
-            <div className="flex-shrink-0 pl-4 hidden lg:flex flex-col items-start justify-center" style={{ fontFamily: 'var(--font-caveat), cursive' }}>
+            <div className="shrink-0 pl-2 lg:pl-4 hidden lg:flex flex-col items-start justify-center" style={{ fontFamily: 'var(--font-caveat), cursive' }}>
               <p className="text-slate-500 leading-tight" style={{ fontSize: '2rem', lineHeight: '1.3' }}>
                 Good<br />
                 Food<br />
@@ -315,58 +286,51 @@ export default function Home() {
       </div>
 
       {/* Module Grid */}
-      <div className="max-w-7xl mx-auto px-6 pb-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 pb-8 w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {allowedScreens.map((screen) => (
-            <Link
-              key={screen.href}
-              href={screen.href}
-              className={`group relative overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-100/60 hover:-translate-y-1 transition-all duration-300 p-6 flex flex-col justify-between`}
-            >
-              {/* Ghost icon background */}
-              <div className="absolute top-2 right-3 opacity-100 transition-opacity duration-300">
-                {screen.ghostIcon}
-              </div>
+          {allowedScreens.map((screen) => {
+            const isMobileVisible =
+              screen.href === '/reports/sales' || screen.href === '/reports/ingredients';
 
-              <div className="relative z-10">
-                {/* Icon */}
-                <div className={`w-12 h-12 ${screen.bgColor} rounded-xl flex items-center justify-center shadow-lg mb-5`}>
-                  {screen.icon}
+            return (
+              <Link
+                key={screen.href}
+                href={screen.href}
+                className={`group relative overflow-hidden rounded-2xl bg-white border border-slate-100 shadow-sm hover:shadow-xl hover:shadow-indigo-100/60 hover:-translate-y-1 transition-all duration-300 p-6 flex-col justify-between ${
+                  isMobileVisible ? 'flex' : 'hidden md:flex'
+                }`}
+              >
+                {/* Ghost icon background */}
+                <div className="absolute top-2 right-3 opacity-100 transition-opacity duration-300">
+                  {screen.ghostIcon}
                 </div>
 
-                {/* Name & Description */}
-                <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-1.5">{screen.name}</h2>
-                <p className="text-xs text-slate-500 leading-relaxed mb-5">{screen.description}</p>
-
-                {/* Badge + Arrow row */}
-                <div className="flex items-center justify-between">
-                  <div className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg ${screen.badgeBg}`}>
-                    {screen.badgeIcon}
-                    <span>{screen.badge}</span>
+                <div className="relative z-10">
+                  {/* Icon */}
+                  <div className={`w-12 h-12 ${screen.bgColor} rounded-xl flex items-center justify-center shadow-lg mb-5`}>
+                    {screen.icon}
                   </div>
-                  <div className={`w-9 h-9 ${screen.arrowBg} rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300`}>
-                    <ArrowRight className="h-4 w-4 text-white" />
+
+                  {/* Name & Description */}
+                  <h2 className="text-sm font-black text-slate-800 uppercase tracking-wider mb-1.5">{screen.name}</h2>
+                  <p className="text-xs text-slate-500 leading-relaxed mb-5">{screen.description}</p>
+
+                  {/* Badge + Arrow row */}
+                  <div className="flex items-center justify-between">
+                    <div className={`flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-lg ${screen.badgeBg}`}>
+                      {screen.badgeIcon}
+                      <span>{screen.badge}</span>
+                    </div>
+                    <div className={`w-9 h-9 ${screen.arrowBg} rounded-full flex items-center justify-center shadow-md group-hover:scale-110 transition-transform duration-300`}>
+                      <ArrowRight className="h-4 w-4 text-white" />
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            );
+          })}
         </div>
       </div>
-
-      {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white">
-        <div className="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
-          <p className="text-xs text-slate-400 font-medium">© 2026 TrivexTech Pvt Ltd. All rights reserved.</p>
-          <div className="flex items-center gap-4">
-            <p className="text-xs text-slate-400 font-medium">NextServe &nbsp;v1.0.0</p>
-            <div className="flex items-center gap-1.5">
-              <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-              <span className="text-xs text-emerald-600 font-semibold">System Online</span>
-            </div>
-          </div>
-        </div>
-      </footer>
-    </div>
+    </AppLayout>
   );
 }

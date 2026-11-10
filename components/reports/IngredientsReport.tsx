@@ -535,23 +535,93 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
         doc.save(`Ingredients_Requirement_Report_${timeRange}_${format(new Date(), 'yyyyMMdd_HHmm')}.pdf`);
     };
 
+    // Full-component skeleton loader
+    if (isLoadingOrders || isLoadingEstimations) {
+        return (
+            <div className="space-y-6 sm:space-y-8 animate-pulse w-full">
+                {showTitle && (
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 w-full">
+                        <div className="space-y-2">
+                            <div className="h-8 sm:h-10 w-64 sm:w-96 bg-slate-200 rounded-2xl" />
+                            <div className="h-4 w-48 sm:w-72 bg-slate-100 rounded-full" />
+                        </div>
+                        <div className="h-12 w-full md:w-44 bg-slate-200 rounded-2xl" />
+                    </div>
+                )}
+
+                {/* Filter and Range Controls Skeleton */}
+                <div className="glass-card p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col xl:flex-row gap-6 items-stretch xl:items-center justify-between border border-white w-full">
+                    <div className="h-10 w-full xl:w-64 bg-slate-200 rounded-2xl" />
+                    <div className="flex flex-wrap gap-2 w-full xl:w-auto">
+                        {[...Array(4)].map((_, i) => (
+                            <div key={i} className="h-10 flex-1 sm:w-20 bg-slate-200 rounded-xl" />
+                        ))}
+                    </div>
+                </div>
+
+                {/* KPI Cards Skeleton */}
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full">
+                    {[...Array(4)].map((_, i) => (
+                        <div key={i} className="glass-card p-5 sm:p-6 rounded-4xl border border-white shadow-sm space-y-4 w-full">
+                            <div className="h-14 w-14 bg-slate-200 rounded-2xl" />
+                            <div className="space-y-2">
+                                <div className="h-3 w-28 bg-slate-200 rounded-full" />
+                                <div className="h-8 w-32 bg-slate-300 rounded-xl" />
+                                <div className="h-3 w-20 bg-slate-100 rounded-full" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Filter Bar Skeleton */}
+                <div className="glass-card p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border border-white flex flex-col lg:flex-row gap-4 w-full">
+                    <div className="h-12 w-full flex-1 bg-slate-100 rounded-2xl" />
+                    <div className="flex flex-col sm:flex-row gap-2 w-full lg:w-auto">
+                        <div className="h-12 w-full sm:w-32 bg-slate-100 rounded-2xl" />
+                        <div className="h-12 w-full sm:w-32 bg-slate-100 rounded-2xl" />
+                        <div className="h-12 w-full sm:w-28 bg-slate-100 rounded-2xl" />
+                    </div>
+                </div>
+
+                {/* Table Skeleton */}
+                <div className="glass-card rounded-[2rem] sm:rounded-[2.5rem] overflow-hidden border border-white shadow-sm w-full">
+                    <div className="p-6 sm:p-8 border-b border-slate-50 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                        <div className="h-6 w-56 bg-slate-200 rounded-xl" />
+                        <div className="h-6 w-28 bg-slate-100 rounded-full" />
+                    </div>
+                    <div className="p-6 space-y-3">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="flex gap-4 items-center py-2 border-b border-slate-50">
+                                <div className="h-5 w-6 bg-slate-100 rounded" />
+                                <div className="h-5 flex-1 bg-slate-100 rounded-lg" />
+                                <div className="h-5 w-28 bg-slate-100 rounded-lg" />
+                                <div className="h-5 w-24 bg-slate-100 rounded-lg" />
+                                <div className="h-5 w-20 bg-slate-100 rounded-lg" />
+                                <div className="h-5 w-24 bg-slate-100 rounded-lg" />
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    }
     return (
-        <div className="space-y-8 animate-in fade-in duration-300">
+        <div className="space-y-6 sm:space-y-8 animate-in fade-in duration-300 w-full">
             {/* Header if standalone */}
             {showTitle && (
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 w-full">
                     <div className="space-y-1">
-                        <h1 className="text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3 italic uppercase">
-                            <ChefHat className="text-primary h-10 w-10 not-italic" />
+                        <h1 className="text-xl sm:text-2xl md:text-4xl font-black text-slate-900 tracking-tight flex items-center gap-2.5 sm:gap-3 italic uppercase">
+                            <ChefHat className="text-primary h-7 w-7 sm:h-9 sm:w-9 md:h-10 md:w-10 not-italic shrink-0" />
                             INGREDIENTS REQUIREMENT & CONSUMPTION
                         </h1>
-                        <p className="text-slate-500 font-medium">Daily, weekly, monthly & custom ingredient usage breakdown by items, categories & portions</p>
+                        <p className="text-slate-500 font-medium text-xs sm:text-sm">Daily, weekly, monthly & custom ingredient usage breakdown by items, categories & portions</p>
                     </div>
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-3 w-full md:w-auto">
                         <button
                             onClick={exportToPDF}
-                            className="bg-primary text-white px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-indigo-600 transition-all shadow-md shadow-primary/20 cursor-pointer active:scale-95"
+                            className="w-full md:w-auto justify-center bg-primary text-white px-5 sm:px-6 py-3 rounded-2xl font-bold flex items-center gap-2 hover:bg-indigo-600 transition-all shadow-md shadow-primary/20 cursor-pointer active:scale-95 text-xs sm:text-sm"
                         >
                             <Download className="h-4 w-4" />
                             Export Ingredients PDF
@@ -561,91 +631,93 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
             )}
 
             {/* Timeframe Selector & Export Bar */}
-            <div className="glass-card p-6 rounded-[2.5rem] flex flex-col xl:flex-row gap-6 items-start xl:items-center justify-between border border-white">
+            <div className="glass-card p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col xl:flex-row gap-6 items-stretch xl:items-center justify-between border border-white w-full">
                 
                 {/* Views / Sub-tabs */}
-                <div className="flex flex-wrap items-center bg-slate-100 p-1.5 rounded-2xl border border-slate-200/50">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center bg-slate-100 p-1.5 rounded-2xl border border-slate-200/50 w-full xl:w-auto gap-1 sm:gap-0">
                     <button
                         onClick={() => setActiveTab('summary')}
                         className={cn(
-                            "px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer",
+                            "flex-1 justify-center px-3 sm:px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer w-full sm:w-auto text-center",
                             activeTab === 'summary'
                                 ? "bg-primary text-white shadow-md shadow-primary/20"
                                 : "text-slate-500 hover:text-slate-800"
                         )}
                     >
-                        <Scale className="h-4 w-4" />
-                        Total Ingredients
+                        <Scale className="h-4 w-4 shrink-0" />
+                        <span className="truncate">Total Ingredients</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('item')}
                         className={cn(
-                            "px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer",
+                            "flex-1 justify-center px-3 sm:px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer w-full sm:w-auto text-center",
                             activeTab === 'item'
                                 ? "bg-primary text-white shadow-md shadow-primary/20"
                                 : "text-slate-500 hover:text-slate-800"
                         )}
                     >
-                        <Utensils className="h-4 w-4" />
-                        Item Wise
+                        <Utensils className="h-4 w-4 shrink-0" />
+                        <span className="truncate">Item Wise</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('category')}
                         className={cn(
-                            "px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer",
+                            "flex-1 justify-center px-3 sm:px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer w-full sm:w-auto text-center",
                             activeTab === 'category'
                                 ? "bg-primary text-white shadow-md shadow-primary/20"
                                 : "text-slate-500 hover:text-slate-800"
                         )}
                     >
-                        <Layers className="h-4 w-4" />
-                        Category Wise
+                        <Layers className="h-4 w-4 shrink-0" />
+                        <span className="truncate">Category Wise</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('portion')}
                         className={cn(
-                            "px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer",
+                            "flex-1 justify-center px-3 sm:px-5 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-1.5 sm:gap-2 cursor-pointer w-full sm:w-auto text-center",
                             activeTab === 'portion'
                                 ? "bg-primary text-white shadow-md shadow-primary/20"
                                 : "text-slate-500 hover:text-slate-800"
                         )}
                     >
-                        <Tag className="h-4 w-4" />
-                        Portion Wise
+                        <Tag className="h-4 w-4 shrink-0" />
+                        <span className="truncate">Portion Wise</span>
                     </button>
                 </div>
 
                 {/* Time Range Selector */}
-                <div className="flex flex-wrap items-center gap-2">
-                    {(['daily', 'weekly', 'monthly', 'custom'] as TimeRange[]).map((range) => (
-                        <button
-                            key={range}
-                            onClick={() => setTimeRange(range)}
-                            className={cn(
-                                "px-5 py-2.5 rounded-xl font-bold text-xs transition-all uppercase tracking-widest cursor-pointer",
-                                timeRange === range
-                                    ? "bg-slate-900 text-white shadow-lg shadow-slate-200"
-                                    : "bg-slate-100 text-slate-500 hover:bg-slate-200"
-                            )}
-                        >
-                            {range}
-                        </button>
-                    ))}
+                <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 w-full xl:w-auto">
+                    <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
+                        {(['daily', 'weekly', 'monthly', 'custom'] as TimeRange[]).map((range) => (
+                            <button
+                                key={range}
+                                onClick={() => setTimeRange(range)}
+                                className={cn(
+                                    "px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs transition-all uppercase tracking-widest cursor-pointer text-center w-full sm:w-auto",
+                                    timeRange === range
+                                        ? "bg-slate-900 text-white shadow-lg shadow-slate-200"
+                                        : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                )}
+                            >
+                                {range}
+                            </button>
+                        ))}
+                    </div>
 
                     {timeRange === 'custom' && (
-                        <div className="flex items-center gap-2 bg-slate-100 p-1.5 rounded-2xl w-full md:w-auto">
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 bg-slate-100 p-1.5 rounded-2xl w-full sm:w-auto">
                             <input
                                 type="date"
                                 value={customStartDate}
                                 onChange={(e) => setCustomStartDate(e.target.value)}
-                                className="bg-white px-3 py-2 rounded-xl text-xs font-bold text-slate-700 outline-none border border-transparent focus:border-primary/30"
+                                className="bg-white px-3 py-2 rounded-xl text-xs font-bold text-slate-700 outline-none border border-transparent focus:border-primary/30 w-full sm:w-auto"
                             />
-                            <span className="text-slate-400"><ChevronRight className="h-4 w-4" /></span>
+                            <span className="text-slate-400 hidden sm:inline"><ChevronRight className="h-4 w-4" /></span>
                             <input
                                 type="date"
                                 value={customEndDate}
                                 onChange={(e) => setCustomEndDate(e.target.value)}
-                                className="bg-white px-3 py-2 rounded-xl text-xs font-bold text-slate-700 outline-none border border-transparent focus:border-primary/30"
+                                className="bg-white px-3 py-2 rounded-xl text-xs font-bold text-slate-700 outline-none border border-transparent focus:border-primary/30 w-full sm:w-auto"
                             />
                         </div>
                     )}
@@ -653,7 +725,7 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                     {!showTitle && (
                         <button
                             onClick={exportToPDF}
-                            className="bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-slate-800 transition-all cursor-pointer ml-2"
+                            className="w-full sm:w-auto justify-center bg-slate-900 text-white px-5 py-2.5 rounded-xl font-bold text-xs flex items-center gap-2 hover:bg-slate-800 transition-all cursor-pointer"
                         >
                             <Download className="h-4 w-4 text-primary" />
                             PDF Report
@@ -663,8 +735,8 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
             </div>
 
             {/* Ingredient Summary KPIs */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div className="glass-card p-6 rounded-4xl border border-white shadow-sm flex flex-col justify-between hover:scale-[1.02] transition-transform">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 w-full">
+                <div className="glass-card p-5 sm:p-6 rounded-4xl border border-white shadow-sm flex flex-col justify-between hover:scale-[1.02] transition-transform w-full">
                     <div className="flex justify-between items-start mb-4">
                         <div className="p-4 rounded-2xl bg-indigo-50 text-indigo-600">
                             <ChefHat className="h-6 w-6" />
@@ -672,12 +744,12 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                     </div>
                     <div>
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">FOOD DISHES SOLD</span>
-                        <h3 className="text-2xl font-black text-slate-900 mt-1">{isLoadingOrders ? "---" : consumptionData.totalDishesSold.toLocaleString()}</h3>
+                        {isLoadingOrders ? <div className="h-8 w-28 bg-slate-200 rounded-xl animate-pulse mt-1" /> : <h3 className="text-2xl font-black text-slate-900 mt-1">{consumptionData.totalDishesSold.toLocaleString()}</h3>}
                         <p className="text-xs text-slate-400 font-medium mt-1">Total portions ordered</p>
                     </div>
                 </div>
 
-                <div className="glass-card p-6 rounded-4xl border border-white shadow-sm flex flex-col justify-between hover:scale-[1.02] transition-transform">
+                <div className="glass-card p-5 sm:p-6 rounded-4xl border border-white shadow-sm flex flex-col justify-between hover:scale-[1.02] transition-transform w-full">
                     <div className="flex justify-between items-start mb-4">
                         <div className="p-4 rounded-2xl bg-emerald-50 text-emerald-600">
                             <Boxes className="h-6 w-6" />
@@ -685,12 +757,12 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                     </div>
                     <div>
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">UNIQUE INGREDIENTS</span>
-                        <h3 className="text-2xl font-black text-slate-900 mt-1">{isLoadingEstimations ? "---" : consumptionData.totalUniqueIngredients}</h3>
+                        {isLoadingEstimations ? <div className="h-8 w-20 bg-slate-200 rounded-xl animate-pulse mt-1" /> : <h3 className="text-2xl font-black text-slate-900 mt-1">{consumptionData.totalUniqueIngredients}</h3>}
                         <p className="text-xs text-slate-400 font-medium mt-1">Raw items consumed</p>
                     </div>
                 </div>
 
-                <div className="glass-card p-6 rounded-4xl border border-white shadow-sm flex flex-col justify-between hover:scale-[1.02] transition-transform">
+                <div className="glass-card p-5 sm:p-6 rounded-4xl border border-white shadow-sm flex flex-col justify-between hover:scale-[1.02] transition-transform w-full">
                     <div className="flex justify-between items-start mb-4">
                         <div className="p-4 rounded-2xl bg-purple-50 text-purple-600">
                             <DollarSign className="h-6 w-6" />
@@ -698,12 +770,12 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                     </div>
                     <div>
                         <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest">TOTAL INGREDIENT COST</span>
-                        <h3 className="text-2xl font-black text-slate-900 mt-1">LKR {consumptionData.totalIngredientCost.toFixed(2)}</h3>
+                        {isLoadingEstimations ? <div className="h-8 w-32 bg-slate-200 rounded-xl animate-pulse mt-1" /> : <h3 className="text-2xl font-black text-slate-900 mt-1">LKR {consumptionData.totalIngredientCost.toFixed(2)}</h3>}
                         <p className="text-xs text-slate-400 font-medium mt-1">Based on estimation cost</p>
                     </div>
                 </div>
 
-                <div className="glass-card p-6 rounded-4xl border border-white shadow-sm flex flex-col justify-between hover:scale-[1.02] transition-transform">
+                <div className="glass-card p-5 sm:p-6 rounded-4xl border border-white shadow-sm flex flex-col justify-between hover:scale-[1.02] transition-transform w-full">
                     <div className="flex justify-between items-start mb-4">
                         <div className={cn("p-4 rounded-2xl", consumptionData.unlinkedDishCount > 0 ? "bg-amber-50 text-amber-600" : "bg-teal-50 text-teal-600")}>
                             <AlertCircle className="h-6 w-6" />
@@ -723,8 +795,8 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
 
             {/* Missing Recipe Warning Banner */}
             {consumptionData.unlinkedDishCount > 0 && (
-                <div className="bg-amber-50 border border-amber-200 rounded-3xl p-5 flex items-start gap-4 text-amber-800">
-                    <AlertCircle className="h-6 w-6 text-amber-600 shrink-0 mt-0.5" />
+                <div className="bg-amber-50 border border-amber-200 rounded-3xl p-4 sm:p-5 flex items-start gap-3 sm:gap-4 text-amber-800 w-full">
+                    <AlertCircle className="h-5 w-5 sm:h-6 sm:w-6 text-amber-600 shrink-0 mt-0.5" />
                     <div className="space-y-1 text-xs">
                         <h4 className="font-bold text-sm">Notice: Some sold items do not have linked recipes</h4>
                         <p>
@@ -736,10 +808,10 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
             )}
 
             {/* Filter Bar */}
-            <div className="glass-card p-6 rounded-[2.5rem] border border-white flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center">
+            <div className="glass-card p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border border-white flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center w-full">
                 
                 {/* Search */}
-                <div className="relative flex-1">
+                <div className="relative flex-1 w-full">
                     <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <input
                         type="text"
@@ -759,12 +831,12 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                 </div>
 
                 {/* Dropdown Filters */}
-                <div className="flex flex-wrap items-center gap-3">
+                <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full lg:w-auto">
                     {/* Category Filter */}
                     <select
                         value={selectedCategory}
                         onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer"
+                        className="w-full sm:w-auto px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer"
                     >
                         <option value="ALL">All Categories</option>
                         {availableCategories.map(cat => (
@@ -776,7 +848,7 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                     <select
                         value={selectedItemName}
                         onChange={(e) => setSelectedItemName(e.target.value)}
-                        className="px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer max-w-[170px] truncate"
+                        className="w-full sm:w-auto px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer sm:max-w-[170px] truncate"
                     >
                         <option value="ALL">All Items</option>
                         {availableItemNames.map(name => (
@@ -788,7 +860,7 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                     <select
                         value={selectedPortion}
                         onChange={(e) => setSelectedPortion(e.target.value)}
-                        className="px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer"
+                        className="w-full sm:w-auto px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer"
                     >
                         <option value="ALL">All Portions</option>
                         <option value="S">S (Small)</option>
@@ -802,19 +874,19 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
 
             {/* TAB 1: TOTAL RAW INGREDIENTS SUMMARY AGGREGATE */}
             {activeTab === 'summary' && (
-                <div className="glass-card rounded-[2.5rem] border border-white p-8 overflow-hidden">
+                <div className="glass-card rounded-[2rem] sm:rounded-[2.5rem] border border-white p-5 sm:p-8 overflow-hidden w-full shadow-sm">
                     <div className="flex items-center justify-between mb-6">
                         <div>
-                            <h2 className="text-xl font-black text-slate-900 italic uppercase flex items-center gap-2">
-                                <Scale className="h-5 w-5 text-primary" />
+                            <h2 className="text-lg sm:text-xl font-black text-slate-900 italic uppercase flex items-center gap-2">
+                                <Scale className="h-5 w-5 text-primary shrink-0" />
                                 AGGREGATE RAW INGREDIENTS CONSUMPTION ({timeRange.toUpperCase()})
                             </h2>
                             <p className="text-xs text-slate-400 font-medium">Total raw materials required to fulfill all sold menu items</p>
                         </div>
                     </div>
 
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                    <div className="overflow-x-auto w-full">
+                        <table className="w-full text-left border-collapse min-w-[650px]">
                             <thead>
                                 <tr className="border-b border-slate-100 text-[10px] font-black text-slate-400 uppercase tracking-wider">
                                     <th className="py-4 px-4">Raw Ingredient</th>
@@ -837,7 +909,7 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                                         <tr key={idx} className="hover:bg-slate-50/80 transition-colors">
                                             <td className="py-4 px-4">
                                                 <div className="flex items-center gap-3">
-                                                    <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 font-black text-xs">
+                                                    <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600 font-black text-xs shrink-0">
                                                         #{idx + 1}
                                                     </div>
                                                     <span className="font-black text-slate-900 text-sm">{ing.name}</span>
@@ -855,7 +927,7 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                                                 LKR {ing.totalCost.toFixed(2)}
                                             </td>
                                             <td className="py-4 px-4">
-                                                <span className="px-3 py-1 bg-slate-100 rounded-full text-slate-600 text-[11px] font-bold">
+                                                <span className="px-3 py-1 bg-slate-100 rounded-full text-slate-600 text-[11px] font-bold whitespace-nowrap">
                                                     Used in {ing.usedInDishesCount} Dish(es)
                                                 </span>
                                             </td>
@@ -863,7 +935,7 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                                                 {ing.masterIngredient ? (
                                                     <div className="flex items-center gap-2">
                                                         <span className={cn(
-                                                            "px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider",
+                                                            "px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider whitespace-nowrap",
                                                             ing.masterIngredient.stockQuantity >= ing.totalQuantity
                                                                 ? "bg-emerald-100 text-emerald-700"
                                                                 : "bg-rose-100 text-rose-700"
@@ -872,7 +944,7 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                                                         </span>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-slate-400 text-[11px] font-semibold italic">Not in Master Stock</span>
+                                                    <span className="text-slate-400 text-[11px] font-semibold italic whitespace-nowrap">Not in Master Stock</span>
                                                 )}
                                             </td>
                                         </tr>
@@ -886,16 +958,16 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
 
             {/* TAB 2: ITEM-WISE INGREDIENT BREAKDOWN */}
             {activeTab === 'item' && (
-                <div className="glass-card rounded-[2.5rem] border border-white p-8 space-y-6">
+                <div className="glass-card rounded-[2rem] sm:rounded-[2.5rem] border border-white p-5 sm:p-8 space-y-6 w-full shadow-sm">
                     <div>
-                        <h2 className="text-xl font-black text-slate-900 italic uppercase flex items-center gap-2">
-                            <Utensils className="h-5 w-5 text-primary" />
+                        <h2 className="text-lg sm:text-xl font-black text-slate-900 italic uppercase flex items-center gap-2">
+                            <Utensils className="h-5 w-5 text-primary shrink-0" />
                             ITEM-WISE INGREDIENTS CONSUMPTION ({timeRange.toUpperCase()})
                         </h2>
                         <p className="text-xs text-slate-400 font-medium">Selling items broken down by portion size with their exact ingredient consumption</p>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 w-full">
                         {consumptionData.itemList.length === 0 ? (
                             <div className="col-span-2 py-12 text-center text-slate-400 font-bold uppercase tracking-wider">
                                 No items sold in this timeframe
@@ -904,11 +976,11 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                             consumptionData.itemList.map((item) => {
                                 const portionStyle = PORTION_COLORS[item.portionSize] || PORTION_COLORS['STANDARD'];
                                 return (
-                                    <div key={item.key} className="bg-slate-50/70 border border-slate-100 rounded-3xl p-6 space-y-4 hover:border-primary/20 transition-all">
-                                        <div className="flex items-start justify-between gap-4 border-b border-slate-200/60 pb-4">
+                                    <div key={item.key} className="bg-slate-50/70 border border-slate-100 rounded-3xl p-4 sm:p-6 space-y-4 hover:border-primary/20 transition-all w-full">
+                                        <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3 sm:gap-4 border-b border-slate-200/60 pb-4">
                                             <div>
-                                                <div className="flex items-center gap-2">
-                                                    <h3 className="text-lg font-black text-slate-900">{item.baseName}</h3>
+                                                <div className="flex items-center gap-2 flex-wrap">
+                                                    <h3 className="text-base sm:text-lg font-black text-slate-900">{item.baseName}</h3>
                                                     <span className={cn("px-2.5 py-0.5 rounded-lg text-[10px] font-black border uppercase", portionStyle.bg, portionStyle.text, portionStyle.border)}>
                                                         {item.portionSize}
                                                     </span>
@@ -916,9 +988,9 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                                                 <p className="text-xs font-bold text-slate-400 mt-1">Category: {item.category}</p>
                                             </div>
 
-                                            <div className="text-right">
+                                            <div className="text-left sm:text-right flex sm:flex-col justify-between sm:justify-start items-center sm:items-end">
                                                 <span className="text-xs font-black text-slate-400 uppercase tracking-wider block">Units Sold</span>
-                                                <span className="text-xl font-black text-indigo-600">{item.soldQty}</span>
+                                                <span className="text-lg sm:text-xl font-black text-indigo-600">{item.soldQty}</span>
                                             </div>
                                         </div>
 
@@ -936,12 +1008,12 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                                                         const ingTotalQty = ing.quantity * item.soldQty;
                                                         const ingTotalCost = ing.cost * item.soldQty;
                                                         return (
-                                                            <div key={iIdx} className="bg-white p-3 rounded-2xl border border-slate-100 flex items-center justify-between text-xs">
+                                                            <div key={iIdx} className="bg-white p-3 rounded-2xl border border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
                                                                 <div>
                                                                     <span className="font-black text-slate-800">{ing.name}</span>
-                                                                    <span className="text-slate-400 font-semibold ml-2">({ing.quantity} {ing.unit} / portion)</span>
+                                                                    <span className="text-slate-400 font-semibold ml-1 sm:ml-2">({ing.quantity} {ing.unit} / portion)</span>
                                                                 </div>
-                                                                <div className="text-right flex items-center gap-4">
+                                                                <div className="text-left sm:text-right flex items-center justify-between sm:justify-end gap-3 sm:gap-4">
                                                                     <span className="font-black text-indigo-600">
                                                                         {ingTotalQty % 1 === 0 ? ingTotalQty : ingTotalQty.toFixed(2)} {ing.unit}
                                                                     </span>
@@ -965,47 +1037,47 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
 
             {/* TAB 3: CATEGORY-WISE INGREDIENT BREAKDOWN */}
             {activeTab === 'category' && (
-                <div className="glass-card rounded-[2.5rem] border border-white p-8 space-y-6">
+                <div className="glass-card rounded-[2rem] sm:rounded-[2.5rem] border border-white p-5 sm:p-8 space-y-6 w-full shadow-sm">
                     <div>
-                        <h2 className="text-xl font-black text-slate-900 italic uppercase flex items-center gap-2">
-                            <Layers className="h-5 w-5 text-primary" />
+                        <h2 className="text-lg sm:text-xl font-black text-slate-900 italic uppercase flex items-center gap-2">
+                            <Layers className="h-5 w-5 text-primary shrink-0" />
                             CATEGORY-WISE INGREDIENT BREAKDOWN ({timeRange.toUpperCase()})
                         </h2>
                         <p className="text-xs text-slate-400 font-medium">Ingredients required grouped by menu dish categories</p>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-4 sm:space-y-6 w-full">
                         {consumptionData.categoryList.length === 0 ? (
                             <div className="py-12 text-center text-slate-400 font-bold uppercase tracking-wider">
                                 No sales recorded for categories in this timeframe
                             </div>
                         ) : (
                             consumptionData.categoryList.map((cat, cIdx) => (
-                                <div key={cIdx} className="bg-slate-50/80 border border-slate-100 rounded-3xl p-6 space-y-4">
-                                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/60 pb-4">
+                                <div key={cIdx} className="bg-slate-50/80 border border-slate-100 rounded-3xl p-4 sm:p-6 space-y-4 w-full">
+                                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200/60 pb-4">
                                         <div className="flex items-center gap-3">
-                                            <div className="p-3 bg-primary/10 text-primary rounded-2xl font-black text-sm">
+                                            <div className="p-2.5 sm:p-3 bg-primary/10 text-primary rounded-2xl font-black text-sm shrink-0">
                                                 #{cIdx + 1}
                                             </div>
                                             <div>
-                                                <h3 className="text-xl font-black text-slate-900">{cat.categoryName}</h3>
+                                                <h3 className="text-lg sm:text-xl font-black text-slate-900">{cat.categoryName}</h3>
                                                 <p className="text-xs font-bold text-slate-400">{cat.totalDishQtySold} portions sold in category</p>
                                             </div>
                                         </div>
-                                        <div className="text-right">
+                                        <div className="text-left sm:text-right flex sm:flex-col justify-between sm:justify-start items-center sm:items-end">
                                             <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Est. Category Ingredient Cost</span>
-                                            <span className="text-xl font-black text-emerald-600">LKR {cat.totalCategoryCost.toFixed(2)}</span>
+                                            <span className="text-lg sm:text-xl font-black text-emerald-600">LKR {cat.totalCategoryCost.toFixed(2)}</span>
                                         </div>
                                     </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full">
                                         {Object.values(cat.ingredients).map((ing, iIdx) => (
-                                            <div key={iIdx} className="bg-white p-4 rounded-2xl border border-slate-100 flex items-center justify-between">
+                                            <div key={iIdx} className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-100 flex items-center justify-between gap-2">
                                                 <div>
                                                     <h4 className="font-black text-slate-800 text-xs">{ing.name}</h4>
                                                     <span className="text-[11px] font-bold text-emerald-600">LKR {ing.cost.toFixed(2)}</span>
                                                 </div>
-                                                <span className="font-black text-indigo-600 text-sm">
+                                                <span className="font-black text-indigo-600 text-sm shrink-0">
                                                     {ing.quantity % 1 === 0 ? ing.quantity : ing.quantity.toFixed(2)} <span className="text-xs uppercase">{ing.unit}</span>
                                                 </span>
                                             </div>
@@ -1020,16 +1092,16 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
 
             {/* TAB 4: PORTION-WISE INGREDIENT BREAKDOWN */}
             {activeTab === 'portion' && (
-                <div className="glass-card rounded-[2.5rem] border border-white p-8 space-y-6">
+                <div className="glass-card rounded-[2rem] sm:rounded-[2.5rem] border border-white p-5 sm:p-8 space-y-6 w-full shadow-sm">
                     <div>
-                        <h2 className="text-xl font-black text-slate-900 italic uppercase flex items-center gap-2">
-                            <Tag className="h-5 w-5 text-primary" />
+                        <h2 className="text-lg sm:text-xl font-black text-slate-900 italic uppercase flex items-center gap-2">
+                            <Tag className="h-5 w-5 text-primary shrink-0" />
                             PORTION-WISE INGREDIENT BREAKDOWN ({timeRange.toUpperCase()})
                         </h2>
                         <p className="text-xs text-slate-400 font-medium">Ingredients required categorized by portion sizes (S, M, L, XL, Standard)</p>
                     </div>
 
-                    <div className="space-y-6">
+                    <div className="space-y-4 sm:space-y-6 w-full">
                         {consumptionData.portionList.length === 0 ? (
                             <div className="py-12 text-center text-slate-400 font-bold uppercase tracking-wider">
                                 No sales recorded for portions in this timeframe
@@ -1038,30 +1110,30 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                             consumptionData.portionList.map((port, pIdx) => {
                                 const portionStyle = PORTION_COLORS[port.portionSize] || PORTION_COLORS['STANDARD'];
                                 return (
-                                    <div key={pIdx} className="bg-slate-50/80 border border-slate-100 rounded-3xl p-6 space-y-4">
-                                        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-200/60 pb-4">
+                                    <div key={pIdx} className="bg-slate-50/80 border border-slate-100 rounded-3xl p-4 sm:p-6 space-y-4 w-full">
+                                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-200/60 pb-4">
                                             <div className="flex items-center gap-3">
-                                                <span className={cn("px-4 py-2 rounded-2xl text-base font-black border uppercase", portionStyle.bg, portionStyle.text, portionStyle.border)}>
+                                                <span className={cn("px-3.5 sm:px-4 py-1.5 sm:py-2 rounded-2xl text-sm sm:text-base font-black border uppercase shrink-0", portionStyle.bg, portionStyle.text, portionStyle.border)}>
                                                     Portion Size: {port.portionSize}
                                                 </span>
                                                 <div>
                                                     <p className="text-xs font-bold text-slate-500">{port.totalDishQtySold} portions sold in size ({port.portionSize})</p>
                                                 </div>
                                             </div>
-                                            <div className="text-right">
+                                            <div className="text-left sm:text-right flex sm:flex-col justify-between sm:justify-start items-center sm:items-end">
                                                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest block">Est. Portion Cost</span>
-                                                <span className="text-xl font-black text-emerald-600">LKR {port.totalPortionCost.toFixed(2)}</span>
+                                                <span className="text-lg sm:text-xl font-black text-emerald-600">LKR {port.totalPortionCost.toFixed(2)}</span>
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 w-full">
                                             {Object.values(port.ingredients).map((ing, iIdx) => (
-                                                <div key={iIdx} className="bg-white p-4 rounded-2xl border border-slate-100 flex items-center justify-between">
+                                                <div key={iIdx} className="bg-white p-3 sm:p-4 rounded-2xl border border-slate-100 flex items-center justify-between gap-2">
                                                     <div>
                                                         <h4 className="font-black text-slate-800 text-xs">{ing.name}</h4>
                                                         <span className="text-[11px] font-bold text-emerald-600">LKR {ing.cost.toFixed(2)}</span>
                                                     </div>
-                                                    <span className="font-black text-indigo-600 text-sm">
+                                                    <span className="font-black text-indigo-600 text-sm shrink-0">
                                                         {ing.quantity % 1 === 0 ? ing.quantity : ing.quantity.toFixed(2)} <span className="text-xs uppercase">{ing.unit}</span>
                                                     </span>
                                                 </div>

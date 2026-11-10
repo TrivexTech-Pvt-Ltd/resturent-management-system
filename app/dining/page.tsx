@@ -12,7 +12,6 @@ import {
     Plus, Trash2,
     Loader2,
     UtensilsCrossed,
-    ArrowLeft,
     ChevronLeft,
     ChevronRight
 } from "lucide-react";
@@ -200,11 +199,14 @@ export default function DiningPage() {
                 {/* Tables Grid */}
                 <div className="glass-card rounded-[2.5rem] overflow-hidden border border-white p-6">
                     {isLoading ? (
-                        <div className="p-20 text-center">
-                            <div className="flex flex-col items-center gap-4">
-                                <Loader2 className="h-10 w-10 text-primary animate-spin" />
-                                <span className="text-slate-400 font-bold uppercase tracking-widest text-sm">Loading Tables...</span>
-                            </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 animate-pulse">
+                            {[...Array(8)].map((_, i) => (
+                                <div key={i} className="glass-card rounded-2xl p-6 border border-slate-100 flex flex-col items-center gap-4">
+                                    <div className="w-20 h-20 bg-slate-200 rounded-2xl" />
+                                    <div className="h-5 w-24 bg-slate-200 rounded-xl" />
+                                    <div className="w-full h-9 bg-slate-100 rounded-xl" />
+                                </div>
+                            ))}
                         </div>
                     ) : filteredTables.length === 0 ? (
                         <div className="p-20 text-center">
