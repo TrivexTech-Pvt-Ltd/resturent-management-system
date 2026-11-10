@@ -260,8 +260,8 @@ export default function LoginPage() {
                 )}
               </div>
 
-              {/* Keep me signed in & Forgot Password */}
-              <div className="flex items-center justify-between text-xs pt-1">
+              {/* Keep me signed in */}
+              <div className="flex items-center text-xs pt-1">
                 <label className="flex items-center gap-2 cursor-pointer select-none text-slate-600">
                   <input
                     type="checkbox"
@@ -271,12 +271,6 @@ export default function LoginPage() {
                   />
                   <span>Keep me signed in</span>
                 </label>
-                <Link
-                  href="#"
-                  className="font-semibold text-[#5846f6] hover:underline"
-                >
-                  Forgot password?
-                </Link>
               </div>
 
               {/* Submit Button */}
@@ -295,17 +289,6 @@ export default function LoginPage() {
                 )}
               </button>
             </form>
- 
-            {/* Bottom Contact Link */}
-            <p className="text-center text-xs sm:text-sm text-slate-500 font-medium mt-6">
-              Don&apos;t have an account?{" "}
-              <Link
-                href="/register"
-                className="text-[#5846f6] font-semibold hover:underline"
-              >
-                Contact us
-              </Link>
-            </p>
           </div>
 
           {/* Bottom space filler for balance */}
