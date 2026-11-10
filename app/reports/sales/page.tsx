@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import {
     BarChart3,
@@ -59,9 +59,11 @@ import { Order, MenuItem, OrderItem } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import AppLayout from "@/components/AppLayout";
+import Pagination from "@/components/ui/Pagination";
 
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import { useDebounce } from "@/hooks/useDebounce";
 
 type ReportView = 'financials' | 'items';
 type TimeRange = 'daily' | 'weekly' | 'monthly' | 'custom';
@@ -91,8 +93,9 @@ const parseOrderDate = (dateStr: string) => {
 };
 
 // Robust Portion & Item Name Parser
-const parseItemDetails = (item: { name: string; category?: string; price: number }, menuList: MenuItem[] = []) => {
-    let name = item.name.trim();
+const parseItemDetails = (item: { name?: string; category?: string; price?: number }, menuList: MenuItem[] = []) => {
+    let name = (item?.name || "").trim();
+    if (!name) return { baseName: "Unknown", portionSize: "STANDARD", category: "General", fullName: "Unknown" };
     let baseName = name;
     let portionSize = "STANDARD";
 
@@ -148,24 +151,21 @@ export default function SalesReportPage() {
     const [itemPage, setItemPage] = useState(1);
     const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isMounted, setIsMounted] = useState(false);
+
+    useEffect(() => {
+        setIsMounted(true);
+    }, []);
     
-    const ITEMS_PER_PAGE = 10;
-    const ITEM_TABLE_PER_PAGE = 10;
+    const [itemsPerPage, setItemsPerPage] = useState(10);
+    const [itemTablePerPage, setItemTablePerPage] = useState(10);
 
-    // Queries
-    const { data: orders = [], isLoading: isLoadingOrders } = useQuery({
-        queryKey: ["orders-report"],
-        queryFn: getOrders,
-    });
+    // Debounce search query to avoid firing API requests on every keystroke
+    const debouncedSearchQuery = useDebounce(itemSearchQuery, 350);
 
-    const { data: menuList = [] } = useQuery({
-        queryKey: ["menu"],
-        queryFn: getMenu,
-    });
-
-    // Server-side paged orders query (used for Transaction Log in financials view)
+    // Date range boundaries for server-side queries
     const pagedStartDate = timeRange === 'custom'
-        ? customStartDate
+        ? (customStartDate ? `${customStartDate}T00:00:00` : format(startOfDay(new Date()), "yyyy-MM-dd'T'HH:mm:ss"))
         : timeRange === 'daily'
             ? format(startOfDay(new Date()), "yyyy-MM-dd'T'HH:mm:ss")
             : timeRange === 'weekly'
@@ -175,11 +175,26 @@ export default function SalesReportPage() {
         ? `${customEndDate}T23:59:59`
         : format(endOfDay(new Date()), "yyyy-MM-dd'T'HH:mm:ss");
 
+    // Scoped orders query (only fetches orders for the active date range & payment method)
+    const { data: orders = [], isLoading: isLoadingOrders } = useQuery({
+        queryKey: ["orders-report", pagedStartDate, pagedEndDate, paymentFilter],
+        queryFn: () => getOrders({
+            startDate: pagedStartDate,
+            endDate: pagedEndDate,
+            paymentMethod: paymentFilter === 'ALL' ? undefined : paymentFilter,
+        }),
+    });
+
+    const { data: menuList = [] } = useQuery({
+        queryKey: ["menu"],
+        queryFn: getMenu,
+    });
+
     const { data: pagedOrdersResult, isLoading: isLoadingPagedOrders } = useQuery({
-        queryKey: ["orders-paged", currentPage, ITEMS_PER_PAGE, pagedStartDate, pagedEndDate, paymentFilter],
+        queryKey: ["orders-paged", currentPage, itemsPerPage, pagedStartDate, pagedEndDate, paymentFilter],
         queryFn: () => getOrdersPaged({
             page: currentPage,
-            pageSize: ITEMS_PER_PAGE,
+            pageSize: itemsPerPage,
             startDate: pagedStartDate,
             endDate: pagedEndDate,
             paymentMethod: paymentFilter === 'ALL' ? undefined : paymentFilter,
@@ -196,26 +211,26 @@ export default function SalesReportPage() {
         queryKey: [
             "item-sales-paged",
             itemPage,
-            ITEM_TABLE_PER_PAGE,
+            itemTablePerPage,
             pagedStartDate,
             pagedEndDate,
             paymentFilter,
             selectedCategory,
             selectedItemName,
             selectedPortion,
-            itemSearchQuery,
+            debouncedSearchQuery,
             sortBy,
         ],
         queryFn: () => getItemSalesPaged({
             page: itemPage,
-            pageSize: ITEM_TABLE_PER_PAGE,
+            pageSize: itemTablePerPage,
             startDate: pagedStartDate,
             endDate: pagedEndDate,
             paymentMethod: paymentFilter,
             category: selectedCategory,
             itemName: selectedItemName,
             portionSize: selectedPortion,
-            search: itemSearchQuery,
+            search: debouncedSearchQuery,
             sortBy: sortBy,
         }),
         placeholderData: (prev) => prev,
@@ -255,6 +270,7 @@ export default function SalesReportPage() {
 
     // Filtered orders list
     const filteredOrders = useMemo(() => {
+        if (!Array.isArray(orders)) return [];
         const filtered = orders.filter(order => {
             const orderDate = parseOrderDate(order.createdAt);
             const matchesDate = isWithinInterval(orderDate, dateInterval);
@@ -352,43 +368,32 @@ export default function SalesReportPage() {
         return itemList;
     }, [filteredOrders, menuList, selectedCategory, selectedItemName, selectedPortion, itemSearchQuery, sortBy]);
 
-    // Categories list for dropdown
-    const availableCategories = useMemo(() => {
+    // Consolidated dropdown options list for category, item name, and portion in a single pass
+    const { availableCategories, availableItemNames, availablePortions } = useMemo(() => {
         const cats = new Set<string>();
-        menuList.forEach(m => { if (m.category) cats.add(m.category); });
+        const names = new Set<string>();
+        const portions = new Set<string>();
+
+        menuList.forEach(m => {
+            if (m.category) cats.add(m.category);
+            if (m.name) names.add(m.name.trim());
+        });
+
         filteredOrders.forEach(o => {
             o.items?.forEach(i => {
                 const parsed = parseItemDetails(i, menuList);
                 if (parsed.category) cats.add(parsed.category);
-            });
-        });
-        return Array.from(cats).sort();
-    }, [menuList, filteredOrders]);
-
-    // Distinct Item Base Names list for dropdown filter
-    const availableItemNames = useMemo(() => {
-        const names = new Set<string>();
-        menuList.forEach(m => { if (m.name) names.add(m.name.trim()); });
-        filteredOrders.forEach(o => {
-            o.items?.forEach(i => {
-                const parsed = parseItemDetails(i, menuList);
                 if (parsed.baseName) names.add(parsed.baseName);
-            });
-        });
-        return Array.from(names).sort();
-    }, [menuList, filteredOrders]);
-
-    // Portions list for dropdown
-    const availablePortions = useMemo(() => {
-        const portions = new Set<string>();
-        filteredOrders.forEach(o => {
-            o.items?.forEach(i => {
-                const parsed = parseItemDetails(i, menuList);
                 if (parsed.portionSize) portions.add(parsed.portionSize);
             });
         });
-        return Array.from(portions).sort();
-    }, [filteredOrders, menuList]);
+
+        return {
+            availableCategories: Array.from(cats).sort(),
+            availableItemNames: Array.from(names).sort(),
+            availablePortions: Array.from(portions).sort(),
+        };
+    }, [menuList, filteredOrders]);
 
     // Financial Statistics
     const totalSales = filteredOrders.reduce((sum, o) => sum + o.total, 0);
@@ -494,14 +499,14 @@ export default function SalesReportPage() {
     const chartData = useMemo(() => {
         const days = eachDayOfInterval(dateInterval);
         return days.map(day => {
-            const dayOrders = orders.filter(o => isSameDay(parseOrderDate(o.createdAt), day));
-            const sales = dayOrders.reduce((sum, o) => sum + (o.paymentMethod === paymentFilter || paymentFilter === 'ALL' ? o.total : 0), 0);
+            const dayOrders = filteredOrders.filter(o => isSameDay(parseOrderDate(o.createdAt), day));
+            const sales = dayOrders.reduce((sum, o) => sum + o.total, 0);
             return {
                 date: format(day, 'MMM dd'),
                 sales: sales
             };
         });
-    }, [orders, dateInterval, paymentFilter]);
+    }, [filteredOrders, dateInterval]);
 
     // Portion Chart Data
     const portionChartData = useMemo(() => {
@@ -520,14 +525,20 @@ export default function SalesReportPage() {
         })).sort((a, b) => b.qty - a.qty);
     }, [itemSalesData]);
 
-    // Top 5 Items Chart
+    // Top 5 Items Chart (Ranked by overall sales generated)
     const topItemsChartData = useMemo(() => {
-        return itemSalesData.slice(0, 5).map(item => ({
-            name: `${item.baseName} (${item.portionSize})`,
-            revenue: item.totalRevenue,
-            qty: item.totalQuantity
-        }));
-    }, [itemSalesData]);
+        const source = (itemSalesData && itemSalesData.length > 0) ? itemSalesData : (pagedItems || []);
+        return [...source]
+            .sort((a, b) => (Number(b.totalRevenue) || 0) - (Number(a.totalRevenue) || 0))
+            .slice(0, 5)
+            .map(item => ({
+                name: item.portionSize && item.portionSize !== 'STANDARD'
+                    ? `${item.baseName} (${item.portionSize})`
+                    : item.baseName,
+                revenue: Number(item.totalRevenue) || 0,
+                qty: Number(item.totalQuantity) || 0
+            }));
+    }, [itemSalesData, pagedItems]);
 
     const handlePageChange = (newPage: number) => {
         if (newPage >= 1 && newPage <= serverTotalPages) {
@@ -902,7 +913,7 @@ export default function SalesReportPage() {
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 w-full">
                             
                             {/* Top 5 Best Sellers Chart */}
-                            <div className="lg:col-span-2 glass-card p-4 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-white w-full">
+                            <div className="lg:col-span-2 glass-card p-4 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-white w-full min-w-0">
                                 <div className="flex items-center justify-between mb-6">
                                     <div>
                                         <h2 className="text-lg sm:text-xl font-black text-slate-900 italic flex items-center gap-2 uppercase">
@@ -912,8 +923,8 @@ export default function SalesReportPage() {
                                         <p className="text-xs text-slate-400 font-medium">Ranked by overall sales generated</p>
                                     </div>
                                 </div>
-                                <div className="h-[280px] sm:h-[300px] w-full">
-                                    {isLoadingOrders ? (
+                                <div className="h-[280px] sm:h-[300px] w-full min-w-0">
+                                    {!isMounted || (isLoadingOrders && isLoadingPagedItems) ? (
                                         <div className="h-full flex flex-col justify-around py-4 animate-pulse">
                                             {[85, 70, 55, 40, 25].map((w, idx) => (
                                                 <div key={idx} className="flex items-center gap-4">
@@ -927,11 +938,25 @@ export default function SalesReportPage() {
                                             No sales data available
                                         </div>
                                     ) : (
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <BarChart data={topItemsChartData} layout="vertical" margin={{ left: 10, right: 15, top: 0, bottom: 0 }}>
+                                        <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={280}>
+                                            <BarChart data={topItemsChartData} layout="vertical" margin={{ left: 10, right: 25, top: 0, bottom: 0 }}>
                                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#E2E8F0" />
-                                                <XAxis type="number" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 700 }} />
-                                                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} tick={{ fill: '#334155', fontSize: 10, fontWeight: 800 }} width={110} />
+                                                <XAxis
+                                                    type="number"
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    tick={{ fill: '#94A3B8', fontSize: 10, fontWeight: 700 }}
+                                                    tickFormatter={(val: any) => Number(val).toLocaleString()}
+                                                />
+                                                <YAxis
+                                                    dataKey="name"
+                                                    type="category"
+                                                    axisLine={false}
+                                                    tickLine={false}
+                                                    tick={{ fill: '#334155', fontSize: 10, fontWeight: 800 }}
+                                                    width={125}
+                                                    tickFormatter={(val: string) => val && val.length > 18 ? `${val.substring(0, 16)}...` : val}
+                                                />
                                                 <Tooltip
                                                     formatter={(val: any) => [`${Number(val).toFixed(2)}`, 'Revenue']}
                                                     contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)', fontWeight: 'bold' }}
@@ -1059,7 +1084,7 @@ export default function SalesReportPage() {
                                                 return (
                                                     <tr key={item.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
                                                         <td className="p-4 sm:p-6 font-bold text-slate-400 text-sm">
-                                                            {(itemPage - 1) * ITEM_TABLE_PER_PAGE + index + 1}
+                                                            {(itemPage - 1) * itemTablePerPage + index + 1}
                                                         </td>
                                                         <td className="p-4 sm:p-6">
                                                             <div>
@@ -1111,52 +1136,19 @@ export default function SalesReportPage() {
 
                             {/* Item Table Pagination */}
                             {!isLoadingPagedItems && serverItemTotalCount > 0 && (
-                                <div className="p-4 sm:p-6 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/50 w-full">
-                                    <p className="text-sm font-bold text-slate-500 text-center sm:text-left">
-                                        Showing <span className="text-slate-900">{(itemPage - 1) * ITEM_TABLE_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(itemPage * ITEM_TABLE_PER_PAGE, serverItemTotalCount)}</span> of <span className="text-slate-900">{serverItemTotalCount}</span> item variations
-                                    </p>
-                                    <div className="flex items-center justify-center flex-wrap gap-2 w-full sm:w-auto">
-                                        <button
-                                            onClick={() => handleItemPageChange(itemPage - 1)}
-                                            disabled={itemPage === 1}
-                                            className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                        >
-                                            <ChevronLeft className="h-5 w-5" />
-                                        </button>
-
-                                        <div className="flex items-center gap-1">
-                                            {Array.from({ length: serverItemTotalPages }, (_, i) => i + 1)
-                                                .filter(page => page === 1 || page === serverItemTotalPages || Math.abs(page - itemPage) <= 1)
-                                                .map((page, index, array) => (
-                                                    <div key={page} className="flex items-center gap-1">
-                                                        {index > 0 && array[index - 1] !== page - 1 && (
-                                                             <span className="text-slate-400 font-bold px-1">...</span>
-                                                        )}
-                                                        <button
-                                                            onClick={() => handleItemPageChange(page)}
-                                                            className={cn(
-                                                                "w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-bold text-sm transition-all",
-                                                                itemPage === page
-                                                                    ? "bg-slate-900 text-white shadow-lg shadow-slate-200"
-                                                                    : "text-slate-600 hover:bg-slate-50"
-                                                            )}
-                                                        >
-                                                            {page}
-                                                        </button>
-                                                    </div>
-                                                ))
-                                            }
-                                        </div>
-
-                                        <button
-                                            onClick={() => handleItemPageChange(itemPage + 1)}
-                                            disabled={itemPage === serverItemTotalPages}
-                                            className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                        >
-                                            <ChevronRight className="h-5 w-5" />
-                                        </button>
-                                    </div>
-                                </div>
+                                <Pagination
+                                    currentPage={itemPage}
+                                    totalPages={serverItemTotalPages}
+                                    totalItems={serverItemTotalCount}
+                                    itemsPerPage={itemTablePerPage}
+                                    onPageChange={handleItemPageChange}
+                                    onItemsPerPageChange={(newSize) => {
+                                        setItemTablePerPage(newSize);
+                                        setItemPage(1);
+                                    }}
+                                    pageSizeOptions={[5, 10, 20, 50, 100]}
+                                    itemName="item variations"
+                                />
                             )}
                         </div>
 
@@ -1200,7 +1192,7 @@ export default function SalesReportPage() {
                         {/* Chart & Payment Distribution */}
                         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 sm:gap-8 w-full">
 
-                            <div className="lg:col-span-2 glass-card p-4 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-white w-full">
+                            <div className="lg:col-span-2 glass-card p-4 sm:p-8 rounded-[2rem] sm:rounded-[2.5rem] border border-white w-full min-w-0">
                                 <div className="flex items-center justify-between mb-6 sm:mb-8">
                                     <h2 className="text-lg sm:text-xl font-black text-slate-900 italic uppercase">REVENUE TREND</h2>
                                     <div className="flex items-center gap-2">
@@ -1210,15 +1202,15 @@ export default function SalesReportPage() {
                                         </div>
                                     </div>
                                 </div>
-                                <div className="h-[280px] sm:h-[350px] w-full">
-                                    {isLoadingOrders ? (
+                                <div className="h-[280px] sm:h-[350px] w-full min-w-0">
+                                    {!isMounted || isLoadingOrders ? (
                                         <div className="h-full flex items-end gap-3 px-6 pb-6 animate-pulse">
                                             {[40, 65, 30, 85, 50, 95, 70, 80, 60, 90, 75, 85].map((h, idx) => (
                                                 <div key={idx} className="flex-1 bg-indigo-100 rounded-t-xl" style={{ height: `${h}%` }} />
                                             ))}
                                         </div>
                                     ) : (
-                                    <ResponsiveContainer width="100%" height="100%">
+                                    <ResponsiveContainer width="100%" height="100%" minWidth={0} minHeight={280}>
                                         <AreaChart data={chartData} margin={{ left: 0, right: 10, top: 0, bottom: 0 }}>
                                             <defs>
                                                 <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
@@ -1350,7 +1342,7 @@ export default function SalesReportPage() {
                                             pagedOrders.map((order, index) => (
                                                 <tr key={order.id} className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors group">
                                                     <td className="p-4 sm:p-6">
-                                                        <span className="font-bold text-slate-500">{(currentPage - 1) * ITEMS_PER_PAGE + index + 1}</span>
+                                                        <span className="font-bold text-slate-500">{(currentPage - 1) * itemsPerPage + index + 1}</span>
                                                     </td>
                                                     <td className="p-4 sm:p-6">
                                                         <span className="font-bold text-slate-900">#{order.orderNumber}</span>
@@ -1400,52 +1392,19 @@ export default function SalesReportPage() {
 
                             {/* Transactions Pagination */}
                             {!isLoadingPagedOrders && serverTotalCount > 0 && (
-                                <div className="p-4 sm:p-6 border-t border-slate-50 flex flex-col sm:flex-row items-center justify-between gap-4 bg-white/50 w-full">
-                                    <p className="text-sm font-bold text-slate-500 text-center sm:text-left">
-                                        Showing <span className="text-slate-900">{(currentPage - 1) * ITEMS_PER_PAGE + 1}</span> to <span className="text-slate-900">{Math.min(currentPage * ITEMS_PER_PAGE, serverTotalCount)}</span> of <span className="text-slate-900">{serverTotalCount}</span> transactions
-                                    </p>
-                                    <div className="flex items-center justify-center flex-wrap gap-2 w-full sm:w-auto">
-                                        <button
-                                            onClick={() => handlePageChange(currentPage - 1)}
-                                            disabled={currentPage === 1}
-                                            className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                        >
-                                            <ChevronLeft className="h-5 w-5" />
-                                        </button>
-
-                                        <div className="flex items-center gap-1">
-                                            {Array.from({ length: serverTotalPages }, (_, i) => i + 1)
-                                                .filter(page => page === 1 || page === serverTotalPages || Math.abs(page - currentPage) <= 1)
-                                                .map((page, index, array) => (
-                                                    <div key={page} className="flex items-center gap-1">
-                                                        {index > 0 && array[index - 1] !== page - 1 && (
-                                                            <span className="text-slate-400 font-bold px-1">...</span>
-                                                        )}
-                                                        <button
-                                                            onClick={() => handlePageChange(page)}
-                                                            className={cn(
-                                                                "w-9 h-9 sm:w-10 sm:h-10 rounded-xl font-bold text-sm transition-all",
-                                                                currentPage === page
-                                                                    ? "bg-slate-900 text-white shadow-lg shadow-slate-200"
-                                                                    : "text-slate-600 hover:bg-slate-50"
-                                                            )}
-                                                        >
-                                                            {page}
-                                                        </button>
-                                                    </div>
-                                                ))
-                                            }
-                                        </div>
-
-                                        <button
-                                            onClick={() => handlePageChange(currentPage + 1)}
-                                            disabled={currentPage === serverTotalPages}
-                                            className="p-2 rounded-xl border border-slate-200 text-slate-600 hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                                        >
-                                            <ChevronRight className="h-5 w-5" />
-                                        </button>
-                                    </div>
-                                </div>
+                                <Pagination
+                                    currentPage={currentPage}
+                                    totalPages={serverTotalPages}
+                                    totalItems={serverTotalCount}
+                                    itemsPerPage={itemsPerPage}
+                                    onPageChange={handlePageChange}
+                                    onItemsPerPageChange={(newSize) => {
+                                        setItemsPerPage(newSize);
+                                        setCurrentPage(1);
+                                    }}
+                                    pageSizeOptions={[5, 10, 20, 50, 100]}
+                                    itemName="transactions"
+                                />
                             )}
                         </div>
                     </div>

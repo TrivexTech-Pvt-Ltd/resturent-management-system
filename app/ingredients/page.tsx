@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
 import AppLayout from "@/components/AppLayout";
+import Pagination from "@/components/ui/Pagination";
 import {
   Boxes,
   Plus,
@@ -91,6 +92,15 @@ export default function IngredientsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("All Categories");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK">("ALL");
+
+  // ── Pagination State ───────────────────────────────────────────────────────
+  const PAGE_SIZE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategoryFilter, statusFilter]);
 
   // ── Modal / Form State ─────────────────────────────────────────────────────
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -204,6 +214,12 @@ export default function IngredientsPage() {
       return matchesSearch && matchesCat && matchesStatus;
     });
   }, [ingredients, searchQuery, selectedCategoryFilter, statusFilter]);
+
+  const totalPages = Math.max(1, Math.ceil(filteredIngredients.length / PAGE_SIZE));
+  const paginatedIngredients = useMemo(
+    () => filteredIngredients.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filteredIngredients, currentPage]
+  );
 
   const stats = useMemo(() => {
     const totalItems = ingredients.length;
@@ -471,7 +487,7 @@ export default function IngredientsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-sm font-medium">
-                  {filteredIngredients.map((item) => {
+                 {paginatedIngredients.map((item) => {
                     const qty = item.stockQuantity ?? 0;
                     const price = item.unitCost ?? 0;
                     const totalVal = qty * price;
@@ -541,6 +557,15 @@ export default function IngredientsPage() {
               </table>
             </div>
           )}
+          {/* Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredIngredients.length}
+            itemsPerPage={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+            itemName="ingredients"
+          />
         </div>
       </div>
 

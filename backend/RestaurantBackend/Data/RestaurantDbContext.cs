@@ -39,6 +39,24 @@ namespace RestaurantBackend.Data
                 .Property(o => o.Status)
                 .HasConversion<string>();
 
+            // Performance indexes for report date-range and payment filters
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => o.CreatedAt)
+                .HasDatabaseName("IX_Orders_CreatedAt");
+
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => o.PaymentMethod)
+                .HasDatabaseName("IX_Orders_PaymentMethod");
+
+            modelBuilder.Entity<Order>()
+                .HasIndex(o => new { o.CreatedAt, o.PaymentMethod })
+                .HasDatabaseName("IX_Orders_CreatedAt_PaymentMethod");
+
+            // Speed up order items lookup by parent order
+            modelBuilder.Entity<OrderItem>()
+                .HasIndex(oi => oi.OrderId)
+                .HasDatabaseName("IX_OrderItems_OrderId");
+
             modelBuilder.Entity<DishEstimation>()
                 .HasMany(d => d.Ingredients)
                 .WithOne(i => i.DishEstimation)
