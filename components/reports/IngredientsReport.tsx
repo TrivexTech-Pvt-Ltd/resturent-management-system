@@ -631,10 +631,10 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
             )}
 
             {/* Timeframe Selector & Export Bar */}
-            <div className="glass-card p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col xl:flex-row gap-6 items-stretch xl:items-center justify-between border border-white w-full">
+            <div className="glass-card p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between border border-white w-full">
                 
                 {/* Views / Sub-tabs */}
-                <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center bg-slate-100 p-1.5 rounded-2xl border border-slate-200/50 w-full xl:w-auto gap-1 sm:gap-0">
+                <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center bg-slate-100 p-1.5 rounded-2xl border border-slate-200/50 w-full md:w-auto gap-1 sm:gap-0">
                     <button
                         onClick={() => setActiveTab('summary')}
                         className={cn(
@@ -686,7 +686,7 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                 </div>
 
                 {/* Time Range Selector */}
-                <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 w-full xl:w-auto">
+                <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                     <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
                         {(['daily', 'weekly', 'monthly', 'custom'] as TimeRange[]).map((range) => (
                             <button
@@ -808,7 +808,7 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
             )}
 
             {/* Filter Bar */}
-            <div className="glass-card p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border border-white flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center w-full">
+            <div className="glass-card p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border border-white flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center w-full">
                 
                 {/* Search */}
                 <div className="relative flex-1 w-full">
@@ -831,44 +831,53 @@ export default function IngredientsReport({ initialTimeRange = 'daily', showTitl
                 </div>
 
                 {/* Dropdown Filters */}
-                <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
                     {/* Category Filter */}
-                    <select
-                        value={selectedCategory}
-                        onChange={(e) => setSelectedCategory(e.target.value)}
-                        className="w-full sm:w-auto px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer"
-                    >
-                        <option value="ALL">All Categories</option>
-                        {availableCategories.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
-                        ))}
-                    </select>
+                    <div className="flex flex-row items-center gap-2 w-full md:w-auto">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Category:</span>
+                        <select
+                            value={selectedCategory}
+                            onChange={(e) => setSelectedCategory(e.target.value)}
+                            className="flex-1 md:flex-none md:w-auto px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer"
+                        >
+                            <option value="ALL">All Categories</option>
+                            {availableCategories.map(cat => (
+                                <option key={cat} value={cat}>{cat}</option>
+                            ))}
+                        </select>
+                    </div>
 
                     {/* Item Filter */}
-                    <select
-                        value={selectedItemName}
-                        onChange={(e) => setSelectedItemName(e.target.value)}
-                        className="w-full sm:w-auto px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer sm:max-w-[170px] truncate"
-                    >
-                        <option value="ALL">All Items</option>
-                        {availableItemNames.map(name => (
-                            <option key={name} value={name}>{name}</option>
-                        ))}
-                    </select>
+                    <div className="flex flex-row items-center gap-2 w-full md:w-auto">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Item:</span>
+                        <select
+                            value={selectedItemName}
+                            onChange={(e) => setSelectedItemName(e.target.value)}
+                            className="flex-1 md:flex-none md:w-auto px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer md:max-w-[170px] truncate"
+                        >
+                            <option value="ALL">All Items</option>
+                            {availableItemNames.map(name => (
+                                <option key={name} value={name}>{name}</option>
+                            ))}
+                        </select>
+                    </div>
 
                     {/* Portion Filter */}
-                    <select
-                        value={selectedPortion}
-                        onChange={(e) => setSelectedPortion(e.target.value)}
-                        className="w-full sm:w-auto px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer"
-                    >
-                        <option value="ALL">All Portions</option>
-                        <option value="S">S (Small)</option>
-                        <option value="M">M (Medium)</option>
-                        <option value="L">L (Large)</option>
-                        <option value="XL">XL (Extra Large)</option>
-                        <option value="STANDARD">Standard</option>
-                    </select>
+                    <div className="flex flex-row items-center gap-2 w-full md:w-auto">
+                        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Portion:</span>
+                        <select
+                            value={selectedPortion}
+                            onChange={(e) => setSelectedPortion(e.target.value)}
+                            className="flex-1 md:flex-none md:w-auto px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer"
+                        >
+                            <option value="ALL">All Portions</option>
+                            <option value="S">S (Small)</option>
+                            <option value="M">M (Medium)</option>
+                            <option value="L">L (Large)</option>
+                            <option value="XL">XL (Extra Large)</option>
+                            <option value="STANDARD">Standard</option>
+                        </select>
+                    </div>
                 </div>
             </div>
 

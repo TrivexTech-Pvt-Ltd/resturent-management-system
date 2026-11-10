@@ -665,14 +665,14 @@ export default function SalesReportPage() {
                 </div>
 
                 {/* View Switcher & Time Range Bar */}
-                <div className="glass-card p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col xl:flex-row gap-6 items-stretch xl:items-center justify-between border border-white w-full">
+                <div className="glass-card p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] flex flex-col md:flex-row gap-4 items-stretch md:items-center justify-between border border-white w-full">
                     
                     {/* View Switcher */}
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center bg-slate-100 p-1.5 rounded-2xl border border-slate-200/50 w-full xl:w-auto gap-1 sm:gap-0">
+                    <div className="flex flex-row items-center bg-slate-100 p-1.5 rounded-2xl border border-slate-200/50 w-full md:w-auto gap-0">
                         <button
                             onClick={() => setActiveView('items')}
                             className={cn(
-                                "flex-1 justify-center px-4 sm:px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer w-full sm:w-auto",
+                                "flex-1 md:flex-none justify-center px-4 sm:px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer",
                                 activeView === 'items'
                                     ? "bg-primary text-white shadow-md shadow-primary/20"
                                     : "text-slate-500 hover:text-slate-800"
@@ -684,7 +684,7 @@ export default function SalesReportPage() {
                         <button
                             onClick={() => setActiveView('financials')}
                             className={cn(
-                                "flex-1 justify-center px-4 sm:px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer w-full sm:w-auto",
+                                "flex-1 md:flex-none justify-center px-4 sm:px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-wider transition-all flex items-center gap-2 cursor-pointer",
                                 activeView === 'financials'
                                     ? "bg-slate-900 text-white shadow-md shadow-slate-200"
                                     : "text-slate-500 hover:text-slate-800"
@@ -696,7 +696,7 @@ export default function SalesReportPage() {
                     </div>
 
                     {/* Time Range Selector */}
-                    <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-2 w-full xl:w-auto">
+                    <div className="flex flex-wrap items-center gap-2 w-full md:w-auto">
                         <div className="grid grid-cols-2 sm:flex sm:flex-wrap items-center gap-2 w-full sm:w-auto">
                             {(['daily', 'weekly', 'monthly', 'custom'] as TimeRange[]).map((range) => (
                                 <button
@@ -796,7 +796,7 @@ export default function SalesReportPage() {
                         </div>
 
                         {/* Item Filters Bar */}
-                        <div className="glass-card p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border border-white flex flex-col lg:flex-row gap-4 justify-between items-stretch lg:items-center w-full">
+                        <div className="glass-card p-4 sm:p-6 rounded-[2rem] sm:rounded-[2.5rem] border border-white flex flex-col md:flex-row gap-4 justify-between items-stretch md:items-center w-full">
                             
                             {/* Search input */}
                             <div className="relative flex-1 w-full">
@@ -822,18 +822,18 @@ export default function SalesReportPage() {
                             </div>
 
                             {/* Dropdowns */}
-                            <div className="flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center gap-3 w-full lg:w-auto">
+                            <div className="flex flex-wrap items-center gap-3 w-full lg:w-auto">
                                 
                                 {/* Category Filter */}
-                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
-                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Category:</span>
+                                <div className="flex flex-row items-center gap-2 w-full md:w-auto">
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Category:</span>
                                     <select
                                         value={selectedCategory}
                                         onChange={(e) => {
                                             setSelectedCategory(e.target.value);
                                             setItemPage(1);
                                         }}
-                                        className="w-full sm:w-auto px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer"
+                                        className="flex-1 md:flex-none md:w-auto px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer"
                                     >
                                         <option value="ALL">All Categories</option>
                                         {availableCategories.map(cat => (
@@ -843,15 +843,15 @@ export default function SalesReportPage() {
                                 </div>
 
                                 {/* Item Name Filter */}
-                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
-                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Item:</span>
+                                <div className="flex flex-row items-center gap-2 w-full md:w-auto">
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Item:</span>
                                     <select
                                         value={selectedItemName}
                                         onChange={(e) => {
                                             setSelectedItemName(e.target.value);
                                             setItemPage(1);
                                         }}
-                                        className="w-full sm:w-auto px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer sm:max-w-[180px] truncate"
+                                        className="flex-1 md:flex-none md:w-auto px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer md:max-w-[180px] truncate"
                                     >
                                         <option value="ALL">All Items</option>
                                         {availableItemNames.map(name => (
@@ -861,15 +861,15 @@ export default function SalesReportPage() {
                                 </div>
 
                                 {/* Portion Size Filter */}
-                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
-                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Portion:</span>
+                                <div className="flex flex-row items-center gap-2 w-full md:w-auto">
+                                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider whitespace-nowrap">Portion:</span>
                                     <select
                                         value={selectedPortion}
                                         onChange={(e) => {
                                             setSelectedPortion(e.target.value);
                                             setItemPage(1);
                                         }}
-                                        className="w-full sm:w-auto px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer"
+                                        className="flex-1 md:flex-none md:w-auto px-4 py-3 bg-slate-50 border border-slate-100 rounded-2xl font-bold text-xs text-slate-700 outline-none hover:bg-slate-100 transition-colors cursor-pointer"
                                     >
                                         <option value="ALL">All Sizes</option>
                                         <option value="S">S (Small)</option>
@@ -881,14 +881,14 @@ export default function SalesReportPage() {
                                 </div>
 
                                 {/* Sort Option */}
-                                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-1.5 sm:gap-2 w-full sm:w-auto">
+                                <div className="flex flex-row items-center gap-2 w-full md:w-auto">
                                     <select
                                         value={sortBy}
                                         onChange={(e) => {
                                             setSortBy(e.target.value as SortOption);
                                             setItemPage(1);
                                         }}
-                                        className="w-full sm:w-auto px-4 py-3 bg-slate-900 text-white rounded-2xl font-bold text-xs outline-none cursor-pointer shadow-sm text-center sm:text-left"
+                                        className="flex-1 md:flex-none md:w-auto px-4 py-3 bg-slate-900 text-white rounded-2xl font-bold text-xs outline-none cursor-pointer shadow-sm"
                                     >
                                         <option value="revenue_desc">Highest Revenue</option>
                                         <option value="qty_desc">Most Quantity Sold</option>
