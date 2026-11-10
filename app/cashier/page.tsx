@@ -5,8 +5,9 @@ import { MenuItem, Portion, OrderItem } from '@/lib/types';
 import MenuItemCard from '@/components/MenuItemCard';
 import PaymentModal from '@/components/PaymentModal';
 import BillPrinter from '@/components/BillPrinter';
+import AppLayout from '@/components/AppLayout';
 import Link from 'next/link';
-import { ArrowLeft, Search, UtensilsCrossed, Trash2, X, LayoutGrid, LayoutList } from 'lucide-react';
+import { Search, UtensilsCrossed, Trash2, X, LayoutGrid, LayoutList } from 'lucide-react';
 import { getMenu, saveOrder } from '@/lib/db';
 import { useOrderStore } from '@/lib/store/useOrderStore';
 
@@ -126,19 +127,10 @@ export default function CashierPage() {
 
     if (isLoading) {
         return (
-            <div className="flex flex-col h-screen overflow-hidden animate-pulse">
-                {/* Header skeleton */}
-                <header className="px-4 md:px-8 py-3 md:py-4 glass-card border-b flex justify-between items-center z-10">
-                    <div className="flex items-center gap-4">
-                        <div className="w-9 h-9 bg-slate-200 rounded-full" />
-                        <div className="h-7 w-32 bg-slate-200 rounded-xl" />
-                    </div>
-                    <div className="h-6 w-28 bg-slate-100 rounded-full" />
-                </header>
-
-                <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+            <AppLayout>
+                <div className="flex flex-col lg:flex-row flex-1 animate-pulse min-h-[calc(100vh-120px)]">
                     {/* Menu section skeleton */}
-                    <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-slate-50/50">
+                    <main className="flex-1 p-4 md:p-6 lg:p-8 bg-slate-50/50">
                         <div className="max-w-7xl mx-auto space-y-6">
                             {/* Search + toggles skeleton */}
                             <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
@@ -154,14 +146,14 @@ export default function CashierPage() {
                             {/* Menu cards skeleton */}
                             <div className="grid grid-cols-1 xl:grid-cols-2 gap-3">
                                 {[...Array(8)].map((_, i) => (
-                                    <div key={i} className="glass-card p-4 rounded-2xl h-20 bg-slate-200 rounded-2xl" />
+                                    <div key={i} className="glass-card p-4 rounded-2xl h-20 bg-slate-200" />
                                 ))}
                             </div>
                         </div>
                     </main>
 
                     {/* Sidebar skeleton */}
-                    <aside className="w-full lg:w-[420px] xl:w-[480px] h-[45vh] lg:h-auto glass-card border-t lg:border-t-0 lg:border-l flex flex-col p-4 md:p-6 bg-white">
+                    <aside className="w-full lg:w-[420px] xl:w-[480px] glass-card border-t lg:border-t-0 lg:border-l flex flex-col p-4 md:p-6 bg-white shrink-0">
                         <div className="h-7 w-36 bg-slate-200 rounded-xl mb-6" />
                         <div className="flex-1 space-y-3">
                             {[...Array(3)].map((_, i) => (
@@ -175,30 +167,15 @@ export default function CashierPage() {
                         </div>
                     </aside>
                 </div>
-            </div>
+            </AppLayout>
         );
     }
 
     return (
-        <div className="flex flex-col h-screen overflow-hidden">
-            {/* Header */}
-            <header className="px-4 md:px-8 py-3 md:py-4 glass-card border-b flex justify-between items-center z-10">
-                <div className="flex items-center gap-4">
-                    <Link href="/" className="bg-slate-100 hover:bg-slate-200 p-2 rounded-full transition-colors text-slate-600">
-                        <ArrowLeft className="w-5 h-5" />
-                    </Link>
-                    <h1 className="text-xl md:text-2xl font-bold text-primary">NextServe</h1>
-                </div>
-                <div className="flex gap-4 items-center">
-                    <span className="text-xs md:text-sm font-medium bg-slate-100 px-3 py-1 rounded-full">
-                        {isMounted ? new Date().toLocaleDateString() : ''}
-                    </span>
-                </div>
-            </header>
-
-            <div className="flex flex-col lg:flex-row flex-1 overflow-hidden">
+        <AppLayout>
+            <div className="flex flex-col lg:flex-row flex-1 min-h-[calc(100vh-120px)]">
                 {/* Menu Section */}
-                <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-slate-50/50">
+                <main className="flex-1 p-4 md:p-6 lg:p-8 bg-slate-50/50 min-w-0">
                     <div className="max-w-7xl mx-auto">
                         <div className="flex flex-col gap-6 mb-8">
                             {/* Search and View Toggles */}
@@ -306,7 +283,7 @@ export default function CashierPage() {
                 </main>
 
                 {/* Order Sidebar */}
-                <aside className="w-full lg:w-[420px] xl:w-[480px] h-[45vh] lg:h-auto glass-card border-t lg:border-t-0 lg:border-l flex flex-col p-4 md:p-6 overflow-hidden bg-white shadow-2xl lg:shadow-none z-20">
+                <aside className="w-full lg:w-[420px] xl:w-[480px] glass-card border-t lg:border-t-0 lg:border-l flex flex-col p-4 md:p-6 bg-white shadow-2xl lg:shadow-none z-20 shrink-0 lg:sticky lg:top-[57px] lg:h-[calc(100vh-57px)]">
                     <div className="flex items-center justify-between mb-4 md:mb-6">
                         <h2 className="text-lg md:text-xl font-bold flex items-center gap-2 text-slate-800">
                             Current Order
@@ -323,7 +300,7 @@ export default function CashierPage() {
                         )}
                     </div>
 
-                    <div className="flex-1 overflow-y-auto space-y-3 mb-4 md:mb-6 pr-1">
+                    <div className="flex-1 overflow-y-auto space-y-3 mb-4 md:mb-6 pr-1 max-h-[45vh] lg:max-h-none min-h-[160px]">
                         {cart.length === 0 ? (
                             <div className="h-full flex flex-col items-center justify-center text-slate-400">
                                 <span className="text-4xl md:text-6xl mb-2 md:mb-4">🛒</span>
@@ -399,6 +376,6 @@ export default function CashierPage() {
                 isLoading={isProcessing}
             />
             <BillPrinter order={lastOrder} endPoint="print" />
-        </div>
+        </AppLayout>
     );
 }

@@ -3,9 +3,9 @@
 import { useState, useMemo, useCallback } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import AppLayout from "@/components/AppLayout";
 import {
   Calculator,
-  ArrowLeft,
   Plus,
   Trash2,
   Save,
@@ -492,16 +492,14 @@ export default function EstimationsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 sm:p-6 md:p-10">
+    <AppLayout>
+    <div className="bg-transparent p-4 sm:p-6 md:p-10">
       <div className="max-w-7xl mx-auto space-y-8">
 
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <Link href="/" className="inline-flex items-center text-slate-400 hover:text-indigo-600 transition-colors text-sm font-bold gap-1 mb-2">
-              <ArrowLeft className="h-4 w-4" />
-              DASHBOARD
-            </Link>
+
             <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3 italic uppercase">
               <Calculator className="text-indigo-600 h-9 w-9 not-italic" />
               DISH COST ESTIMATIONS
@@ -1101,5 +1099,6 @@ export default function EstimationsPage() {
         )}
       </div>
     </div>
+    </AppLayout>
   );
 }

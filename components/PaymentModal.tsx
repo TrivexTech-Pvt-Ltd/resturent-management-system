@@ -1,5 +1,8 @@
+'use client';
+
 import { useState, useEffect, memo } from 'react';
 import { cn } from '@/lib/utils';
+import { Banknote, CreditCard, X, Check, ArrowRight, Loader2 } from 'lucide-react';
 
 interface PaymentModalProps {
     isOpen: boolean;
@@ -7,19 +10,27 @@ interface PaymentModalProps {
     total: number;
     onConfirm: (method: 'CASH' | 'CARD') => void;
     isLoading?: boolean;
+    initialAmount?: number | null;
 }
 
-function PaymentModal({ isOpen, onClose, total, onConfirm, isLoading = false }: PaymentModalProps) {
+function PaymentModal({
+    isOpen,
+    onClose,
+    total,
+    onConfirm,
+    isLoading = false,
+    initialAmount = null,
+}: PaymentModalProps) {
     const [method, setMethod] = useState<'CASH' | 'CARD'>('CASH');
     const [receivedAmount, setReceivedAmount] = useState<string>('');
 
-    // Reset form when modal opens
+    // Reset or initialize form when modal opens
     useEffect(() => {
         if (isOpen) {
             setMethod('CASH');
-            setReceivedAmount('');
+            setReceivedAmount(initialAmount ? initialAmount.toString() : '');
         }
-    }, [isOpen]);
+    }, [isOpen, initialAmount]);
 
     const received = parseFloat(receivedAmount) || 0;
     const balance = received - total;
@@ -27,50 +38,105 @@ function PaymentModal({ isOpen, onClose, total, onConfirm, isLoading = false }: 
     const handleConfirm = () => {
         if (method === 'CASH' && received < total) return;
         onConfirm(method);
-        // Don't clear immediately, let parent handle close
+    };
+
+    const handleQuickAdd = (addVal: number) => {
+        const cur = parseFloat(receivedAmount) || 0;
+        setReceivedAmount((cur + addVal).toString());
+    };
+
+    const handleSetExact = () => {
+        setReceivedAmount(total.toFixed(2));
     };
 
     if (!isOpen) return null;
 
-    const denominations = [500, 1000, 5000];
-
     return (
-        <div className="fixed inset-0 bg-slate-900/40 z-50 flex items-center justify-center p-4" style={{ willChange: 'opacity' }}>
-            <div className="bg-white w-full max-w-sm rounded-4xl p-6 overflow-hidden shadow-2xl" style={{ willChange: 'transform' }}>
-                <div className="flex justify-between items-center mb-5">
-                    <h2 className="text-xl font-bold italic tracking-tight uppercase">Checkout</h2>
-                    <button onClick={onClose} disabled={isLoading} className="p-2 hover:bg-slate-100 rounded-lg transition-all text-secondary cursor-pointer disabled:opacity-50">✕</button>
-                </div>
-
-                <div className="bg-slate-50 p-5 rounded-2xl mb-5 text-center border border-slate-100">
-                    <p className="text-slate-400 text-[10px] font-black uppercase tracking-widest mb-1">Total Payable</p>
-                    <p className="text-4xl font-black text-primary italic tracking-tighter tabular-nums">{total.toFixed(2)}</p>
-                </div>
-
-                <div className="flex gap-3 mb-5">
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 animate-in fade-in duration-200">
+            <div className="bg-white w-full max-w-md rounded-3xl p-6 overflow-hidden shadow-2xl border border-slate-100 animate-in zoom-in-95 duration-200">
+                {/* Header */}
+                <div className="flex justify-between items-center mb-5 pb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-xl bg-indigo-50 flex items-center justify-center text-indigo-600 font-black text-sm">
+                            $
+                        </div>
+                        <div>
+                            <h2 className="text-lg font-black text-slate-800 tracking-tight">Checkout Payment</h2>
+                            <p className="text-xs text-slate-400 font-medium">Select method & finalize transaction</p>
+                        </div>
+                    </div>
                     <button
+                        onClick={onClose}
+                        disabled={isLoading}
+                        className="w-8 h-8 flex items-center justify-center hover:bg-slate-100 rounded-xl transition-all text-slate-400 hover:text-slate-700 cursor-pointer disabled:opacity-50"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
+                </div>
+
+                {/* Payable Amount Highlight */}
+                <div className="bg-gradient-to-br from-indigo-50/70 via-indigo-50/40 to-violet-50/70 p-5 rounded-2xl mb-5 text-center border border-indigo-100/60 shadow-inner">
+                    <p className="text-indigo-600/80 text-[11px] font-black uppercase tracking-widest mb-1">
+                        Total Amount Payable
+                    </p>
+                    <div className="flex items-baseline justify-center gap-1">
+                        <span className="text-sm font-black text-indigo-400">LKR</span>
+                        <span className="text-4xl font-black text-indigo-600 tracking-tight tabular-nums">
+                            {total.toFixed(2)}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Payment Method Tabs */}
+                <div className="grid grid-cols-2 gap-3 mb-5">
+                    <button
+                        type="button"
                         onClick={() => setMethod('CASH')}
                         disabled={isLoading}
-                        className={`flex-1 p-4 rounded-xl border-2 flex items-center justify-center gap-2 transition-all cursor-pointer ${method === 'CASH' ? 'border-primary bg-primary/5 text-primary' : 'border-transparent bg-slate-50 text-slate-400'} ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`p-3.5 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition-all cursor-pointer font-bold text-xs uppercase tracking-wider ${
+                            method === 'CASH'
+                                ? 'border-indigo-600 bg-indigo-50/60 text-indigo-700 shadow-sm shadow-indigo-100'
+                                : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200 hover:text-slate-700'
+                        } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                        <span className="text-xl">💵</span>
-                        <span className="font-black uppercase text-[10px] tracking-widest">Cash</span>
+                        <Banknote className="w-5 h-5 text-emerald-600" />
+                        <span>Cash Tender</span>
                     </button>
                     <button
+                        type="button"
                         onClick={() => setMethod('CARD')}
                         disabled={isLoading}
-                        className={`flex-1 p-4 rounded-xl border-2 flex items-center justify-center gap-2 transition-all cursor-pointer ${method === 'CARD' ? 'border-primary bg-primary/5 text-primary' : 'border-transparent bg-slate-50 text-slate-400'} ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        className={`p-3.5 rounded-2xl border-2 flex items-center justify-center gap-2.5 transition-all cursor-pointer font-bold text-xs uppercase tracking-wider ${
+                            method === 'CARD'
+                                ? 'border-indigo-600 bg-indigo-50/60 text-indigo-700 shadow-sm shadow-indigo-100'
+                                : 'border-slate-100 bg-slate-50 text-slate-500 hover:border-slate-200 hover:text-slate-700'
+                        } ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
                     >
-                        <span className="text-xl">💳</span>
-                        <span className="font-black uppercase text-[10px] tracking-widest">Card</span>
+                        <CreditCard className="w-5 h-5 text-indigo-600" />
+                        <span>Card Payment</span>
                     </button>
                 </div>
 
+                {/* Cash Options */}
                 {method === 'CASH' && (
                     <div className="space-y-4 mb-5">
                         <div>
-                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 px-1">Received Amount</label>
+                            <div className="flex justify-between items-center mb-1.5 px-1">
+                                <label className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider">
+                                    Cash Tendered
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={handleSetExact}
+                                    className="text-[11px] font-bold text-indigo-600 hover:text-indigo-800 cursor-pointer hover:underline"
+                                >
+                                    Exact: {total.toFixed(2)}
+                                </button>
+                            </div>
                             <div className="relative group">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 font-black text-sm">
+                                    LKR
+                                </span>
                                 <input
                                     type="number"
                                     value={receivedAmount}
@@ -78,42 +144,98 @@ function PaymentModal({ isOpen, onClose, total, onConfirm, isLoading = false }: 
                                     placeholder="0.00"
                                     autoFocus
                                     disabled={isLoading}
-                                    className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-primary/30 focus:ring-4 focus:ring-primary/5 outline-none transition-all font-black text-xl text-slate-800 placeholder:text-slate-200 disabled:opacity-50"
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' && received >= total) {
+                                            handleConfirm();
+                                        }
+                                    }}
+                                    className="w-full pl-14 pr-4 py-3 bg-slate-50 border-2 border-slate-200/80 rounded-2xl focus:border-indigo-600 focus:bg-white focus:ring-4 focus:ring-indigo-500/10 outline-none transition-all font-black text-xl text-slate-800 placeholder:text-slate-300 disabled:opacity-50"
                                 />
                             </div>
                         </div>
 
-                        <div className={cn(
-                            "p-4 rounded-xl flex justify-between items-center transition-all duration-200",
-                            received > 0 ? "opacity-100" : "opacity-0 pointer-events-none",
-                            balance >= 0 ? "bg-emerald-50 border border-emerald-100" : "bg-rose-50 border border-rose-100"
-                        )}>
+                        {/* Quick Presets */}
+                        <div className="flex flex-wrap gap-1.5">
+                            <button
+                                type="button"
+                                onClick={handleSetExact}
+                                className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 text-slate-700 text-xs font-bold transition-all cursor-pointer"
+                            >
+                                Exact
+                            </button>
+                            {[500, 1000, 2000, 5000].map((amt) => (
+                                <button
+                                    key={amt}
+                                    type="button"
+                                    onClick={() => setReceivedAmount(amt.toString())}
+                                    className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-indigo-100 hover:text-indigo-700 text-slate-700 text-xs font-bold transition-all cursor-pointer"
+                                >
+                                    {amt}
+                                </button>
+                            ))}
+                            <button
+                                type="button"
+                                onClick={() => setReceivedAmount('')}
+                                className="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-100 hover:text-rose-700 text-slate-500 text-xs font-bold transition-all cursor-pointer ml-auto"
+                            >
+                                Clear
+                            </button>
+                        </div>
+
+                        {/* Change / Due calculation banner */}
+                        <div
+                            className={cn(
+                                'p-3.5 rounded-2xl flex justify-between items-center transition-all duration-200 border',
+                                received > 0 ? 'opacity-100' : 'opacity-0 pointer-events-none',
+                                balance >= 0
+                                    ? 'bg-emerald-50/80 border-emerald-200/80 text-emerald-900'
+                                    : 'bg-rose-50/80 border-rose-200/80 text-rose-900'
+                            )}
+                        >
                             <div>
-                                <p className={cn("text-[9px] font-black uppercase tracking-widest leading-none mb-1", balance >= 0 ? "text-emerald-400" : "text-rose-400")}>
-                                    {balance >= 0 ? "Change" : "Required"}
+                                <p
+                                    className={cn(
+                                        'text-[10px] font-black uppercase tracking-widest leading-none mb-1',
+                                        balance >= 0 ? 'text-emerald-600' : 'text-rose-500'
+                                    )}
+                                >
+                                    {balance >= 0 ? 'Change to Return' : 'Amount Still Due'}
                                 </p>
-                                <p className={cn("text-xl font-black tabular-nums leading-none", balance >= 0 ? "text-emerald-600" : "text-rose-600")}>
-                                    {Math.abs(balance).toFixed(2)}
+                                <p
+                                    className={cn(
+                                        'text-2xl font-black tabular-nums leading-none',
+                                        balance >= 0 ? 'text-emerald-700' : 'text-rose-600'
+                                    )}
+                                >
+                                    LKR {Math.abs(balance).toFixed(2)}
                                 </p>
                             </div>
-                            <div className={cn("text-xl", balance >= 0 ? "opacity-100" : "opacity-30")}>
-                                {balance >= 0 ? "🤝" : "⌛"}
+                            <div className="w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg">
+                                {balance >= 0 ? '🤝' : '⚠️'}
                             </div>
                         </div>
                     </div>
                 )}
 
+                {/* Confirm button */}
                 <button
                     onClick={handleConfirm}
-                    disabled={(method === 'CASH' && (received < total || !receivedAmount)) || isLoading}
-                    className="w-full bg-slate-900 text-white py-4 rounded-xl font-black text-base hover:bg-slate-800 disabled:opacity-20 disabled:cursor-not-allowed transition-all shadow-xl shadow-slate-200 uppercase tracking-widest cursor-pointer flex justify-center items-center gap-2"
+                    disabled={
+                        (method === 'CASH' && (received < total || !receivedAmount)) || isLoading
+                    }
+                    className="w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white py-4 rounded-2xl font-black text-sm uppercase tracking-wider disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-500/20 active:scale-[0.99] cursor-pointer flex justify-center items-center gap-2"
                 >
                     {isLoading ? (
                         <>
-                            <span className="animate-spin">⏳</span>
-                            Processing...
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Processing Order...</span>
                         </>
-                    ) : "Confirm Order"}
+                    ) : (
+                        <>
+                            <span>Complete & Print Bill</span>
+                            <ArrowRight className="w-4 h-4" />
+                        </>
+                    )}
                 </button>
             </div>
         </div>
