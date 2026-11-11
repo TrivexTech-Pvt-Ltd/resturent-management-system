@@ -164,16 +164,25 @@ export default function SalesReportPage() {
     const debouncedSearchQuery = useDebounce(itemSearchQuery, 350);
 
     // Date range boundaries for server-side queries
-    const pagedStartDate = timeRange === 'custom'
-        ? (customStartDate ? `${customStartDate}T00:00:00` : format(startOfDay(new Date()), "yyyy-MM-dd'T'HH:mm:ss"))
-        : timeRange === 'daily'
-            ? format(startOfDay(new Date()), "yyyy-MM-dd'T'HH:mm:ss")
-            : timeRange === 'weekly'
-                ? format(subWeeks(new Date(), 1), "yyyy-MM-dd'T'HH:mm:ss")
-                : format(subMonths(new Date(), 1), "yyyy-MM-dd'T'HH:mm:ss");
-    const pagedEndDate = timeRange === 'custom'
-        ? `${customEndDate}T23:59:59`
-        : format(endOfDay(new Date()), "yyyy-MM-dd'T'HH:mm:ss");
+    // IMPORTANT: computed inside useMemo so the string values are stable across
+    // re-renders (calling new Date() inline would generate a new millisecond
+    // timestamp on every render, causing the queryKey to change every render,
+    // which keeps isLoadingOrders permanently true and traps the page in
+    // skeleton mode for weekly / monthly / custom ranges).
+    const { pagedStartDate, pagedEndDate } = useMemo(() => {
+        const now = new Date();
+        const start = timeRange === 'custom'
+            ? (customStartDate ? `${customStartDate}T00:00:00` : format(startOfDay(now), "yyyy-MM-dd'T'HH:mm:ss"))
+            : timeRange === 'daily'
+                ? format(startOfDay(now), "yyyy-MM-dd'T'HH:mm:ss")
+                : timeRange === 'weekly'
+                    ? format(subWeeks(now, 1), "yyyy-MM-dd'T'HH:mm:ss")
+                    : format(subMonths(now, 1), "yyyy-MM-dd'T'HH:mm:ss");
+        const end = timeRange === 'custom'
+            ? `${customEndDate}T23:59:59`
+            : format(endOfDay(now), "yyyy-MM-dd'T'HH:mm:ss");
+        return { pagedStartDate: start, pagedEndDate: end };
+    }, [timeRange, customStartDate, customEndDate]);
 
     // Scoped orders query (only fetches orders for the active date range & payment method)
     const { data: orders = [], isLoading: isLoadingOrders } = useQuery({
