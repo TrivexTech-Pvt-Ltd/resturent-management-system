@@ -6,12 +6,12 @@ import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
+import AppLayout from "@/components/AppLayout";
 import {
     Search,
     Plus, Trash2,
     Loader2,
     UtensilsCrossed,
-    ArrowLeft,
     ChevronLeft,
     ChevronRight
 } from "lucide-react";
@@ -161,14 +161,12 @@ export default function DiningPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-10">
+        <AppLayout>
+        <div className="bg-transparent p-6 md:p-10">
             <div className="max-w-6xl mx-auto">
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                     <div>
-                        <Link href="/" className="inline-flex items-center text-slate-400 hover:text-primary transition-colors text-sm font-bold gap-1 mb-2">
-                            <ArrowLeft className="h-4 w-4" />
-                            DASHBOARD
-                        </Link>
+
                         <h1 className="text-3xl font-black text-slate-900 tracking-tight italic flex items-center gap-3">
                             <UtensilsCrossed className="text-primary h-8 w-8" />
                             DINING TABLES
@@ -325,5 +323,6 @@ export default function DiningPage() {
                 isLoading={deleteMutation.isPending}
             />
         </div>
+        </AppLayout>
     );
 }

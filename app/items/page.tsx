@@ -13,11 +13,11 @@ import {
     Loader2,
     UtensilsCrossed,
     X,
-    ArrowLeft,
     ChevronLeft,
     ChevronRight,
 } from "lucide-react";
 import { toast } from "react-hot-toast";
+import AppLayout from "@/components/AppLayout";
 
 import { getMenu, addMenuItem, updateMenuItem, deleteMenuItem } from "@/lib/db";
 import { MenuItem } from "@/lib/types";
@@ -185,24 +185,21 @@ export default function ItemsPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#F8FAFC] p-6 md:p-10">
-            <div className="max-w-6xl mx-auto">
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                    <div>
-                        <Link href="/" className="inline-flex items-center text-slate-400 hover:text-primary transition-colors text-sm font-bold gap-1 mb-2">
-                            <ArrowLeft className="h-4 w-4" />
-                            DASHBOARD
-                        </Link>
-                        <h1 className="text-3xl font-black text-slate-900 tracking-tight italic flex items-center gap-3">
-                            <UtensilsCrossed className="text-primary h-8 w-8" />
-                            MENU ITEMS
-                        </h1>
-                        <p className="text-slate-500 font-medium mt-1">Manage your professional restaurant catalog</p>
-                    </div>
-                    <button
-                        onClick={openAddModal}
-                        className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-xl shadow-primary/20 flex items-center gap-2 w-fit active:scale-95"
-                    >
+        <AppLayout>
+            <div className="bg-transparent p-6 md:p-10">
+                <div className="max-w-7xl mx-auto space-y-8">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                        <div>
+                            <h1 className="text-3xl font-black text-slate-900 tracking-tight italic flex items-center gap-3">
+                                <UtensilsCrossed className="text-primary h-8 w-8" />
+                                MENU ITEMS
+                            </h1>
+                            <p className="text-slate-500 font-medium mt-1">Manage your professional restaurant catalog</p>
+                        </div>
+                        <button
+                            onClick={openAddModal}
+                            className="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-2xl font-bold transition-all shadow-xl shadow-primary/20 flex items-center gap-2 w-fit active:scale-95"
+                        >
                         <Plus className="h-5 w-5" />
                         Add New Item
                     </button>
@@ -518,6 +515,7 @@ export default function ItemsPage() {
                 description={`This will permanently delete "${deletingItem?.name}" from the database. This action cannot be undone.`}
                 isLoading={deleteMutation.isPending}
             />
-        </div>
+            </div>
+        </AppLayout>
     );
 }

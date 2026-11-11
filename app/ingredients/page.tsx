@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Link from "next/link";
+import AppLayout from "@/components/AppLayout";
+import Pagination from "@/components/ui/Pagination";
 import {
   Boxes,
-  ArrowLeft,
   Plus,
   Trash2,
   Edit2,
@@ -91,6 +92,15 @@ export default function IngredientsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategoryFilter, setSelectedCategoryFilter] = useState("All Categories");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "IN_STOCK" | "LOW_STOCK" | "OUT_OF_STOCK">("ALL");
+
+  // ── Pagination State ───────────────────────────────────────────────────────
+  const PAGE_SIZE = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+
+  // Reset to page 1 whenever filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, selectedCategoryFilter, statusFilter]);
 
   // ── Modal / Form State ─────────────────────────────────────────────────────
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -205,6 +215,12 @@ export default function IngredientsPage() {
     });
   }, [ingredients, searchQuery, selectedCategoryFilter, statusFilter]);
 
+  const totalPages = Math.max(1, Math.ceil(filteredIngredients.length / PAGE_SIZE));
+  const paginatedIngredients = useMemo(
+    () => filteredIngredients.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE),
+    [filteredIngredients, currentPage]
+  );
+
   const stats = useMemo(() => {
     const totalItems = ingredients.length;
     let lowStockCount = 0;
@@ -245,18 +261,13 @@ export default function IngredientsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC] p-4 sm:p-6 md:p-10">
+    <AppLayout>
+    <div className="bg-transparent p-4 sm:p-6 md:p-10">
       <div className="max-w-7xl mx-auto space-y-8">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-            <Link
-              href="/"
-              className="inline-flex items-center text-slate-400 hover:text-indigo-600 transition-colors text-sm font-bold gap-1 mb-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              DASHBOARD
-            </Link>
+            
             <h1 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight flex items-center gap-3 italic uppercase">
               <Boxes className="text-emerald-600 h-9 w-9 not-italic" />
               STOCK &amp; INGREDIENT INVENTORY
@@ -476,7 +487,7 @@ export default function IngredientsPage() {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-100 text-sm font-medium">
-                  {filteredIngredients.map((item) => {
+                 {paginatedIngredients.map((item) => {
                     const qty = item.stockQuantity ?? 0;
                     const price = item.unitCost ?? 0;
                     const totalVal = qty * price;
@@ -546,6 +557,15 @@ export default function IngredientsPage() {
               </table>
             </div>
           )}
+          {/* Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredIngredients.length}
+            itemsPerPage={PAGE_SIZE}
+            onPageChange={setCurrentPage}
+            itemName="ingredients"
+          />
         </div>
       </div>
 
@@ -730,5 +750,6 @@ export default function IngredientsPage() {
         </div>
       )}
     </div>
+    </AppLayout>
   );
 }

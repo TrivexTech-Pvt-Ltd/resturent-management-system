@@ -1,15 +1,29 @@
 import { api } from "./api";
 import { Order, MenuItem, User } from "./types";
 
-export const getOrders = async (): Promise<Order[]> => {
+export interface GetOrdersParams {
+    startDate?: string;
+    endDate?: string;
+    paymentMethod?: string;
+}
+
+export async function getOrders(params?: GetOrdersParams): Promise<Order[]>;
+export async function getOrders(): Promise<Order[]>;
+export async function getOrders(params?: any): Promise<Order[]> {
     try {
-        const response = await api.get("/Orders");
-        return response.data;
+        const isParams = params && typeof params === 'object' && !('queryKey' in params);
+        const queryParams = isParams ? {
+            startDate: params.startDate,
+            endDate: params.endDate,
+            paymentMethod: params.paymentMethod === 'ALL' ? undefined : params.paymentMethod,
+        } : undefined;
+        const response = await api.get("/Orders", queryParams);
+        return Array.isArray(response.data) ? response.data : [];
     } catch (error) {
         console.error("Error fetching orders:", error);
         return [];
     }
-};
+}
 
 export interface PagedOrdersResponse {
     data: Order[];

@@ -36,6 +36,7 @@ export interface MenuItem {
   category: string;
   image?: string;
   portions: Portion[];
+  isActive?: boolean;
 }
 
 export type UserRole = "Admin" | "User";

@@ -20,9 +20,24 @@ namespace RestaurantBackend.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Order>>> GetOrders()
+        public async Task<ActionResult<IEnumerable<Order>>> GetOrders(
+            [FromQuery] string? startDate = null,
+            [FromQuery] string? endDate = null,
+            [FromQuery] string? paymentMethod = null)
         {
-            return await _context.Orders.Include(o => o.Items).OrderBy(x => x.OrderNumber).ThenBy(x => x.CreatedAt).ToListAsync();
+            var query = _context.Orders.AsNoTracking().Include(o => o.Items).AsQueryable();
+
+            if (!string.IsNullOrEmpty(startDate) && DateTime.TryParse(startDate, out var start))
+                query = query.Where(o => o.CreatedAt >= start.ToUniversalTime());
+
+            if (!string.IsNullOrEmpty(endDate) && DateTime.TryParse(endDate, out var end))
+                query = query.Where(o => o.CreatedAt <= end.ToUniversalTime());
+
+            if (!string.IsNullOrEmpty(paymentMethod) && paymentMethod != "ALL"
+                && Enum.TryParse<PaymentMethod>(paymentMethod, true, out var parsedMethod))
+                query = query.Where(o => o.PaymentMethod == parsedMethod);
+
+            return await query.OrderBy(x => x.OrderNumber).ThenBy(x => x.CreatedAt).ToListAsync();
         }
 
         [HttpGet("paged")]
@@ -124,53 +139,61 @@ namespace RestaurantBackend.Controllers
             [FromQuery] string? search = null,
             [FromQuery] string? sortBy = "revenue_desc")
         {
-            var query = _context.Orders.AsNoTracking().Include(o => o.Items).AsQueryable();
+            // Build a lightweight projection query — avoids loading full Order entities
+            var orderQuery = _context.Orders.AsNoTracking().AsQueryable();
 
             if (!string.IsNullOrEmpty(startDate) && DateTime.TryParse(startDate, out var start))
-                query = query.Where(o => o.CreatedAt >= start.ToUniversalTime());
+                orderQuery = orderQuery.Where(o => o.CreatedAt >= start.ToUniversalTime());
 
             if (!string.IsNullOrEmpty(endDate) && DateTime.TryParse(endDate, out var end))
-                query = query.Where(o => o.CreatedAt <= end.ToUniversalTime());
+                orderQuery = orderQuery.Where(o => o.CreatedAt <= end.ToUniversalTime());
 
             if (!string.IsNullOrEmpty(paymentMethod) && paymentMethod != "ALL"
                 && Enum.TryParse<PaymentMethod>(paymentMethod, true, out var parsedMethod))
-                query = query.Where(o => o.PaymentMethod == parsedMethod);
+                orderQuery = orderQuery.Where(o => o.PaymentMethod == parsedMethod);
 
-            var orders = await query.ToListAsync();
-            var menuList = await _context.MenuItems.AsNoTracking().ToListAsync();
+            // Project to only the fields needed for aggregation — no full entity materialization
+            var rawItems = await orderQuery
+                .SelectMany(o => o.Items.Select(oi => new
+                {
+                    oi.Name,
+                    oi.Category,
+                    oi.Price,
+                    Quantity = oi.Quantity > 0 ? oi.Quantity : 1,
+                }))
+                .ToListAsync();
+
+            var menuList = await _context.MenuItems.AsNoTracking()
+                .Select(m => new MenuItem { Name = m.Name, Category = m.Category })
+                .ToListAsync();
 
             var aggregated = new Dictionary<string, ItemSalesDto>();
 
-            foreach (var order in orders)
+            foreach (var item in rawItems)
             {
-                if (order.Items == null) continue;
-                foreach (var item in order.Items)
+                var (bName, pSize, cat, fName) = ParseItemDetails(item.Name, item.Category, menuList);
+                var key = $"{bName}___{pSize}";
+
+                if (!aggregated.TryGetValue(key, out var dto))
                 {
-                    var (bName, pSize, cat, fName) = ParseItemDetails(item.Name, item.Category, menuList);
-                    var key = $"{bName}___{pSize}";
-
-                    if (!aggregated.TryGetValue(key, out var dto))
+                    dto = new ItemSalesDto
                     {
-                        dto = new ItemSalesDto
-                        {
-                            Id = key,
-                            FullName = fName,
-                            BaseName = bName,
-                            PortionSize = pSize,
-                            Category = cat,
-                            TotalQuantity = 0,
-                            TotalRevenue = 0,
-                            UnitPrice = item.Price,
-                            OrderCount = 0
-                        };
-                        aggregated[key] = dto;
-                    }
-
-                    int qty = item.Quantity > 0 ? item.Quantity : 1;
-                    dto.TotalQuantity += qty;
-                    dto.TotalRevenue += item.Price * qty;
-                    dto.OrderCount += 1;
+                        Id = key,
+                        FullName = fName,
+                        BaseName = bName,
+                        PortionSize = pSize,
+                        Category = cat,
+                        TotalQuantity = 0,
+                        TotalRevenue = 0,
+                        UnitPrice = item.Price,
+                        OrderCount = 0
+                    };
+                    aggregated[key] = dto;
                 }
+
+                dto.TotalQuantity += item.Quantity;
+                dto.TotalRevenue += item.Price * item.Quantity;
+                dto.OrderCount += 1;
             }
 
             var items = aggregated.Values.AsEnumerable();
